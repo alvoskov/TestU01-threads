@@ -26,8 +26,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-set (HEADERS testu01_mt.h)
-set (SOURCES weyl_test.cpp testu01_mt.cpp)
+set (HEADERS testu01_mt.h bigcrush.cpp crush.cpp)
+set (SOURCES weyl_test.cpp testu01_mt.cpp bigcrush.h crush.h)
 
 
 add_executable(weyl_test ${HEADERS} ${SOURCES})

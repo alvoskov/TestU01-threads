@@ -130,6 +130,66 @@ void BatteryIO::WriteReport(const char *batName, const char *genName, chrono_Chr
 ///// Some functions /////
 //////////////////////////
 
+
+static void thread_func(std::vector<TestDescr> &tests, BatteryIO &io, int thread_id)
+{
+    size_t ntests = tests.size(), i = 1;
+    printf("vvvvvvvvvv  Thread #%d started  vvvvvvvvvv\n", thread_id);
+    for (auto &t : tests) {
+        printf("vvvvv  Thread #%d: test %s started (test %d of %d)\n",
+            thread_id, t.GetName().c_str(), (int) i, (int) ntests);
+        t.Run(io);
+        printf("^^^^^  Thread #%d: test %s finished (test %d of %d)\n",
+            thread_id, t.GetName().c_str(), (int) i++, (int) ntests);
+    }
+    printf("^^^^^^^^^^  Thread #%d finished  ^^^^^^^^^^\n", thread_id);
+}
+
+void run_tests(std::vector<TestDescr> &tests,
+    std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+    const std::string &battery_name)
+{
+    chrono_Chrono *timer = chrono_Create();
+
+    size_t nthreads = std::thread::hardware_concurrency();
+    size_t ntests = tests.size();
+    while (nthreads > ntests)
+        nthreads /= 2;
+    printf("=====> Number of threads: %d\n", (int) nthreads);
+    std::vector<std::vector<TestDescr>> threads_tasks(nthreads);
+    std::vector<BatteryIO> threads_bats;
+    for (size_t i = 0; i < nthreads; i++) {
+        threads_bats.emplace_back(create_gen());
+    }
+    size_t th_id = 0;
+    for (auto &t : tests) {
+        threads_tasks[th_id].push_back(t);
+        if (++th_id == nthreads)
+            th_id = 0;
+    }
+
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < nthreads; i++) {
+        threads.emplace_back(thread_func,
+            std::ref(threads_tasks[i]),
+            std::ref(threads_bats[i]),
+            i);
+    }
+
+    for (auto &th : threads) {
+        th.join();
+    }
+
+    auto gen = create_gen();
+    BatteryIO io(gen);
+    for (auto &bat : threads_bats) {
+        io.Add(bat);
+    }
+    io.WriteReport(battery_name.c_str(), gen.get()->GetName().c_str(), timer);
+    chrono_Delete(timer);
+}
+
+
 /**
  * @brief Get the p-values in a swalk_RandomWalk1 test
  * @details It is a rewrite of the `GetPVal_Walk` function from `bbattery.c`.
@@ -152,8 +212,7 @@ static void GetPValue_Walk(BatteryIO &io, long N, swalk_Res *res, size_t id, con
 }
 
 
-std::function<void(TestDescr &, BatteryIO &)>
-sstring_AutoCor_cb(long N, long n, int r, int s, int d)
+TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Basic *res = sres_CreateBasic();
@@ -163,8 +222,7 @@ sstring_AutoCor_cb(long N, long n, int r, int s, int d)
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p)
+TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Poisson *res = sres_CreatePoisson();
@@ -174,8 +232,7 @@ smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p)
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
+TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         smarsa_Res *res = smarsa_CreateRes();
@@ -185,8 +242,29 @@ smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta)
+
+TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        auto *res2 = sres_CreateChi2 ();
+        sknuth_CouponCollector (io.Gen(), res2, N, n, r, d);
+        io.Add(td.GetId(), td.GetName(), res2->pVal2[gofw_Mean]);
+        sres_DeleteChi2(res2);
+    };
+}
+
+TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sspectral_Res *res = sspectral_CreateRes();
+        sspectral_Fourier3(io.Gen(), res, N, k, r, s);
+        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_AD]);
+        sspectral_DeleteRes(res);
+    };
+}
+
+
+TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();
@@ -197,8 +275,29 @@ sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta)
 }
 
 
-std::function<void(TestDescr &, BatteryIO &)>
-sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
+TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        smarsa_Res2 *res = smarsa_CreateRes2();
+        smarsa_GCD (io.Gen(), res, N, n, r, s);
+        io.Add(td.GetId(), td.GetName(), res->GCD->pVal2[gofw_Mean]);
+        smarsa_DeleteRes2(res);
+    };
+}
+
+
+TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sstring_Res *res = sstring_CreateRes();
+        sstring_HammingCorr(io.Gen(), res, N, n, r, s, L);
+        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
+        sstring_DeleteRes(res);
+
+    };
+}
+
+TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sstring_Res *res = sstring_CreateRes();
@@ -209,8 +308,41 @@ sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
 }
 
 
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
+TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Basic *res = sres_CreateBasic();
+        scomp_LempelZiv(io.Gen(), res, N, t, r, s);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
+        sres_DeleteBasic(res);
+    };
+}
+
+
+TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        scomp_Res *res = scomp_CreateRes();
+        scomp_LinearComp(io.Gen(), res, N, n, r, s);
+        io.Add(td.GetId(), td.GetName(), res->JumpNum->pVal2[gofw_Mean]);
+        io.Add(td.GetId(), td.GetName(), res->JumpSize->pVal2[gofw_Mean]);
+        scomp_DeleteRes(res);
+    };
+}
+
+TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sstring_Res2 *res = sstring_CreateRes2();
+        sstring_LongestHeadRun(io.Gen(), res, N, n, r, s, L);
+        io.Add(td.GetId(), td.GetName(), res->Chi->pVal2[gofw_Mean]);
+        io.Add(td.GetId(), td.GetName(), res->Disc->pVal2);
+        sstring_DeleteRes2(res);
+    };
+}
+
+
+TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();
@@ -220,8 +352,7 @@ smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
+TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         auto *res5 = sknuth_CreateRes1 ();
@@ -234,8 +365,30 @@ sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_RandomWalk1_cb(long N, long n, int r, int s, long L0, long L1, const std::string &mess)
+
+TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Chi2 *res = sres_CreateChi2();
+        sstring_PeriodsInStrings(io.Gen(), res, N, n, r, s);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteChi2 (res);
+    };
+}
+
+TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Chi2 *res = sres_CreateChi2();
+        sknuth_Permutation(io.Gen(), res, N, n, r, t);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteChi2(res);
+    };
+}
+
+
+TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
+    long L0, long L1, const std::string &mess)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         auto *res = swalk_CreateRes ();
@@ -245,8 +398,52 @@ smarsa_RandomWalk1_cb(long N, long n, int r, int s, long L0, long L1, const std:
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
+
+TestCbFunc sstring_Run_cb(long N, long n, int r, int s)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sstring_Res3 *res = sstring_CreateRes3();
+        sstring_Run(io.Gen(), res, N, n, r, s);
+        io.Add(td.GetId(), td.GetName(), res->NRuns->pVal2[gofw_Mean]);
+        io.Add(td.GetId(), td.GetName(), res->NBits->pVal2[gofw_Mean]);
+        sstring_DeleteRes3 (res);
+    };
+}
+
+
+TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Basic *res = sres_CreateBasic();
+        svaria_SampleProd(io.Gen(), res, N, n, r, t);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteBasic(res);
+    };
+}
+
+TestCbFunc svaria_SampleMean_cb(long N, long n, int r)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Basic *res = sres_CreateBasic();
+        svaria_SampleMean(io.Gen(), res, N, n, r);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_AD]);
+        sres_DeleteBasic(res);
+    };
+}
+
+
+TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Basic *res = sres_CreateBasic();
+        smarsa_SerialOver(io.Gen(), res, N, n, r, d, t);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteBasic (res);
+    };
+}
+
+
+TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();
@@ -256,8 +453,8 @@ sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
     };
 }
 
-std::function<void(TestDescr &, BatteryIO &)>
-svaria_WeightDistrib_cb(long N, long n, int r, long k, double alpha, double beta)
+TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
+    double alpha, double beta)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();

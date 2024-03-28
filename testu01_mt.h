@@ -38,6 +38,7 @@ extern "C" {
 #include <mutex>
 #include <algorithm>
 
+
 /**
  * @brief Object-oriented envelope for TestU01 structures.
  * Allows to use RAII paradigm instead of manual calloc/free.
@@ -104,6 +105,17 @@ public:
 };
 
 
+
+class TestDescr;
+
+/**
+ * @brief Callback function that runs the test and saves its
+ * result in BatteryIO class using the test description from
+ * TestDescr.
+ */
+typedef std::function<void(TestDescr &, BatteryIO &)> TestCbFunc;
+
+
 class TestDescr
 {
     int id;
@@ -115,41 +127,41 @@ public:
     inline const std::string &GetName() { return name; }
     inline void Run(BatteryIO &io) { pvalue_func(*this, io); }
 
-    TestDescr(int testid, const std::string &testname,
-        std::function<void (TestDescr &td, BatteryIO &io)> f) : id(testid),
+    TestDescr(int testid, const std::string &testname, TestCbFunc f)
+    : id(testid),
         name(testname), pvalue_func(f)
     {
     }
 };
 
-std::function<void(TestDescr &, BatteryIO &)>
-sstring_AutoCor_cb(long N, long n, int r, int s, int d);
+void run_tests(std::vector<TestDescr> &tests,
+    std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+    const std::string &battery_name);
 
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p);
-
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_CollisionOver_cb(long N, long n, int r, long d, int t);
-
-std::function<void(TestDescr &, BatteryIO &)>
-sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta);
-
-std::function<void(TestDescr &, BatteryIO &)>
-sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d);
-
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k);
-
-std::function<void(TestDescr &, BatteryIO &)>
-sknuth_MaxOft_cb(long N, long n, int r, int d, int t);
-
-std::function<void(TestDescr &, BatteryIO &)>
-smarsa_RandomWalk1_cb(long N, long n, int r, int s, long L0, long L1, const std::string &mess);
-
-std::function<void(TestDescr &, BatteryIO &)>
-sknuth_SimpPoker_cb(long N, long n, int r, int d, int k);
-
-std::function<void(TestDescr &, BatteryIO &)>
-svaria_WeightDistrib_cb(long N, long n, int r, long k, double alpha, double beta);
+TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);
+TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p);
+TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t);
+TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d);
+TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s);
+TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta);
+TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s);
+TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L);
+TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d);
+TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s);
+TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s);
+TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L);
+TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k);
+TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t);
+TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s);
+TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t);
+TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
+    long L0, long L1, const std::string &mess);
+TestCbFunc sstring_Run_cb(long N, long n, int r, int s);
+TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t);
+TestCbFunc svaria_SampleMean_cb(long N, long n, int r);
+TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t);
+TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k);
+TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
+    double alpha, double beta);
 
 #endif
