@@ -80,51 +80,22 @@ void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen
         smarsa_BirthdaySpacings_cb(3, 20 * MILLION, 22, 256, 8, 1));
 
     // ClosePairs tests
-/*
-   {
-      lebool flag = snpair_mNP2S_Flag;
-      snpair_Res *res;
-      res = snpair_CreateRes ();
+    // Beware of snpair_mNP2S_Flag global variable!
+    tests.emplace_back(++j2, "ClosePairs",
+        snpair_ClosePairs_cb(10, 2 * MILLION, 0, 2, 0, 30, ", t = 2", false));
 
-      snpair_mNP2S_Flag = FALSE;
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         snpair_ClosePairs (gen, res, 10, 2 * MILLION, 0, 2, 0, 30);
-         GetPVal_CPairs (10, res, &j, ", t = 2", j2);
-      }
+    tests.emplace_back(++j2, "ClosePairs",
+        snpair_ClosePairs_cb(10, 2 * MILLION, 0, 3, 0, 30, ", t = 3", true));
 
-      snpair_mNP2S_Flag = TRUE;
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         snpair_ClosePairs (gen, res, 10, 2 * MILLION, 0, 3, 0, 30);
-         GetPVal_CPairs (10, res, &j, ", t = 3", j2);
-      }
+    tests.emplace_back(++j2, "ClosePairs",
+        snpair_ClosePairs_cb(5, 2 * MILLION, 0, 7, 0, 30, ", t = 7", true));
 
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         snpair_ClosePairs (gen, res, 5, 2 * MILLION, 0, 7, 0, 30);
-         GetPVal_CPairs (10, res, &j, ", t = 7", j2);
-      }
+    tests.emplace_back(++j2, "ClosePairsBitMatch, t = 2",
+        snpair_ClosePairsBitMatch_cb(4, 4 * MILLION, 0, 2));
 
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         snpair_ClosePairsBitMatch (gen, res, 4, 4 * MILLION, 0, 2);
-         bbattery_pVal[++j] = res->pVal[snpair_BM];
-         TestNumber[j] = j2;
-         strcpy (bbattery_TestNames[j], "ClosePairsBitMatch, t = 2");
-      }
+    tests.emplace_back(++j2, "ClosePairsBitMatch, t = 4",
+        snpair_ClosePairsBitMatch_cb(2, 4 * MILLION, 0, 4));
 
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         snpair_ClosePairsBitMatch (gen, res, 2, 4 * MILLION, 0, 4);
-         bbattery_pVal[++j] = res->pVal[snpair_BM];
-         TestNumber[j] = j2;
-         strcpy (bbattery_TestNames[j], "ClosePairsBitMatch, t = 4");
-      }
-      snpair_DeleteRes (res);
-      snpair_mNP2S_Flag = flag;
-   }
-*/
     // SimpPoker tests
     tests.emplace_back(++j2, "SimpPoker, d = 16", 
         sknuth_SimpPoker_cb(1, 40 * MILLION, 0, 16, 16));
@@ -302,16 +273,9 @@ void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen
     tests.emplace_back(++j2, "MatrixRank, 1200 x 1200",
         smarsa_MatrixRank_cb(1, 2 * THOUSAND, 20, 10, 40 * s, 40 * s));
 
-/*
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         smarsa_Savir2 (gen, res, 1, 20 * MILLION, 0, 1024*1024, 30);
-         bbattery_pVal[++j] = res->pVal2[gofw_Mean];
-         TestNumber[j] = j2;
-         strcpy (bbattery_TestNames[j], "Savir2");
-      }
-      sres_DeleteChi2 (res);
-*/
+    tests.emplace_back(++j2, "Savir2",
+        smarsa_Savir2_cb(1, 20 * MILLION, 0, 1024*1024, 30));
+
     // GCD tests
     tests.emplace_back(++j2, "GCD, r = 0",
         smarsa_GCD_cb(1, 100 * MILLION, 0, 30));
@@ -372,28 +336,12 @@ void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen
     tests.emplace_back(++j2, "PeriodsInStrings, r = 15",
         sstring_PeriodsInStrings_cb(1, 300 * MILLION, 15, 15));
 
-/*
-   {
-      sres_Basic *res;
-      res = sres_CreateBasic ();
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         sstring_HammingWeight2 (gen, res, 100, 100 * MILLION, r, s, MILLION);
-         bbattery_pVal[++j] = res->pVal2[gofw_Sum];
-         TestNumber[j] = j2;
-         strcpy (bbattery_TestNames[j], "HammingWeight2, r = 0");
-      }
+    // HammingWeight2 tests
+    tests.emplace_back(++j2, "HammingWeight2, r = 0",
+        sstring_HammingWeight2_cb(100, 100 * MILLION, r, s, MILLION));
 
-      ++j2;
-      for (i = 0; i < Rep[j2]; ++i) {
-         sstring_HammingWeight2 (gen, res, 30, 100 * MILLION, 20, 10, MILLION);
-         bbattery_pVal[++j] = res->pVal2[gofw_Sum];
-         TestNumber[j] = j2;
-         strcpy (bbattery_TestNames[j], "HammingWeight2, r = 20");
-      }
-      sres_DeleteBasic (res);
-   }
-*/
+    tests.emplace_back(++j2, "HammingWeight2, r = 20",
+        sstring_HammingWeight2_cb(30, 100 * MILLION, 20, 10, MILLION));
 
     // HammingCorr tests
     tests.emplace_back(++j2, "HammingCorr, L = 30",
