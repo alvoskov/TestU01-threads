@@ -19,13 +19,13 @@ unsigned long UniformGenerator::GetBits(void *param, void *state)
     UniformGenerator *obj = static_cast<UniformGenerator *>(state);
     return obj->GetBits();
 }
-    
+
 UniformGenerator::UniformGenerator(const std::string &name)
 {
     this->name = name;
     gen.state = static_cast<void *>(this);
     gen.param = nullptr;
-	gen.Write = WrExternGen;
+    gen.Write = WrExternGen;
     gen.GetU01 = GetU01Handle;
     gen.GetBits = GetBits;
     gen.name = const_cast<char *>(name.c_str());

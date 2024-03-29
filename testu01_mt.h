@@ -20,7 +20,10 @@
 
 extern "C" {
 #include "unif01.h"
-//#include "config.h"
+#include "gdef.h"
+#ifndef PACKAGE_STRING
+#include "config.h"
+#endif
 #include "gofw.h"
 #include "bbattery.h"
 #include "smultin.h"
@@ -37,7 +40,6 @@ extern "C" {
 #include "num.h"
 #include "unif01.h"
 #include "ufile.h"
-#include "gdef.h"
 }
 
 #define THOUSAND 1000
