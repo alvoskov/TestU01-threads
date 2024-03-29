@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     };
 
     if (argc != 3) {
-        printf("Usage: mt_test battery generator\n");
+        printf("Usage: testu01th_demo battery generator\n");
         printf("battery: battery name (SmallCrush, Crush, BigCrush)\n");
         printf("generator: PRNG name. The supported generators are:\n");
         std::vector<std::string> gnames;

@@ -1,5 +1,19 @@
 /**
- * @brief Multithreaded extension of TestU01 library.
+ * @file testu01_mt.h
+ * @brief A multithreaded extension of TestU01 library. Partially based on its
+ * source code, especiall on the `bbattery.c` file and some other header files.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+ * e-mail: lecuyer@iro.umontreal.ca
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
 #ifndef __TESTU01_MT_H
 #define __TESTU01_MT_H
@@ -30,6 +44,7 @@ extern "C" {
 #define MILLION (THOUSAND * THOUSAND)
 #define BILLION (THOUSAND * MILLION)
 
+#include "testu01_mt_cintf.h"
 #include <string>
 #include <functional>
 #include <memory>
@@ -45,7 +60,6 @@ extern "C" {
  */
 class UniformGenerator
 {
-    unif01_Gen gen;
     static void WrExternGen(void *junk2) { (void) junk2; }
     std::string name;    
 
@@ -53,6 +67,9 @@ class UniformGenerator
     UniformGenerator &operator=(const UniformGenerator &obj) = delete;
     static double GetU01Handle(void *param, void *state);
     static unsigned long GetBits(void *param, void *state);
+
+protected:
+    unif01_Gen gen;
     
 public:
     UniformGenerator(const std::string &name);
@@ -62,15 +79,47 @@ public:
     virtual uint32_t GetBits() = 0;
 };
 
+
+
 /**
- * @brief Keeps the p value obtained for the test
+ * @brief A variant of UniformGenerator that is designed as an interface
+ * for C program.
+ * @details The next functions should be supplied by the C module:
+ * - `double get_u01(void *param, void *state)` - that returns uniformly
+ *    distributed pseudorandom numbers from the [0;1) interval.
+ * - `uint32_t get_bits32(void *param, void *state)` - that returns
+ *    uniformly distributed 32-bit unsigned pseudorandom numbers.
+ * - `void gen_delete(void *param, void *state)` - destroys the generator.
+ */
+class UniformGeneratorC : public UniformGenerator
+{
+    static void WrExternGen(void *junk2) { (void) junk2; }
+    std::string name;
+    DeleteStateCallbackC destroy;
+
+    UniformGeneratorC(const UniformGeneratorC &obj) = delete;
+    UniformGeneratorC &operator=(const UniformGeneratorC &obj) = delete;
+    
+public:
+    UniformGeneratorC(const GenInfoC *gi);
+    unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
+    const std::string &GetName() { return name; }
+    double GetU01() override { return 0.0; }
+    uint32_t GetBits() override { return 0; }
+    virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
+};
+
+
+/**
+ * @brief Keeps the p value obtained for the test. Supports comparison
+ * operator `<` that is important for `std::sort`.
  */
 class PValueRecord
 {
 public:
-    int id;
-    std::string name;
-    double pvalue;
+    int id; ///< Test ID (several tests may have the same ID)
+    std::string name; ///< Test name.
+    double pvalue; ///< The obtained p-value.
 
     PValueRecord(int id_, const std::string &name_, double pvalue_)
     : id(id_), name(name_), pvalue(pvalue_) {}
@@ -83,16 +132,27 @@ public:
 };
 
 
-
+/**
+ * @brief The class keeps the shared pointer to the used PRNG
+ * and allows to store the results of statistical tests. It is
+ * not thread safe and each thread should use its own example
+ * of BatteryIO.
+ */
 class BatteryIO
 {
-    std::shared_ptr<UniformGenerator> gen;
-    std::vector<PValueRecord> results;
+    std::shared_ptr<UniformGenerator> gen; ///< The used PRNG.
+    std::vector<PValueRecord> results; ///< The stored results.
 
 public:
     BatteryIO(std::shared_ptr<UniformGenerator> gobj) : gen(gobj) {}
     inline unif01_Gen *Gen() const { return gen.get()->GetPtr(); }
 
+    /**
+     * @brief Adds the result of statistical test to the battery.
+     * @param id     Test id (may be the same for several tests)
+     * @param name   Test name
+     * @param pvalue The obtained p-value.
+     */
     inline void Add(int id, const std::string &name, double pvalue)
     {
         results.emplace_back(id, name, pvalue);

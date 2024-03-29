@@ -3,24 +3,6 @@
 #include "testu01_mt.h"
 #include <random>
 
-
-/**
- * @brief Conversion of unsigned (pseudorandom) 64-bit integer
- * to the double that belongs to the [0;1) interval.
- */
-inline double uint64_to_udouble(uint64_t val)
-{
-    union {
-        uint64_t i;
-        double f;
-    } x;
-    x.i = val;
-    x.i = (x.i >> 12) | 0x3f'f0'00'00'00'00'00'00;
-    x.f -= 1.0;
-    return x.f;
-}
-
-
 /**
  * @brief A wrapper for Mersenne twister from the C++ standard library.
  */

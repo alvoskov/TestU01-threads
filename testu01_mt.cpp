@@ -32,6 +32,24 @@ UniformGenerator::UniformGenerator(const std::string &name)
 }
 
 
+//////////////////////////////////////////////////
+///// UniformGeneratorC class implementation /////
+//////////////////////////////////////////////////
+
+
+UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
+: UniformGenerator("")
+{
+    this->name = std::string(gi->name);
+    gen.state = gi->init_state();
+    gen.param = nullptr;
+    gen.Write = WrExternGen;
+    gen.GetU01 = gi->get_u01;
+    gen.GetBits = gi->get_bits32;
+    gen.name = const_cast<char *>(name.c_str());
+    destroy = gi->delete_state;
+}
+
 //////////////////////////////////////////
 ///// BatteryIO class implementation /////
 //////////////////////////////////////////
@@ -150,6 +168,12 @@ TestsPull::TestsPull(const std::vector<TestDescr> &obj)
     }
 }
 
+/**
+ * @brief Returns the pointer to the next test that was not processed.
+ * @param[out] pos_msg Buffer for the `test _ of _` message.
+ * @return Pointer to the test (success) or nullptr (failure, i.e.
+ * no more tests left).
+ */
 const TestDescr *TestsPull::Get(std::string &pos_msg)
 {
     std::lock_guard<std::mutex> lock(get_mutex);
@@ -202,6 +226,8 @@ void TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_ge
     for (size_t i = 0; i < nthreads; i++) {
         threads_bats.emplace_back(create_gen());
     }
+    // Disable thread unsafe features of TestU01
+    swrite_Host = FALSE;
     // Multi-threaded run
     auto tic = std::chrono::high_resolution_clock::now();
     std::vector<std::thread> threads;

@@ -26,19 +26,33 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-set (HEADERS testu01_mt.h bigcrush.cpp crush.cpp smallcrush.cpp generators.cpp)
-set (SOURCES weyl_test.cpp testu01_mt.cpp bigcrush.h crush.h smallcrush.h generators.h)
+add_library(testu01threads testu01_mt.h testu01_mt_cintf.h bigcrush.h crush.h smallcrush.h generators.h
+    testu01_mt.cpp testu01_mt_cintf.cpp bigcrush.cpp crush.cpp smallcrush.cpp generators.cpp)
+target_include_directories(testu01threads PRIVATE C:/C_PROG/testu01/include D:/C_PROG/testu01/include)
+target_link_directories(testu01threads PRIVATE C:/C_PROG/testu01 D:/C_PROG/testu01)
 
 
-add_executable(weyl_test ${HEADERS} ${SOURCES})
-if(M_LIB)
-    target_link_libraries (weyl_test)
-endif()
+add_executable(testu01th_demo testu01th_demo.cpp)
+add_executable(testu01th_lib testu01th_lib.cpp)
+add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
 
-target_include_directories(weyl_test PRIVATE C:/C_PROG/testu01/include D:/C_PROG/testu01/include)
-target_link_directories(weyl_test PRIVATE C:/C_PROG/testu01 D:/C_PROG/testu01)
-target_link_libraries(weyl_test testu01)
-if (WIN32)
-    target_link_libraries(weyl_test ws2_32)
-endif()
+# An examples of plugin
+add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
+add_library(kiss93_shared SHARED kiss93_shared.c testu01_mt_cintf.h)
+
+
+foreach (program testu01th_demo testu01th_lib splitmix_exec)
+    if(M_LIB)
+    	target_link_libraries (${program})
+    endif()
+    target_link_libraries(${program} testu01threads)
+    target_include_directories(${program} PRIVATE C:/C_PROG/testu01/include D:/C_PROG/testu01/include)
+    target_link_directories(${program} PRIVATE C:/C_PROG/testu01 D:/C_PROG/testu01)
+    target_link_libraries(${program} testu01)
+    if (WIN32)
+        target_link_libraries(${program} ws2_32)
+    endif()
+endforeach (program)
+
+
 
