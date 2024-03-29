@@ -95,20 +95,48 @@ bool load_module(GenCModule &mod, const char *libname)
 
 #include <dlfcn.h>
 
+class ExtLibraryWrapper
+{
+    void *lib;
+
+public:
+    ExtLibraryWrapper() : lib(nullptr) {}
+    ExtLibraryWrapper(void *h) : lib(h) {}
+    ~ExtLibraryWrapper()
+    {
+        if (lib != nullptr)
+            dlclose(lib);
+    }
+};
+
+
 bool load_module(GenCModule &mod, const char *libname)
 {
-
-/*
-    ext_library prng_lib = dlopen(argv[2], RTLD_LAZY);
-    if (!ext_library) {
+    void *lib = dlopen(libname, RTLD_LAZY);
+    if (lib == nullptr) {
         fprintf(stderr, "dlopen() error: %s\n", dlerror());
-        return 1;
+        return false;
     };
 
-    dlclose(prng_lib);
-*/
+    static ExtLibraryWrapper lib_wrapper(lib);
 
-    return false;
+    mod.gen_initlib = reinterpret_cast<GenInitLibFunc>(dlsym(lib, "gen_initlib"));
+    if (mod.gen_initlib == nullptr) {
+        fprintf(stderr, "Cannot find the 'gen_initlib' function");
+        return false;
+    }
+    mod.gen_closelib = reinterpret_cast<GenCloseLibFunc>(dlsym(lib, "gen_closelib"));
+    if (mod.gen_initlib == nullptr) {
+        fprintf(stderr, "Cannot find the 'gen_closelib' function");
+        return false;
+    }
+    mod.gen_getinfo = reinterpret_cast<GenGetInfoFunc>(dlsym(lib, "gen_getinfo"));
+    if (mod.gen_initlib == nullptr) {
+        fprintf(stderr, "Cannot find the 'gen_getinfo' function");
+        return false;
+    }
+
+    return true;
 }
 
 

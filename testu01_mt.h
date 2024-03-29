@@ -20,7 +20,7 @@
 
 extern "C" {
 #include "unif01.h"
-#include "config.h"
+//#include "config.h"
 #include "gofw.h"
 #include "bbattery.h"
 #include "smultin.h"
