@@ -1,6 +1,10 @@
 #include "generators.h"
 
 
+/////////////////////////////////////////////////
+///// MT19937Generator class implementation /////
+/////////////////////////////////////////////////
+
 MT19937Generator::MT19937Generator() : UniformGenerator("MT19937") {}
 
 double MT19937Generator::GetU01()
@@ -14,7 +18,9 @@ uint32_t MT19937Generator::GetBits()
 }
 
 
-////////////////////
+/////////////////////////////////////////////
+///// LcgGenerator class implementation /////
+/////////////////////////////////////////////
 
 LcgGenerator::LcgGenerator(int seed) : UniformGenerator("LCG")
 {
@@ -23,17 +29,19 @@ LcgGenerator::LcgGenerator(int seed) : UniformGenerator("LCG")
 
 double LcgGenerator::GetU01()
 {
-    x = (((uint64_t) x) *  397204094 + 0) % 2147483647;
+    x = static_cast<uint32_t>(((static_cast<uint64_t>(x)) * a + 0) % m);
     return (double) x / (UINT_MAX);
 }
 
 uint32_t LcgGenerator::GetBits()
 {
-    x = (((uint64_t) x) *  397204094 + 0) % 2147483647;
+    x = static_cast<uint32_t>((static_cast<uint64_t>(x) *  a + 0) % m);
     return x;
 }
 
-//////////////
+///////////////////////////////////////////////
+///// LcgGenerator59 class implementation /////
+///////////////////////////////////////////////
 
 LcgGenerator59::LcgGenerator59(int seed) : UniformGenerator("LCG59")
 {
@@ -52,7 +60,10 @@ uint32_t LcgGenerator59::GetBits()
     return static_cast<uint32_t>(x >> 27);
 }
 
-//////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////
+///// KISS93Generator class implementation /////
+////////////////////////////////////////////////
 
 KISS93Generator::KISS93Generator(uint32_t s1, uint32_t s2, uint32_t s3)
 : UniformGenerator("KISS93"), S1(s1), S2(s2), S3(s3) {}

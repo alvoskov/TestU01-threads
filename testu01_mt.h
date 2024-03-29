@@ -115,6 +115,12 @@ class TestDescr;
  */
 typedef std::function<void(TestDescr &, BatteryIO &)> TestCbFunc;
 
+/**
+ * @brief Function that returns the `std::shared_ptr` smart pointer
+ * to the initialized pseudorandom number generator.
+ */
+typedef std::function<std::shared_ptr<UniformGenerator>()> GenFactoryFunc;
+
 
 class TestDescr
 {
@@ -133,6 +139,27 @@ public:
     {
     }
 };
+
+
+class TestsPull
+{
+    std::vector<TestDescr> tests;
+    std::mutex get_mutex;
+    size_t pos;
+
+    size_t GetNThreads() const;
+    static void ThreadFunc(TestsPull &pull, BatteryIO &io, int thread_id);
+
+
+public:
+    TestsPull() {}
+    TestsPull(const std::vector<TestDescr> &obj);
+    const TestDescr *Get(std::string &pos_msg);
+
+    void Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+        const std::string &battery_name);
+};
+
 
 void run_tests(std::vector<TestDescr> &tests,
     std::function<std::shared_ptr<UniformGenerator>()> create_gen,

@@ -128,63 +128,86 @@ void BatteryIO::WriteReport(const char *batName, const char *genName, chrono_Chr
     printf ("\n\n\n");
 }
 
-//////////////////////////
-///// Some functions /////
-//////////////////////////
 
+//////////////////////////////////////////
+///// TestsPull class implementation /////
+//////////////////////////////////////////
 
-static void thread_func(std::vector<TestDescr> &tests, BatteryIO &io, int thread_id)
+TestsPull::TestsPull(const std::vector<TestDescr> &obj)
 {
-    size_t ntests = tests.size(), i = 1;
-    fprintf(stderr, "vvvvvvvvvv  Thread #%d started  vvvvvvvvvv\n", thread_id);
-    for (auto &t : tests) {
-        fprintf(stderr, "vvvvv  Thread #%d: test %s started (test %d of %d)\n",
-            thread_id, t.GetName().c_str(), (int) i, (int) ntests);
-        t.Run(io);
-        fprintf(stderr, "^^^^^  Thread #%d: test %s finished (test %d of %d)\n",
-            thread_id, t.GetName().c_str(), (int) i++, (int) ntests);
-    }
-    fprintf(stderr, "^^^^^^^^^^  Thread #%d finished  ^^^^^^^^^^\n", thread_id);
-}
-
-void run_tests(std::vector<TestDescr> &tests,
-    std::function<std::shared_ptr<UniformGenerator>()> create_gen,
-    const std::string &battery_name)
-{
-    chrono_Chrono *timer = chrono_Create();
-
-    size_t nthreads = std::thread::hardware_concurrency();
-    size_t ntests = tests.size();
-    while (nthreads > ntests)
-        nthreads /= 2;
-    printf("=====> Number of threads: %d\n", (int) nthreads);
-    std::vector<std::vector<TestDescr>> threads_tasks(nthreads);
-    std::vector<BatteryIO> threads_bats;
-    for (size_t i = 0; i < nthreads; i++) {
-        threads_bats.emplace_back(create_gen());
-    }
-    size_t th_id = 0;
-
-    // Make randomized indices list
-    std::vector<size_t> tests_inds(tests.size());
-    for (size_t i = 0; i < tests.size(); i++) {
+    pos = 0;
+    size_t len = obj.size();
+    std::vector<size_t> tests_inds(len);
+    for (size_t i = 0; i < len; i++) {
         tests_inds[i] = i;
     }
     std::random_device rd;
     std::mt19937 prng(rd()); 
     std::shuffle(tests_inds.begin(), tests_inds.end(), prng);
-    // Make lists of tests for threads
-    for (size_t i = 0; i < tests.size(); i++) {
-        threads_tasks[th_id].push_back(tests[tests_inds[i]]);
-        if (++th_id == nthreads)
-            th_id = 0;
+
+    for (auto ind : tests_inds) {
+        tests.push_back(obj[ind]);
+    }
+}
+
+const TestDescr *TestsPull::Get(std::string &pos_msg)
+{
+    std::lock_guard<std::mutex> lock(get_mutex);
+    if (pos < tests.size()) {
+        pos_msg = "test " + std::to_string(pos + 1) +
+            " of " + std::to_string(tests.size());
+        return &tests[pos++];
+    } else {
+        pos_msg = "NONE";
+        return nullptr;
+    }
+}
+
+
+size_t TestsPull::GetNThreads() const
+{
+    size_t nthreads = std::thread::hardware_concurrency();
+    size_t ntests = tests.size();
+    while (nthreads > ntests)
+        nthreads /= 2;
+    return nthreads;
+}
+
+
+void TestsPull::ThreadFunc(TestsPull &pull, BatteryIO &io, int thread_id)
+{
+    fprintf(stderr, "vvvvvvvvvv  Thread #%d started  vvvvvvvvvv\n", thread_id);
+    const TestDescr *test = nullptr;
+    std::string pos_msg;
+    while ((test = pull.Get(pos_msg)) != nullptr) {
+        TestDescr t = *test;
+        fprintf(stderr, "vvvvv  Thread #%d: test %s started (%s)\n",
+            thread_id, t.GetName().c_str(), pos_msg.c_str());
+        t.Run(io);
+        fprintf(stderr, "^^^^^  Thread #%d: test %s finished (%s)\n",
+            thread_id, t.GetName().c_str(), pos_msg.c_str());
+    }
+    fprintf(stderr, "^^^^^^^^^^  Thread #%d finished  ^^^^^^^^^^\n", thread_id);
+}
+
+
+void TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+    const std::string &battery_name)
+{
+    // Timers and threads number
+    chrono_Chrono *timer = chrono_Create();
+    size_t nthreads = GetNThreads();
+    fprintf(stderr, "=====> Number of threads: %d\n", (int) nthreads);
+    std::vector<BatteryIO> threads_bats;
+    for (size_t i = 0; i < nthreads; i++) {
+        threads_bats.emplace_back(create_gen());
     }
     // Multi-threaded run
     auto tic = std::chrono::high_resolution_clock::now();
     std::vector<std::thread> threads;
     for (size_t i = 0; i < nthreads; i++) {
-        threads.emplace_back(thread_func,
-            std::ref(threads_tasks[i]),
+        threads.emplace_back(ThreadFunc,
+            std::ref(*this),
             std::ref(threads_bats[i]),
             i);
     }
@@ -204,11 +227,29 @@ void run_tests(std::vector<TestDescr> &tests,
     size_t s = (ms_total / 1000) % 60;
     size_t m = (ms_total / 60000) % 60;
     size_t h = (ms_total / 3600000);
-    fprintf(stderr, "Elapsed time: %.2d:%.2d:%.2d.%.3d\n",
+    fprintf(stderr, "=====> Elapsed time: %.2d:%.2d:%.2d.%.3d\n",
         (int) h, (int) m, (int) s, (int) ms);
     // Print report
     io.WriteReport(battery_name.c_str(), gen.get()->GetName().c_str(), timer);
     chrono_Delete(timer);
+}
+
+
+
+
+
+//////////////////////////
+///// Some functions /////
+//////////////////////////
+
+
+
+void run_tests(std::vector<TestDescr> &tests,
+    std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+    const std::string &battery_name)
+{
+    TestsPull pull(tests);
+    pull.Run(create_gen, battery_name);
 }
 
 

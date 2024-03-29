@@ -5,7 +5,7 @@
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+ * (c) 2002 Pierre L'Ecuyer, DIRO, UniversitÃ© de MontrÃ©al.
  * e-mail: lecuyer@iro.umontreal.ca
  *
  * All rights reserved.

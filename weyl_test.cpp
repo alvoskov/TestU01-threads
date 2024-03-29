@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include <string>
+#include <map>
 #include <cstring>
 #include <functional>
 #include <memory>
@@ -78,39 +79,51 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[]) 
 {
+    const std::map<std::string, GenFactoryFunc> gen_map = {
+        {"LCG", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::shared_ptr<UniformGenerator>(new LcgGenerator());
+        }},
+        {"LCG59", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::shared_ptr<UniformGenerator>(new LcgGenerator59());
+        }},
+        {"LFIBMUL-17-5", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::shared_ptr<UniformGenerator>(new LFibMulGenerator<17,5>());
+        }},
+        {"KISS93", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::shared_ptr<UniformGenerator>(new KISS93Generator());
+        }},
+        {"MT19937", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::shared_ptr<UniformGenerator>(new MT19937Generator());
+        }},
+        {"SPLITMIX", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::shared_ptr<UniformGenerator>(new SplitMixGenerator());
+        }}
+    };
+
     if (argc != 3) {
         printf("Usage: mt_test battery generator\n");
         printf("battery: battery name (SmallCrush, Crush, BigCrush)\n");
-        printf("generator: PRNG name (LCG, LCG59, KISS93, MT19937)\n");
+        printf("generator: PRNG name. The supported generators are:\n");
+        std::vector<std::string> gnames;
+        for (auto &kv : gen_map) {
+            gnames.push_back(kv.first);
+        }
+
+        std::sort(gnames.begin(), gnames.end());
+        for (auto &n : gnames) {
+            printf("  %s\n", n.c_str());
+        }
         return 0;
     }
 
     std::string battery(argv[1]), generator(argv[2]);
 
-    // LCG59 generator: fails BirthdaySpacings test in SmallCrush
-    // KISS93Generator : fails LinearComp (r = 29) tests in Crush battery
-    std::function<std::shared_ptr<UniformGenerator>()> create_gen;
-    if (generator == "LCG") {
-        create_gen = [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new LcgGenerator());
-        };
-    } else if (generator == "LCG59") {
-        create_gen = [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new LcgGenerator59());
-        };
-    } else if (generator == "KISS93") {
-        create_gen = [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new KISS93Generator());
-        };
-    } else if (generator == "MT19937") {
-        create_gen = [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new MT19937Generator());
-        };
-    } else {
+    if (gen_map.count(generator) == 0) {
         std::cerr << "Unknown generator " << generator << std::endl;
         return 1;
     }
 
+    auto create_gen = gen_map.at(generator);    
     if (battery == "SmallCrush") {
         mt_bat_SmallCrush(create_gen);
     } else if (battery == "Crush") {
