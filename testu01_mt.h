@@ -138,9 +138,11 @@ void run_tests(std::vector<TestDescr> &tests,
     std::function<std::shared_ptr<UniformGenerator>()> create_gen,
     const std::string &battery_name);
 
+TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);
 TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p);
 TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t);
+TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t);
 TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d);
 TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m, const std::string &mess, bool flag);
 TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t);
@@ -159,12 +161,15 @@ TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s);
 TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t);
 TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
     long L0, long L1, const std::string &mess);
+TestCbFunc sknuth_Run_cb(long N, long n, int r, bool Up);
 TestCbFunc sstring_Run_cb(long N, long n, int r, int s);
+TestCbFunc svaria_SampleCorr_cb(long N, long n, int r, int k);
 TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t);
 TestCbFunc svaria_SampleMean_cb(long N, long n, int r);
 TestCbFunc smarsa_Savir2_cb(long N, long n, int r, long m, int t);
 TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t);
 TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k);
+TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g);
 TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
     double alpha, double beta);
 

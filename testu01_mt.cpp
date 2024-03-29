@@ -1,5 +1,6 @@
 #include "testu01_mt.h"
 #include <chrono>
+#include <random>
 
 /////////////////////////////////////////////////
 ///// UniformGenerator class implementation /////
@@ -163,14 +164,22 @@ void run_tests(std::vector<TestDescr> &tests,
         threads_bats.emplace_back(create_gen());
     }
     size_t th_id = 0;
-    for (auto &t : tests) {
-        threads_tasks[th_id].push_back(t);
+
+    // Make randomized indices list
+    std::vector<size_t> tests_inds(tests.size());
+    for (size_t i = 0; i < tests.size(); i++) {
+        tests_inds[i] = i;
+    }
+    std::random_device rd;
+    std::mt19937 prng(rd()); 
+    std::shuffle(tests_inds.begin(), tests_inds.end(), prng);
+    // Make lists of tests for threads
+    for (size_t i = 0; i < tests.size(); i++) {
+        threads_tasks[th_id].push_back(tests[tests_inds[i]]);
         if (++th_id == nthreads)
             th_id = 0;
     }
-
-
-
+    // Multi-threaded run
     auto tic = std::chrono::high_resolution_clock::now();
     std::vector<std::thread> threads;
     for (size_t i = 0; i < nthreads; i++) {
@@ -179,17 +188,16 @@ void run_tests(std::vector<TestDescr> &tests,
             std::ref(threads_bats[i]),
             i);
     }
-
     for (auto &th : threads) {
         th.join();
     }
-
+    // Merge results from different threads
     auto gen = create_gen();
     BatteryIO io(gen);
     for (auto &bat : threads_bats) {
         io.Add(bat);
     }
-
+    // Estimate the elapsed time
     auto toc = std::chrono::high_resolution_clock::now();    
     size_t ms_total = std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic).count();
     size_t ms = ms_total % 1000;
@@ -198,7 +206,7 @@ void run_tests(std::vector<TestDescr> &tests,
     size_t h = (ms_total / 3600000);
     fprintf(stderr, "Elapsed time: %.2d:%.2d:%.2d.%.3d\n",
         (int) h, (int) m, (int) s, (int) ms);
-
+    // Print report
     io.WriteReport(battery_name.c_str(), gen.get()->GetName().c_str(), timer);
     chrono_Delete(timer);
 }
@@ -246,6 +254,21 @@ static void GetPValue_CPairs(BatteryIO &io, long N, snpair_Res *res, size_t id, 
    }
 }
 
+///////////////////////////////////////////////////////
+///// Functions that generate callbacks for tests /////
+///////////////////////////////////////////////////////
+
+
+TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Basic *res = sres_CreateBasic();
+        svaria_AppearanceSpacings(io.Gen(), res, N, Q, K, r, s, L);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteBasic(res);
+    };
+}
+
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
@@ -276,6 +299,15 @@ TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
     };
 }
 
+TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sknuth_Res2 *res = sknuth_CreateRes2 ();
+        sknuth_CollisionPermut(io.Gen(), res, N, n, r, t);
+        io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
+        sknuth_DeleteRes2 (res);
+    };
+}
 
 TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d)
 {
@@ -469,6 +501,16 @@ TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
     };
 }
 
+TestCbFunc sknuth_Run_cb(long N, long n, int r, bool Up)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Chi2 *res = sres_CreateChi2 ();
+        sknuth_Run(io.Gen(), res, N, n, r, Up);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
+        sres_DeleteChi2(res);
+    };
+}
+
 
 TestCbFunc sstring_Run_cb(long N, long n, int r, int s)
 {
@@ -481,13 +523,25 @@ TestCbFunc sstring_Run_cb(long N, long n, int r, int s)
     };
 }
 
+TestCbFunc svaria_SampleCorr_cb(long N, long n, int r, int k)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Basic *res = sres_CreateBasic();
+        svaria_SampleCorr(io.Gen(), res, N, n, r, k);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteBasic(res);
+    };
+}
 
 TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t)
 {
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Basic *res = sres_CreateBasic();
         svaria_SampleProd(io.Gen(), res, N, n, r, t);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        if (N > 1) // Derived from comparison of Crush and BigCrush
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_AD]);
+        else
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
         sres_DeleteBasic(res);
     };
 }
@@ -528,6 +582,16 @@ TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();
         sknuth_SimpPoker(io.Gen(), res, N, n, r, d, k);
+        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        sres_DeleteChi2(res);
+    };
+}
+
+TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        sres_Chi2 *res = sres_CreateChi2();
+        svaria_SumCollector(io.Gen(), res, N, n, r, g);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
         sres_DeleteChi2(res);
     };

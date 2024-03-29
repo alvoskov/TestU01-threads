@@ -185,53 +185,25 @@ void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen
     tests.emplace_back(++j2, "MaxOft, t = 30",
         sknuth_MaxOft_cb(1, 10 * MILLION, 0, MILLION / 10, 30));
 
-
     // SampleProd and other "Sample..." tests
-    tests.emplace_back(++j2, "SampleProd, t = 10", [] (TestDescr &td, BatteryIO &io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_SampleProd (io.Gen(), res, 1, 10 * MILLION, 0, 10);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    });
+    tests.emplace_back(++j2, "SampleProd, t = 10",
+        svaria_SampleProd_cb(1, 10 * MILLION, 0, 10));
 
-    tests.emplace_back(++j2, "SampleProd, t = 30", [] (TestDescr &td, BatteryIO &io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_SampleProd(io.Gen(), res, 1, 10 * MILLION, 0, 30);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    });
+    tests.emplace_back(++j2, "SampleProd, t = 30", 
+        svaria_SampleProd_cb(1, 10 * MILLION, 0, 30));
 
+    tests.emplace_back(++j2, "SampleMean",
+        svaria_SampleMean_cb(10*MILLION, 20, 0));
 
+    tests.emplace_back(++j2, "SampleCorr", 
+        svaria_SampleCorr_cb(1, 500 * MILLION, 0, 1));
 
-    tests.emplace_back(++j2, "SampleMean", [] (TestDescr &td, BatteryIO &io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_SampleMean(io.Gen(), res, 10*MILLION, 20, 0);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_AD]);
-        sres_DeleteBasic(res);
-    });
+    // AppearanceSpacings tests
+    tests.emplace_back(++j2, "AppearanceSpacings, r = 0",
+        svaria_AppearanceSpacings_cb(1, 10 * MILLION, 400 * MILLION, r, 30, 15));
 
-    tests.emplace_back(++j2, "SampleCorr", [] (TestDescr &td, BatteryIO &io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_SampleCorr(io.Gen(), res, 1, 500 * MILLION, 0, 1);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    });
-
-    tests.emplace_back(++j2, "AppearanceSpacings, r = 0", [] (TestDescr &td, BatteryIO &io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_AppearanceSpacings(io.Gen(), res, 1, 10 * MILLION, 400 * MILLION,
-            r, 30, 15);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    });
-
-    tests.emplace_back(++j2, "AppearanceSpacings, r = 20", [] (TestDescr &td, BatteryIO &io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_AppearanceSpacings(io.Gen(), res, 1, 10 * MILLION, 100 * MILLION,
-            20, 10, 15);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    });
+    tests.emplace_back(++j2, "AppearanceSpacings, r = 20",
+        svaria_AppearanceSpacings_cb(1, 10 * MILLION, 100 * MILLION, 20, 10, 15));
 
     // WeightDistrib tests
     tests.emplace_back(++j2, "WeightDistrib, r = 0",
@@ -247,12 +219,8 @@ void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen
         svaria_WeightDistrib_cb(1, 2 * MILLION, 24, 256, 0.0, 0.125));
 
     // SumCollector test
-    tests.emplace_back(++j2, "SumCollector", [] (TestDescr &td, BatteryIO &io) {
-        sres_Chi2 *res = sres_CreateChi2();
-        svaria_SumCollector(io.Gen(), res, 1, 20 * MILLION, 0, 10.0);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res);
-    });    
+    tests.emplace_back(++j2, "SumCollector",
+        svaria_SumCollector_cb(1, 20 * MILLION, 0, 10.0));
 
     // MatrixRank tests
     tests.emplace_back(++j2, "MatrixRank, 60 x 60",
