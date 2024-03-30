@@ -81,7 +81,9 @@ public:
 
 /**
  * @brief KISS93 pseudorandom number generator. It passes SmallCrush
- * but fails the LinearComp (r = 29) test in the Crush battery.
+ * but fails the next tests:
+ * - LinearComp (r = 29) test in the Crush battery.
+ * - LinearComp (r = 29) test in the BigCrush battery.
  */
 class KISS93Generator : public UniformGenerator
 {

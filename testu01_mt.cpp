@@ -433,6 +433,18 @@ TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m, cons
     };
 }
 
+/**
+ * @brief Needed for pseudoDIEHARD battery.
+ */
+TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        snpair_Res *res = snpair_CreateRes();
+        snpair_ClosePairs(io.Gen(), res, N, n, r, k, p, m);
+        io.Add(td.GetId(), td.GetName(), res->pVal[snpair_NP]);
+        snpair_DeleteRes(res);
+    };
+}
 
 TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t)
 {
@@ -441,6 +453,21 @@ TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t)
         snpair_ClosePairsBitMatch(io.Gen(), res, N, n, r, t);
         io.Add(td.GetId(), td.GetName(), res->pVal[snpair_BM]);
         snpair_DeleteRes(res);
+    };
+}
+
+/**
+ * @brief An envelope for smarsa_CollisionOver for pseudoDIEHARD battery.
+ */
+TestCbFunc smarsa_Dna_cb(int i)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        printf ("***********************************************************\n"
+            "Test DNA calling smarsa_CollisionOver\n\n");
+        smarsa_Res *res = smarsa_CreateRes();
+        smarsa_CollisionOver(io.Gen(), res, 1, 2097152, i, 4, 10);
+        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
+        smarsa_DeleteRes(res);
     };
 }
 
@@ -579,6 +606,33 @@ TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
         sknuth_DeleteRes1(res5);        
     };
 }
+
+
+TestCbFunc smarsa_Opso_cb(long N, int r, int p)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        smarsa_Res *res = smarsa_CreateRes();
+        smarsa_Opso(io.Gen(), res, N, r, p);
+        io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
+        smarsa_DeleteRes(res);
+    };
+}
+
+/**
+ * @brief An envelope for smarsa_CollisionOver for pseudoDIEHARD battery.
+ */
+TestCbFunc smarsa_Oqso_cb(int i)
+{
+    return [=] (TestDescr &td, BatteryIO &io) {
+        printf ("***********************************************************\n"
+            "Test OQSO calling smarsa_CollisionOver\n\n");
+        smarsa_Res *res = smarsa_CreateRes();
+        smarsa_CollisionOver(io.Gen(), res, 1, 2097152, i, 32, 4);
+        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
+        smarsa_DeleteRes(res);
+    };
+}
+
 
 
 TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s)

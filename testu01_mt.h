@@ -24,8 +24,10 @@ extern "C" {
 #ifndef PACKAGE_STRING
 #include "config.h"
 #endif
-#include "gofw.h"
 #include "bbattery.h"
+#include "fbar.h"
+#include "gofw.h"
+#include "gofs.h"
 #include "smultin.h"
 #include "sknuth.h"
 #include "smarsa.h"
@@ -251,7 +253,9 @@ TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t);
 TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t);
 TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d);
 TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m, const std::string &mess, bool flag);
+TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m);
 TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t);
+TestCbFunc smarsa_Dna_cb(int i);
 TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s);
 TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta);
 TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s);
@@ -263,6 +267,8 @@ TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s);
 TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L);
 TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k);
 TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t);
+TestCbFunc smarsa_Opso_cb(long N, int r, int p);
+TestCbFunc smarsa_Oqso_cb(int i);
 TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s);
 TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t);
 TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,

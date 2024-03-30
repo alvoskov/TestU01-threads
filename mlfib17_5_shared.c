@@ -38,12 +38,11 @@ static void *init_state()
 {
     MLFib17_5_State *obj = (MLFib17_5_State *) malloc(sizeof(MLFib17_5_State));
     // pcg_rxs_m_xs64 for initialization
-    uint64_t state = 12345;
+    uint32_t seed = prng_seed32();
+    uint64_t state = seed;
+    printf("SEED: %X\n", seed);
     for (size_t k = 1; k <= LFIB_A; k++) {    
-        uint64_t word = ((state >> ((state >> 59) + 5)) ^ state) *
-            12605985483714917081ull;
-        state = state * 6364136223846793005ull + 1442695040888963407ull;
-        obj->U[k] = ( (word >> 43) ^ word ) | 0x1;
+        obj->U[k] = pcg_bits64(&state) | 0x1;
     }
     obj->i = LFIB_A; obj->j = LFIB_B;
     return (void *) obj;

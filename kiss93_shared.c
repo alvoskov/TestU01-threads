@@ -47,20 +47,17 @@ static void delete_state(void *param, void *state)
 
 int EXPORT gen_initlib()
 {
-    printf("===== gen_initlib =====\n");
     return 1;
 }
 
 int EXPORT gen_closelib()
 {
-    printf("===== gen_closelib =====\n");
     return 1;
 }
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
     static const char name[] = "KISS93";
-    printf("===== gen_getinfo =====\n");
     gi->name = name;
     gi->init_state = init_state;
     gi->delete_state = delete_state;

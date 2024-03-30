@@ -33,6 +33,7 @@
 #ifndef __TESTU01_MT_CINTF
 #define __TESTU01_MT_CINTF
 #include <stdint.h>
+#include <time.h>
 
 typedef double (*GetU01CallbackC)(void *param, void *state);
 typedef long unsigned int (*GetBits32CallbackC)(void *param, void *state);
@@ -92,6 +93,35 @@ static inline double uint64_to_udouble(uint64_t val)
     x.f -= 1.0;
     return x.f;
 }
+
+#if defined(__GNUC__) && defined(__x86_64__)
+#include <x86intrin.h>
+#undef STDC_HEADERS
+#endif
+
+#undef ABC
+
+static inline uint32_t prng_seed32()
+{
+    uint32_t seed = (uint32_t) time(NULL);
+#if defined(__GNUC__) && defined(__x86_64__)
+    seed = seed * (__rdtsc() & 0xFFFFFFFF);
+#endif
+    return seed;
+}
+
+/**
+ * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
+ * for initialization for other PRNGs such as lagged Fibbonaci.
+ */
+static inline uint64_t pcg_bits64(uint64_t *state)
+{
+    uint64_t word = ((*state >> ((*state >> 59) + 5)) ^ *state) *
+        12605985483714917081ull;
+    *state = *state * 6364136223846793005ull + 1442695040888963407ull;
+    return (word >> 43) ^ word;
+}
+
 void set_generator(const GenInfoC *gi);
 int run_smallcrush();
 int run_crush();
