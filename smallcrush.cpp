@@ -1,16 +1,11 @@
 #include "smallcrush.h"
 
-void mt_bat_SmallCrush (std::function<std::shared_ptr<UniformGenerator>()> create_gen)
+SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
+    : TestsBattery(genf)
 {
-   const int r = 0;
-   int j2 = 0;
-   printf ("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
-      "                 Starting SmallCrush\n"
-      "                 Version: %s\n"
-      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n",
-      PACKAGE_STRING);
-
-    std::vector<TestDescr> tests;
+    const int r = 0;
+    int j2 = 0;
+    battery_name = "SmallCrush(mt)";
 
     tests.emplace_back(++j2, "BirthdaySpacings", // 1
         smarsa_BirthdaySpacings_cb(1, 5 * MILLION, r, 1073741824, 2, 1));
@@ -49,7 +44,4 @@ void mt_bat_SmallCrush (std::function<std::shared_ptr<UniformGenerator>()> creat
 
     tests.emplace_back(++j2, "RandomWalk", // 11-15
         smarsa_RandomWalk1_cb(1, MILLION, r, 30, 150, 150, ""));
-
-    //------------------------------------------------------------------------------------
-    run_tests(tests, create_gen, "SmallCrush(mt)");
 }

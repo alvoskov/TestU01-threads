@@ -260,24 +260,60 @@ void TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_ge
     chrono_Delete(timer);
 }
 
+/////////////////////////////////////////////
+///// TestsBattery class implementation /////
+/////////////////////////////////////////////
 
+
+
+TestsBattery::TestsBattery(GenFactoryFunc genf)
+    : create_gen(genf)
+{
+}
+
+void TestsBattery::Run() const
+{
+    printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+        "                 Starting %s\n"
+        "                 Version: %s\n"
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n",
+        battery_name.c_str(), PACKAGE_STRING);
+
+    TestsPull pull(tests);
+    pull.Run(create_gen, battery_name);
+}
+
+bool TestsBattery::RunTest(int id) const
+{
+    if (id <= 0) {
+        Run();
+        return true;
+    }
+
+    std::vector<TestDescr> t;
+    for (size_t i = 0; i < tests.size(); i++) {
+        if (tests[i].GetId() == id)
+            t.push_back(tests[i]);
+    }
+    if (t.size() == 0)
+        return false;
+
+    printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+        "                 Starting %s test %d\n"
+        "                 Version: %s\n"
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n",
+        battery_name.c_str(), id, PACKAGE_STRING);
+
+    TestsPull pull(t);
+    pull.Run(create_gen, battery_name + " test " + std::to_string(id));
+    return true;
+}
 
 
 
 //////////////////////////
 ///// Some functions /////
 //////////////////////////
-
-
-
-void run_tests(std::vector<TestDescr> &tests,
-    std::function<std::shared_ptr<UniformGenerator>()> create_gen,
-    const std::string &battery_name)
-{
-    TestsPull pull(tests);
-    pull.Run(create_gen, battery_name);
-}
-
 
 /**
  * @brief Get the p-values in a swalk_RandomWalk1 test
@@ -435,7 +471,10 @@ TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s)
     return [=] (TestDescr &td, BatteryIO &io) {
         smarsa_Res2 *res = smarsa_CreateRes2();
         smarsa_GCD (io.Gen(), res, N, n, r, s);
-        io.Add(td.GetId(), td.GetName(), res->GCD->pVal2[gofw_Mean]);
+        if (N == 1)
+            io.Add(td.GetId(), td.GetName(), res->GCD->pVal2[gofw_Mean]);
+        else
+            io.Add(td.GetId(), td.GetName(), res->GCD->pVal2[gofw_Sum]);
         smarsa_DeleteRes2(res);
     };
 }
@@ -457,7 +496,10 @@ TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
     return [=] (TestDescr &td, BatteryIO &io) {
         sstring_Res *res = sstring_CreateRes();
         sstring_HammingIndep(io.Gen(), res, N, n, r, s, L, d);
-        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
+        if (N == 1)
+            io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
+        else
+            io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Sum]);
         sstring_DeleteRes(res);
     };
 }
@@ -512,7 +554,10 @@ TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();
         smarsa_MatrixRank(io.Gen(), res, N, n, r, s, L, k);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        if (N == 1)
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        else
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
         sres_DeleteChi2(res);
     };
 }
@@ -541,7 +586,10 @@ TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s)
     return [=] (TestDescr &td, BatteryIO &io) {
         sres_Chi2 *res = sres_CreateChi2();
         sstring_PeriodsInStrings(io.Gen(), res, N, n, r, s);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        if (N == 1)        
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        else
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
         sres_DeleteChi2 (res);
     };
 }
@@ -628,7 +676,10 @@ TestCbFunc smarsa_Savir2_cb(long N, long n, int r, long m, int t)
     return [=] (TestDescr &td, BatteryIO &io) {
         auto *res = sres_CreateChi2();
         smarsa_Savir2(io.Gen(), res, N, n, r, m, t);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        if (N == 1)
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
+        else
+            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
         sres_DeleteChi2(res);
     };
 }

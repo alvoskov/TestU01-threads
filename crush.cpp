@@ -1,24 +1,11 @@
 #include "crush.h"
 
-
-
-/*
- * A battery of stringent statistical tests for Random Number Generators
- * used in simulation.
- * Rep[i] gives the number of times that test i will be done. The default
- * values are Rep[i] = 1 for all i.
- */
-void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen)
+CrushBattery::CrushBattery(GenFactoryFunc genf)
+    : TestsBattery(genf)
 {
     constexpr int s = 30, r = 0;
     int j2 = 0;
-    std::vector<TestDescr> tests;
-
-    printf ("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
-        "                 Starting Crush\n"
-        "                 Version: %s\n"
-        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n",
-        PACKAGE_STRING);
+    battery_name = "Crush(mt)";
 
     // SerialOver tests
     tests.emplace_back(++j2, "SerialOver, t = 2",
@@ -364,6 +351,4 @@ void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen
 
     tests.emplace_back(++j2, "AutoCor, d = 10",
         sstring_AutoCor_cb(5, 11 + BILLION, 20, 10, 10));
-
-    run_tests(tests, create_gen, "Crush(mt)");
 }

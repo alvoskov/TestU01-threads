@@ -39,8 +39,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-add_library(testu01threads testu01_mt.h testu01_mt_cintf.h bigcrush.h crush.h smallcrush.h generators.h
-    testu01_mt.cpp testu01_mt_cintf.cpp bigcrush.cpp crush.cpp smallcrush.cpp generators.cpp)
+add_library(testu01threads testu01_mt.h testu01_mt_cintf.h batteries.h bigcrush.h crush.h smallcrush.h pdiehard.h generators.h
+    testu01_mt.cpp testu01_mt_cintf.cpp bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp generators.cpp)
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE})
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 
@@ -49,9 +49,10 @@ add_executable(testu01th_demo testu01th_demo.cpp)
 add_executable(testu01th_lib testu01th_lib.cpp)
 add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
 
-# An examples of plugin
+# Examples of plugins
 add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 add_library(kiss93_shared SHARED kiss93_shared.c testu01_mt_cintf.h)
+add_library(mlfib17_5_shared SHARED mlfib17_5_shared.c testu01_mt_cintf.h)
 
 
 foreach (program testu01th_demo testu01th_lib splitmix_exec)

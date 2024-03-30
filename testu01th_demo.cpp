@@ -1,8 +1,6 @@
 
 #include "testu01_mt.h"
-#include "bigcrush.h"
-#include "crush.h"
-#include "smallcrush.h"
+#include "batteries.h"
 #include "generators.h"
 
 #include <stdlib.h>
@@ -102,7 +100,7 @@ int main(int argc, char *argv[])
 
     if (argc != 3) {
         printf("Usage: testu01th_demo battery generator\n");
-        printf("battery: battery name (SmallCrush, Crush, BigCrush)\n");
+        printf("battery: battery name (SmallCrush, Crush, BigCrush, pseudoDIEHARD)\n");
         printf("generator: PRNG name. The supported generators are:\n");
         std::vector<std::string> gnames;
         for (auto &kv : gen_map) {
@@ -125,11 +123,17 @@ int main(int argc, char *argv[])
 
     auto create_gen = gen_map.at(generator);    
     if (battery == "SmallCrush") {
-        mt_bat_SmallCrush(create_gen);
+        SmallCrushBattery bat(create_gen);
+        bat.Run();
     } else if (battery == "Crush") {
-        mt_bat_Crush(create_gen);
+        CrushBattery bat(create_gen);
+        bat.Run();
     } else if (battery == "BigCrush") {
-        mt_bat_BigCrush(create_gen);
+        BigCrushBattery bat(create_gen);
+        bat.Run();
+    } else if (battery == "pseudoDIEHARD") {
+        PseudoDiehardBattery bat(create_gen);
+        bat.Run();
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
     }

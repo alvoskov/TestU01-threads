@@ -191,8 +191,8 @@ class TestDescr
     std::function<void (TestDescr &td, BatteryIO &io)> pvalue_func;
 
 public:
-    inline int GetId() { return id; }
-    inline const std::string &GetName() { return name; }
+    inline int GetId() const { return id; }
+    inline const std::string &GetName() const { return name; }
     inline void Run(BatteryIO &io) { pvalue_func(*this, io); }
 
     TestDescr(int testid, const std::string &testname, TestCbFunc f)
@@ -201,6 +201,8 @@ public:
     {
     }
 };
+
+
 
 
 class TestsPull
@@ -223,9 +225,24 @@ public:
 };
 
 
-void run_tests(std::vector<TestDescr> &tests,
-    std::function<std::shared_ptr<UniformGenerator>()> create_gen,
-    const std::string &battery_name);
+
+/**
+ * @brief Generic class for tests batteries such as SmallCrush, Crush
+ * or BigCrush.
+ */
+class TestsBattery
+{
+protected:
+    std::vector<TestDescr> tests;
+    GenFactoryFunc create_gen;
+    std::string battery_name;
+
+public:
+    TestsBattery(GenFactoryFunc genf);
+    void Run() const;
+    bool RunTest(int id) const;
+};
+
 
 TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);

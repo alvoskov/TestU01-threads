@@ -1,20 +1,11 @@
 #include "bigcrush.h"
 
-/**
- * @brief A multi-threaded version of BigCrush test battery.
- */
-void mt_bat_BigCrush (std::function<std::shared_ptr<UniformGenerator>()> create_gen)
+BigCrushBattery::BigCrushBattery(GenFactoryFunc genf)
+    : TestsBattery(genf)
 {
     constexpr int s = 30, r = 0;
     int j2 = 0;
-    std::vector<TestDescr> tests;
-
-    printf (
-        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
-        "                 Starting BigCrush\n"
-        "                 Version: %s\n"
-        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n",
-        PACKAGE_STRING);
+    battery_name = "BigCrush(mt)";
 
     // SerialOver tests
     tests.emplace_back(++j2, "SerialOver, r = 0",
@@ -371,6 +362,4 @@ void mt_bat_BigCrush (std::function<std::shared_ptr<UniformGenerator>()> create_
     tests.emplace_back(++j2, "AutoCor, d=3, r=27",
         sstring_AutoCor_cb(10, 30 + BILLION, 27, 3, 3));
     //util_Assert (j2 <= BIGCRUSH_NUM, "BigCrush:   j2 > BIGCRUSH_NUM");
-
-    run_tests(tests, create_gen, "BigCrush(mt)");
 }

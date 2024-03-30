@@ -17,9 +17,7 @@
  */
 
 #include "testu01_mt.h"
-#include "bigcrush.h"
-#include "crush.h"
-#include "smallcrush.h"
+#include "batteries.h"
 #include "generators.h"
 
 #include <stdlib.h>
@@ -146,24 +144,33 @@ bool load_module(GenCModule &mod, const char *libname)
 #endif
 
 
-////////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Program entry point.
+ */
 int main(int argc, char *argv[]) 
 {
-    if (argc != 3) {
-        std::cout << "Usage: test_lib battery generator_lib" << std::endl;
+    if (argc < 3) {
+        std::cout << "Runs test batteries from TestU01 library in serial or parallel mode." << std::endl;
+        std::cout << "The parallel mode allows to use all cores of CPU for computations and" << std::endl;
+        std::cout << "used its own dispatcher. The serial version runs in one-threaded mode" << std::endl;
+        std::cout << "and just runs the batteries from TestU01 without modification." << std::endl << std::endl;
+        std::cout << "Usage: test01th_lib battery generator_lib [test_id]" << std::endl;
         std::cout << "  battery: battery name; supported batteries are:" << std::endl;
-        std::cout << "    - SmallCrush - parallel version of TestU01 SmallCrush" << std::endl;
-        std::cout << "    - Crush      - parallel version of TestU01 Crush" << std::endl;
-        std::cout << "    - BigCrush   - parallel version of TestU01 BigCrush" << std::endl;
-        std::cout << "    - SmallCrush_ser - classic (serial) version of SmallCrush" << std::endl;
-        std::cout << "    - Crush_ser      - classic (serial) version of Crush" << std::endl;
-        std::cout << "    - BigCrush_ser   - classic (serial) version of BigCrush" << std::endl;
-        std::cout << "  generator: PRNG name (name of dynamic library)\n" << std::endl;
+        std::cout << "    Parallel versions of batteries:" << std::endl;
+        std::cout << "    - SmallCrush, Crush, BigCrush, pseudoDIEHARD" << std::endl;
+        std::cout << "    Serial versions of batteries:" << std::endl;
+        std::cout << "    - SmallCrush_ser, Crush_ser, BigCrush_ser, pseudoDIEHARD_ser" << std::endl;
+        std::cout << "  generator: PRNG name (name of dynamic library). Should export the functions:" << std::endl;
+        std::cout << "    - int gen_initlib()" << std::endl;
+        std::cout << "    - int gen_getinfo(GenInfoC *gi)" << std::endl;
+        std::cout << "    - int gen_closelib()" << std::endl;
+        std::cout << "  test_id:   Optional argument with specific test ID" << std::endl << std::endl;
         return 0;
     }
 
     GenCModule mod;
     GenInfoC geninfo;
+    int test_id = -1;
 
     if (!load_module(mod, argv[2])) {
         std::cerr << "Cannot load the module" << std::endl;
@@ -177,12 +184,26 @@ int main(int argc, char *argv[])
     };
 
     std::string battery = argv[1];
+    if (argc >= 4) {
+        test_id = std::stoi(argv[3]);
+        if (test_id == 0) {
+            std::cerr << "Invalid test number " << argv[3] << std::endl;
+            return 1;
+        }
+    }
+
     if (battery == "SmallCrush") {
-        mt_bat_SmallCrush(create_gen);
+        SmallCrushBattery bat(create_gen);
+        bat.RunTest(test_id);
     } else if (battery == "Crush") {
-        mt_bat_Crush(create_gen);
+        CrushBattery bat(create_gen);
+        bat.RunTest(test_id);
     } else if (battery == "BigCrush") {
-        mt_bat_BigCrush(create_gen);
+        BigCrushBattery bat(create_gen);
+        bat.RunTest(test_id);
+    } else if (battery == "pseudoDIEHARD") {
+        PseudoDiehardBattery bat(create_gen);
+        bat.RunTest(test_id);
     } else if (battery == "SmallCrush_ser") {
         auto objptr = create_gen();
         bbattery_SmallCrush(objptr->GetPtr());
@@ -192,6 +213,9 @@ int main(int argc, char *argv[])
     } else if (battery == "BigCrush_ser") {
         auto objptr = create_gen();
         bbattery_BigCrush(objptr->GetPtr());
+    } else if (battery == "pseudoDIEHARD_ser") {
+        auto objptr = create_gen();
+        bbattery_pseudoDIEHARD(objptr->GetPtr());
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
     }

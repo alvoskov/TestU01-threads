@@ -19,5 +19,16 @@
 #define __CRUSH_H
 #include "testu01_mt.h"
 
-void mt_bat_Crush (std::function<std::shared_ptr<UniformGenerator>()> create_gen);
+/*
+ * A battery of stringent statistical tests for Random Number Generators
+ * used in simulation.
+ * Rep[i] gives the number of times that test i will be done. The default
+ * values are Rep[i] = 1 for all i.
+ */
+class CrushBattery : public TestsBattery
+{
+public:
+    CrushBattery(GenFactoryFunc genf);
+};
+
 #endif

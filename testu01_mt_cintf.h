@@ -2,10 +2,19 @@
  * @file testu01th_lib.h
  * @brief Simple C-style interface that enables an interaction between
  * TestU01-threads library and C programs.
+ *
  * @details Two styles of interactions are supported:
  *
  * - Calling SmallCrush, Crush and BigCrush test batteries from C program.
  * - Calling PRNG from shared library written in pure C.
+ *
+ * If PRNG is compiled as a separate shared C library it should export
+ * the next three functions:
+ *
+ * - `int EXPORT gen_initlib()` (initialized the library after loading)
+ * - `int EXPORT gen_closelib()` (run before unloading the library)
+ * - `int EXPORT gen_getinfo(GenInfoC *gi)` (fills GenInfoC structure
+ *   with function pointers for the used PRNG)
  * 
  * This file is designed for both C and C++ programs. Please, don't add
  * anything C++-specific here!
@@ -83,7 +92,6 @@ static inline double uint64_to_udouble(uint64_t val)
     x.f -= 1.0;
     return x.f;
 }
-double uint64_to_udouble(uint64_t val);
 void set_generator(const GenInfoC *gi);
 int run_smallcrush();
 int run_crush();

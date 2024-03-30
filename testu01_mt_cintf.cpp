@@ -13,10 +13,10 @@ void set_generator(const GenInfoC *gi)
 
 int run_smallcrush()
 {
-    auto create_gen = [] () -> std::shared_ptr<UniformGenerator> {
+    SmallCrushBattery bat([] () -> std::shared_ptr<UniformGenerator> {
         return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
-    };
-    mt_bat_SmallCrush(create_gen);
+    });
+    bat.Run();
     return 1;
 }
 

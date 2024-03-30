@@ -19,5 +19,11 @@
 #define __SMALLCRUSH_H
 #include "testu01_mt.h"
 
-void mt_bat_SmallCrush(std::function<std::shared_ptr<UniformGenerator>()> create_gen);
+
+class SmallCrushBattery : public TestsBattery
+{
+public:
+    SmallCrushBattery(GenFactoryFunc genf);
+};
+
 #endif
