@@ -45,8 +45,10 @@ static void delete_state(void *param, void *state)
     free(state);
 }
 
-int EXPORT gen_initlib()
+int EXPORT gen_initlib(uint64_t seed, void *data)
 {
+    (void) seed;
+    (void) data;
     return 1;
 }
 

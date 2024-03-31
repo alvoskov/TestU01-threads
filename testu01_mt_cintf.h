@@ -61,8 +61,8 @@ typedef struct {
 #endif
 
 
-typedef int (*GenInitLibFunc)();
-typedef int (*GenCloseLibFunc)();
+typedef int (*GenInitLibFunc)(uint64_t seed, void *data);
+typedef int (*GenCloseLibFunc)(void);
 typedef int (*GenGetInfoFunc)(GenInfoC *gi);
 
 /**

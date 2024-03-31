@@ -4,22 +4,21 @@
 
 static GenInfoC gi;
 
-int EXPORT gen_initlib()
+int EXPORT gen_initlib(uint64_t seed, void *data)
 {
-    printf("===== gen_initlib =====\n");
+    (void) seed;
+    (void) data;
     splitmix_get_geninfo(&gi);
     return 1;
 }
 
 int EXPORT gen_closelib()
 {
-    printf("===== gen_closelib =====\n");
     return 1;
 }
 
 int EXPORT gen_getinfo(GenInfoC *gi_out)
 {
-    printf("===== gen_getinfo =====\n");
     *gi_out = gi;
     return 1;
 }

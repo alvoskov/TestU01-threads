@@ -39,7 +39,7 @@ static void delete_state(void *param, void *state)
 }
 
 
-void splitmix_get_geninfo(GenInfoC *gi)
+int splitmix_get_geninfo(GenInfoC *gi)
 {
     static const char name[] = "SplitMix64";
     gi->name = name;
@@ -47,4 +47,5 @@ void splitmix_get_geninfo(GenInfoC *gi)
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
+    return 1;
 }

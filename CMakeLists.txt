@@ -53,6 +53,8 @@ add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
 add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 add_library(kiss93_shared SHARED kiss93_shared.c testu01_mt_cintf.h)
 add_library(mlfib17_5_shared SHARED mlfib17_5_shared.c testu01_mt_cintf.h)
+add_library(alfib_shared SHARED alfib_shared.c testu01_mt_cintf.h)
+add_library(lfib_float_shared SHARED lfib_float_shared.c testu01_mt_cintf.h)
 
 
 foreach (program testu01th_demo testu01th_lib splitmix_exec)

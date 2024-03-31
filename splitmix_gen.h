@@ -10,7 +10,7 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
-void splitmix_get_geninfo(GenInfoC *gi);
+int splitmix_get_geninfo(GenInfoC *gi);
 #ifdef __cplusplus
 }
 #endif
