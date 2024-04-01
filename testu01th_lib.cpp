@@ -24,6 +24,7 @@
 #include <stdio.h>
 
 #include <string>
+#include <system_error>
 #include <map>
 #include <cstring>
 #include <chrono>
@@ -59,7 +60,9 @@ bool load_module(GenCModule &mod, const char *libname)
 {
     HMODULE hDll = LoadLibraryA(libname);
     if (hDll == 0 || hDll == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "Cannot load the '%s' module\n", libname);
+        int errcode = (int) GetLastError();
+        fprintf(stderr, "Cannot load the '%s' module; error code: %d\n",
+            libname, errcode);
         return false;
     }
 

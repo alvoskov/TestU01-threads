@@ -30,6 +30,7 @@ typedef struct {
 static uint64_t get_bits64(void *param, void *state)
 {
     MLFib17_5_State *obj = (MLFib17_5_State *) state;
+    (void) param;
     uint64_t x = obj->U[obj->i] * obj->U[obj->j];
     obj->U[obj->i] = x;
     if(--obj->i == 0) obj->i = LFIB_A;
