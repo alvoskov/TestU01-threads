@@ -101,24 +101,20 @@ void EXPORT fill_u01(void *param, void *state)
         }
     }
 
-#pragma omp simd
     for (size_t k = 0; k < LFIB_A; k++) {
         obj->z[k] -= c;
         if (obj->z[k] < 0.0) obj->z[k] += r;
     }
 
-#pragma omp simd
     for (size_t k = 0; k < LFIB_A; k++) {
         obj->w[k] -= obj->z[k];
         if (obj->w[k] < 0.0) obj->w[k] += r;
     }
 
-#pragma omp simd
     for (size_t k = 0; k < LFIB_A; k++) {
         obj->U[k] = obj->U[k] - obj->w[k];
     }
 
-#pragma omp simd
     for (size_t k = 0; k < LFIB_A; k++) {
         if (obj->U[k] < 0.0) obj->U[k] += 1.0;
     }
