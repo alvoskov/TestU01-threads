@@ -58,6 +58,7 @@ add_library(mlfib17_5_shared SHARED mlfib17_5_shared.c testu01_mt_cintf.h)
 add_library(alfib_shared SHARED alfib_shared.c testu01_mt_cintf.h)
 add_library(lfib_float_shared SHARED lfib_float_shared.c testu01_mt_cintf.h)
 add_library(lfib_vfloat_shared SHARED lfib_vfloat_shared.c testu01_mt_cintf.h)
+add_library(chacha_shared SHARED chacha_shared.c testu01_mt_cintf.h)
 
 
 foreach (program testu01th_demo testu01th_lib splitmix_exec)
