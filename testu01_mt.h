@@ -164,8 +164,10 @@ public:
 
     void Add(const BatteryIO &obj);
     size_t GetNTestsFailed() const;
+    inline size_t GetNResults() const { return results.size(); }
+    inline const PValueRecord &GetPValueRecord(size_t ind) { return results[ind]; }
     void WritePValue(double p);
-    void WriteReport(const char *batName, const char *genName, chrono_Chrono *timer);
+    void WriteReport(const char *batName, const char *genName, chrono_Chrono *timer);    
 };
 
 

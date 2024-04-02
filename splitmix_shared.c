@@ -4,10 +4,9 @@
 
 static GenInfoC gi;
 
-int EXPORT gen_initlib(uint64_t seed, void *data)
+int EXPORT gen_initlib(CallerAPI *intf)
 {
-    (void) seed;
-    (void) data;
+    (void) intf;
     splitmix_get_geninfo(&gi);
     return 1;
 }

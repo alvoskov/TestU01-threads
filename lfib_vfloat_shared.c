@@ -7,7 +7,9 @@
 #define LFIB_B 7
 // 17, 5
 
-static uint32_t global_seed;
+//static uint32_t global_seed;
+
+static CallerAPI intf;
 
 static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
 static const double r = 9007199254740881.0 / 9007199254740992.0; /**< base (prime) */
@@ -174,7 +176,7 @@ static void fill_wz(LFibFloat *obj, uint32_t seed)
 static void *init_state()
 {
     LFibFloat *obj = (LFibFloat *) malloc_util(sizeof(LFibFloat));
-    fill_wz(obj, global_seed);
+    fill_wz(obj, (uint32_t) intf.get_seed64());
 //    uint32_t seed = global_seed;
 //    obj->z = (double) seed / UINT_MAX;
 //    obj->w = obj->z;
@@ -208,10 +210,9 @@ static void delete_state(void *param, void *state)
     free_util(state);
 }
 
-int EXPORT gen_initlib(uint64_t seed, void *data)
+int EXPORT gen_initlib(CallerAPI *intf_)
 {
-    global_seed = seed;
-    (void) data;
+    intf = *intf_;
     return 1;
 }
 

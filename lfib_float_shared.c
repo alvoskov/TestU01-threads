@@ -5,6 +5,8 @@
 #define LFIB_A 17
 #define LFIB_B 5
 
+static CallerAPI intf;
+
 static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
 
 static inline double amb_mod_r(double a, double b)
@@ -73,10 +75,9 @@ static void delete_state(void *param, void *state)
     free(state);
 }
 
-int EXPORT gen_initlib(uint64_t seed, void *data)
+int EXPORT gen_initlib(CallerAPI *intf_)
 {
-    (void) seed;
-    (void) data;
+    intf = *intf_;
     return 1;
 }
 

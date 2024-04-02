@@ -207,9 +207,23 @@ void TestsPull::ThreadFunc(TestsPull &pull, BatteryIO &io, int thread_id)
         TestDescr t = *test;
         fprintf(stderr, "vvvvv  Thread #%d: test %s started (%s)\n",
             thread_id, t.GetName().c_str(), pos_msg.c_str());
+        size_t ind1 = io.GetNResults();
         t.Run(io);
-        fprintf(stderr, "^^^^^  Thread #%d: test %s finished (%s)\n",
+        size_t ind2 = io.GetNResults();
+        fprintf(stderr, "^^^^^  Thread #%d: test %s finished (%s)",
             thread_id, t.GetName().c_str(), pos_msg.c_str());
+        if (ind2 > ind1) {
+            ind2--;
+            fprintf(stderr, "; p = [");
+            for (size_t i = ind1; i <= ind2; i++) {
+                fprintf(stderr, "%g ", io.GetPValueRecord(i).pvalue);
+            }
+            fprintf(stderr, "]\n");
+        } else {
+            fprintf(stderr, "\n");
+        }
+        
+
     }
     fprintf(stderr, "^^^^^^^^^^  Thread #%d finished  ^^^^^^^^^^\n", thread_id);
 }

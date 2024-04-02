@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static CallerAPI intf;
+
 typedef struct {
     uint32_t S1;
     uint32_t S2;
@@ -45,10 +47,9 @@ static void delete_state(void *param, void *state)
     free(state);
 }
 
-int EXPORT gen_initlib(uint64_t seed, void *data)
+int EXPORT gen_initlib(CallerAPI *intf_)
 {
-    (void) seed;
-    (void) data;
+    intf = *intf_;
     return 1;
 }
 

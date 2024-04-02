@@ -26,6 +26,7 @@ typedef struct {
     int j;
 } MLFib17_5_State;
 
+static CallerAPI intf;
 
 static uint64_t get_bits64(void *param, void *state)
 {
@@ -70,10 +71,9 @@ static void delete_state(void *param, void *state)
     free(state);
 }
 
-int EXPORT gen_initlib(uint64_t seed, void *data)
+int EXPORT gen_initlib(CallerAPI *intf_)
 {
-    (void) seed;
-    (void) data;
+    intf = *intf_;
     return 1;
 }
 

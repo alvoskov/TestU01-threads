@@ -37,8 +37,9 @@
 
 typedef double (*GetU01CallbackC)(void *param, void *state);
 typedef long unsigned int (*GetBits32CallbackC)(void *param, void *state);
-typedef void *(*InitStateCallbackC)();
+typedef void *(*InitStateCallbackC)(void);
 typedef void (*DeleteStateCallbackC)(void *param, void *state);
+typedef uint64_t (*GetSeed64CallbackC)(void);
 
 /**
  * @brief Keeps the information for initialization and destruction
@@ -53,6 +54,11 @@ typedef struct {
     GetBits32CallbackC get_bits32;
 } GenInfoC;
 
+
+typedef struct {
+    GetSeed64CallbackC get_seed64;    
+} CallerAPI;
+
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #define EXPORT __declspec( dllexport )
 #define USE_LOADLIBRARY
@@ -61,7 +67,7 @@ typedef struct {
 #endif
 
 
-typedef int (*GenInitLibFunc)(uint64_t seed, void *data);
+typedef int (*GenInitLibFunc)(CallerAPI *intf);
 typedef int (*GenCloseLibFunc)(void);
 typedef int (*GenGetInfoFunc)(GenInfoC *gi);
 
@@ -129,5 +135,14 @@ int run_bigcrush();
 #ifdef __cplusplus
 }
 #endif
+
+
+/*
+ * External modules functions prototypes. They are needed for
+ * protection from function types mismatchin
+ */
+int gen_initlib(CallerAPI *intf);
+int gen_closelib(void);
+int gen_getinfo(GenInfoC *gi);
 
 #endif

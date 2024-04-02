@@ -35,6 +35,12 @@
 #include <mutex>
 #include <algorithm>
 #include <iostream>
+#include <chrono>
+#include <thread>
+
+// Platform-dependent include files
+#include <immintrin.h>
+#include <x86intrin.h>
 
 #ifdef USE_LOADLIBRARY
 //////////////////////////////////////////
@@ -155,10 +161,9 @@ bool load_module(GenCModule &mod, const char *libname)
 
 static GenCModule dummy_cmodule;
 
-static int dummy_initlib(uint64_t seed, void *data)
+static int dummy_initlib(CallerAPI *intf)
 {
-    (void) seed;
-    (void) data;
+    (void) intf;
     return 1;
 }
 
@@ -237,6 +242,32 @@ static double measure_speed(GenFactoryFunc create_gen)
     return ns_per_call;
 }
 
+/*
+static uint64_t seed64_rdtsc()
+{
+    uint64_t s = 0;
+    uint32_t lcg = (uint32_t) time(NULL);
+    for (size_t i = 0; i < 4; i++) {
+        uint64_t tic = __rdtsc();
+        lcg = (69069 * lcg + 1);
+        uint32_t ms = 2 + (lcg >> 30);
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+        uint64_t toc = __rdtsc();
+        s |= (toc - tic) << (i * 16);
+    }   
+    return s;
+}
+*/
+
+static uint64_t seed64()
+{
+    // Rdseed instruction
+    uint64_t s;
+    while (!_rdseed64_step(&s)) {}
+//    printf("%llX\n", seed64_rdtsc());
+    return s;
+}
+
 /**
  * @brief Program entry point.
  */
@@ -263,6 +294,11 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    CallerAPI intf;
+    intf.get_seed64 = seed64;
+
+
+
     GenCModule mod;
     GenInfoC geninfo;
     int test_id = -1;
@@ -271,7 +307,7 @@ int main(int argc, char *argv[])
         std::cerr << "Cannot load the module" << std::endl;
         return 1;
     }
-    mod.gen_initlib(prng_seed32(), nullptr);
+    mod.gen_initlib(&intf);
     mod.gen_getinfo(&geninfo);
 
     auto create_gen = [&geninfo] () -> std::shared_ptr<UniformGenerator> {
