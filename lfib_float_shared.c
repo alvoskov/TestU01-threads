@@ -1,6 +1,7 @@
 #include "testu01_mt_cintf.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #define LFIB_A 17
 #define LFIB_B 5
