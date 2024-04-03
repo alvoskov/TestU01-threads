@@ -375,7 +375,9 @@ static void GetPValue_CPairs(BatteryIO &io, long N, snpair_Res *res, size_t id, 
 
 void set_bin_stdout()
 {
+#ifdef USE_LOADLIBRARY
     _setmode( _fileno(stdout), _O_BINARY); // needed to allow binary stdout on windows
+#endif
 }
 
 
