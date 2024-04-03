@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iostream>
 
+
 //////////////////////////////////////////////////////////////////////
 
 template<size_t lfib_a, size_t lfib_b>
@@ -71,7 +72,6 @@ public:
 	    return (uint32_t) (GetU01() * unif01_NORM32);
     }
 };
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +134,8 @@ int main(int argc, char *argv[])
     } else if (battery == "pseudoDIEHARD") {
         PseudoDiehardBattery bat(create_gen);
         bat.Run();
+    } else if (battery == "practrand32") {
+        prng_bits32_to_file(create_gen());
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
     }

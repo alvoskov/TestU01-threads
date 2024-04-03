@@ -1,6 +1,29 @@
+/**
+ * @brief Test for ChaCha pseudorandom number generator. 
+ * @details If compares the ChaCha20 PRNG output with reference values
+ * from the RFC 7359 specification.
+ *
+ * References:
+ * 1. RFC 7539. ChaCha20 and Poly1305 for IETF Protocols
+ *    https://datatracker.ietf.org/doc/html/rfc7539
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #include "chacha_shared.h"
 #include <stdio.h>
 
+/**
+ * @brief Print the 4x4 matrix of uint32_t from the ChaCha PRNG state.
+ * @param x Pointer to the matrix (C-style)
+ */
 void print_mat16(uint32_t *x)
 {
     for (size_t i = 0; i < 16; i++) {
@@ -10,14 +33,19 @@ void print_mat16(uint32_t *x)
     }
 }
 
+/**
+ * @brief Program entry point.
+ */
 int main()
 {
+    /* Input values */
     uint32_t x_init[] = {
         0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
         0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c,
         0x00000001,  0x09000000,  0x4a000000,  0x00000000
     };
 
+    /* Refernce values from RFC 7359 */
     uint32_t out_final[] = {
        0xe4e7f110,  0x15593bd1,  0x1fdd0f50,  0xc47120a3,
        0xc7f4d1c7,  0x0368c033,  0x9aaa2204,  0x4e6cd4c3,

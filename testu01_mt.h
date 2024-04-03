@@ -108,8 +108,8 @@ public:
     UniformGeneratorC(const GenInfoC *gi);
     unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
     const std::string &GetName() { return name; }
-    double GetU01() override { return 0.0; }
-    uint32_t GetBits() override { return 0; }
+    double GetU01() override { return gen.GetU01(gen.param, gen.state); }
+    uint32_t GetBits() override { return gen.GetBits(gen.param, gen.state); }
     virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
 };
 
@@ -246,6 +246,10 @@ public:
     void Run() const;
     bool RunTest(int id) const;
 };
+
+
+void set_bin_stdout();
+void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr);
 
 
 TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);

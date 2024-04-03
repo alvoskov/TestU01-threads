@@ -347,6 +347,8 @@ int main(int argc, char *argv[])
     } else if (battery == "pseudoDIEHARD_ser") {
         auto objptr = create_gen();
         bbattery_pseudoDIEHARD(objptr->GetPtr());
+    } else if (battery == "practrand32") {
+        prng_bits32_to_file(create_gen());
     } else if (battery == "speed") {
         GenInfoC dummy_gen;
         init_dummy_cmodule();

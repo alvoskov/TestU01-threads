@@ -1,6 +1,7 @@
 #include "testu01_mt.h"
 #include <chrono>
 #include <random>
+#include <fcntl.h>
 
 /////////////////////////////////////////////////
 ///// UniformGenerator class implementation /////
@@ -370,6 +371,26 @@ static void GetPValue_CPairs(BatteryIO &io, long N, snpair_Res *res, size_t id, 
         }
    }
 }
+
+
+void set_bin_stdout()
+{
+    _setmode( _fileno(stdout), _O_BINARY); // needed to allow binary stdout on windows
+}
+
+
+void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
+{
+    uint32_t buf[256];
+    set_bin_stdout();
+    while (1) {
+        for (int i = 0; i < 256; i++) {
+            buf[i] = genptr->GetBits();
+        }
+        fwrite(buf, sizeof(uint32_t), 256, stdout);
+    }
+}
+
 
 ///////////////////////////////////////////////////////
 ///// Functions that generate callbacks for tests /////
