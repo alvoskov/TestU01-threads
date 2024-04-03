@@ -259,13 +259,15 @@ static uint64_t seed64_rdtsc()
 }
 */
 
+/**
+ * @brief Obtain hardware generated seed (random number)
+ * from the RDSEED instruction.
+ */
 static uint64_t seed64()
 {
-    // Rdseed instruction
-    uint64_t s;
-    while (!_rdseed64_step(&s)) {}
-//    printf("%llX\n", seed64_rdtsc());
-    return s;
+    long long unsigned int rd;
+    while (!_rdseed64_step(&rd)) {}
+    return static_cast<uint64_t>(rd);
 }
 
 /**
