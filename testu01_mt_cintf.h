@@ -47,23 +47,30 @@ typedef uint64_t (*GetSeed64CallbackC)(void);
  * for pure C.
  */
 typedef struct {
-    const char *name;
-    InitStateCallbackC init_state;
-    DeleteStateCallbackC delete_state;
-    GetU01CallbackC get_u01;
-    GetBits32CallbackC get_bits32;
+    const char *name; /**< Generator name */
+    InitStateCallbackC init_state; /**< Function that initializes the PRNG state */
+    DeleteStateCallbackC delete_state; /**< Function that deletes the PRNG state */
+    GetU01CallbackC get_u01; /**< Function returns the double pseudorandom number */
+    GetBits32CallbackC get_bits32; /**< Function returns the uint32_t pseudorandom number */
 } GenInfoC;
 
 
 typedef struct {
-    GetSeed64CallbackC get_seed64;    
+    GetSeed64CallbackC get_seed64; /**< Get random 64-bit seed */
+    void *(*malloc)(size_t len); /**< Pointer to malloc function */
+    void (*free)(void *); /**< Pointer to free function */
 } CallerAPI;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
+#include <windows.h>
 #define EXPORT __declspec( dllexport )
 #define USE_LOADLIBRARY
+#define SHARED_ENTRYPOINT_CODE \
+int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
+    (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
 #else
 #define EXPORT
+#define SHARED_ENTRYPOINT_CODE
 #endif
 
 

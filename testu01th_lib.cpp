@@ -296,6 +296,8 @@ int main(int argc, char *argv[])
 
     CallerAPI intf;
     intf.get_seed64 = seed64;
+    intf.malloc = malloc;
+    intf.free = free;
 
 
 

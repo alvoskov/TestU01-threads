@@ -23,11 +23,14 @@
  * In scientific publications which used this software, a reference to it
  * would be appreciated.
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include "chacha_shared.h"
 
 static CallerAPI intf;
+
+/////////////////////////////////////////////////
+///// Entry point for -nostdlib compilation /////
+/////////////////////////////////////////////////
+SHARED_ENTRYPOINT_CODE
 
 //////////////////////////////
 ///// CPU-dependent code /////
@@ -96,6 +99,7 @@ static inline void ChaCha_inc_counter(ChaChaState *obj)
 
 /**
  * @brief Implementation of ChaCha rounds for a 512-bit block.
+ * The function is exported for debugging purposes.
  * @details The scheme of rounds are:
  *
  * | x . . . |    | . x . . |    | . . x . |    | . . . x |
@@ -155,7 +159,13 @@ void EXPORT ChaCha_block(ChaChaState *obj)
     }
 }
 
-
+/**
+ * @brief Initialize the state of ChaCha CSPRNG.
+ * The function is exported for debugging purposes.
+ * @param obj     The state to be initialized.
+ * @param nrounds Number of rounds (8, 12, 20).
+ * @param seed    Pointer to array of 8 uint32_t values (seeds).
+ */
 void EXPORT ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
 {
     /* Constants: the upper row of the matrix */
@@ -201,7 +211,7 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    ChaChaState *obj = (ChaChaState *) malloc(sizeof(ChaChaState));
+    ChaChaState *obj = (ChaChaState *) intf.malloc(sizeof(ChaChaState));
     uint32_t seeds[8];
     for (size_t i = 0; i < 4; i++) {
         uint64_t s = intf.get_seed64();
@@ -216,7 +226,7 @@ static void *init_state()
 static void delete_state(void *param, void *state)
 {
     (void) param;
-    free(state);
+    intf.free(state);
 }
 
 /////////////////////////////////////////////////
