@@ -5,6 +5,12 @@
 
 /**
  * @brief A wrapper for Mersenne twister from the C++ standard library.
+ * @details Fails the next tests from the Crush batter:
+ * - 71 LinearComp, r = 0
+ * - 72 LinearComp, r = 29
+ * And from the BigCrush battery:
+ * - 80 LinearComp, r = 0
+ * - 81 LinearComp, r = 29
  */
 class MT19937Generator : public UniformGenerator
 {

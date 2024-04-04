@@ -56,10 +56,12 @@ add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen
 add_library(kiss93_shared SHARED kiss93_shared.c testu01_mt_cintf.h)
 add_library(mlfib17_5_shared SHARED mlfib17_5_shared.c testu01_mt_cintf.h)
 add_library(alfib_shared SHARED alfib_shared.c testu01_mt_cintf.h)
+add_library(alfib_mod_shared SHARED alfib_mod_shared.c testu01_mt_cintf.h)
 add_library(lfib_float_shared SHARED lfib_float_shared.c testu01_mt_cintf.h)
 add_library(lfib_vfloat_shared SHARED lfib_vfloat_shared.c testu01_mt_cintf.h)
 add_library(chacha_shared SHARED chacha_shared.c chacha_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
+set_target_properties(kiss93_shared PROPERTIES LINK_FLAGS "-nostdlib")
 
 # Test for ChaCha PRNG
 add_executable(chacha_test chacha_test.c)

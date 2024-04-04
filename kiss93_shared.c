@@ -3,8 +3,11 @@
  * but fails the LinearComp (r = 29) test in the Crush battery.
  */
 #include "testu01_mt_cintf.h"
-#include <stdio.h>
-#include <stdlib.h>
+
+/////////////////////////////////////////////////
+///// Entry point for -nostdlib compilation /////
+/////////////////////////////////////////////////
+SHARED_ENTRYPOINT_CODE
 
 static CallerAPI intf;
 
@@ -34,7 +37,7 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    KISS93State *obj = (KISS93State *) malloc(sizeof(KISS93State));
+    KISS93State *obj = (KISS93State *) intf.malloc(sizeof(KISS93State));
     obj->S1 = 12345;
     obj->S2 = 6789;
     obj->S3 = 111213;
@@ -44,7 +47,7 @@ static void *init_state()
 static void delete_state(void *param, void *state)
 {
     (void) param;
-    free(state);
+    intf.free(state);
 }
 
 int EXPORT gen_initlib(CallerAPI *intf_)
