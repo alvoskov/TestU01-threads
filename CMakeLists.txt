@@ -67,6 +67,11 @@ set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
 add_executable(chacha_test generators/chacha_test.c)
 target_link_libraries(chacha_test chacha_shared)
 
+add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c generators/chacha_avx_shared.h testu01_mt_cintf.h)
+set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
+add_executable(chacha_avx_test generators/chacha_avx_test.c)
+target_link_libraries(chacha_avx_test chacha_avx_shared)
+
 
 # Link executables
 foreach (program testu01th_demo testu01th_lib splitmix_exec)
