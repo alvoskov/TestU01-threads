@@ -81,6 +81,7 @@ public:
     const std::string &GetName() { return name; }
     virtual double GetU01() = 0;
     virtual uint32_t GetBits() = 0;
+    virtual uint64_t GetBits64();
 };
 
 
@@ -100,6 +101,7 @@ class UniformGeneratorC : public UniformGenerator
     static void WrExternGen(void *junk2) { (void) junk2; }
     std::string name;
     DeleteStateCallbackC destroy;
+    GetBits64CallbackC get_bits64;
 
     UniformGeneratorC(const UniformGeneratorC &obj) = delete;
     UniformGeneratorC &operator=(const UniformGeneratorC &obj) = delete;
@@ -110,6 +112,7 @@ public:
     const std::string &GetName() { return name; }
     double GetU01() override { return gen.GetU01(gen.param, gen.state); }
     uint32_t GetBits() override { return gen.GetBits(gen.param, gen.state); }
+    uint64_t GetBits64() override { return get_bits64(gen.param, gen.state); }
     virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
 };
 
@@ -250,7 +253,7 @@ public:
 
 void set_bin_stdout();
 void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr);
-
+void prng_bits64_to_file(std::shared_ptr<UniformGenerator> genptr);
 
 TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);

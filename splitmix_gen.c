@@ -47,5 +47,6 @@ int splitmix_get_geninfo(GenInfoC *gi)
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
+    gi->get_bits64 = get_bits64;
     return 1;
 }

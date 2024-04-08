@@ -242,22 +242,35 @@ static double measure_speed(GenFactoryFunc create_gen)
     return ns_per_call;
 }
 
+
 /*
-static uint64_t seed64_rdtsc()
+uint64_t seed64_rdtsc()
 {
     uint64_t s = 0;
+    char buf[16];
     uint32_t lcg = (uint32_t) time(NULL);
-    for (size_t i = 0; i < 4; i++) {
+    lcg ^= (uint32_t) __rdtsc() & 0xFFFFFFFF;
+    for (size_t i = 0; i < 8; i++) {
         uint64_t tic = __rdtsc();
-        lcg = (69069 * lcg + 1);
-        uint32_t ms = 2 + (lcg >> 30);
-        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+        for (size_t j = 0; j < 16; j++) {
+            for (size_t k = 0; k < 16; k++) {
+                lcg = (69069 * lcg + 1);
+                buf[k] = ((lcg >> 16) % 26) + 'A';
+            }
+            buf[15] = 0;
+            getenv(buf);
+            //printf("%s\n", buf);
+        }
+        //uint32_t ms = 1000;// + (lcg >> 30);
+        //std::this_thread::sleep_for(std::chrono::microseconds(ms));
         uint64_t toc = __rdtsc();
-        s |= (toc - tic) << (i * 16);
-    }   
+        s |= ((toc - tic) & 0xFF) << (i * 8);
+    }
+    s ^= __rdtsc();
     return s;
 }
 */
+
 
 /**
  * @brief Obtain hardware generated seed (random number)
@@ -270,29 +283,34 @@ static uint64_t seed64()
     return static_cast<uint64_t>(rd);
 }
 
+void print_help()
+{
+    std::cout << "Runs test batteries from TestU01 library in serial or parallel mode." << std::endl;
+    std::cout << "The parallel mode allows to use all cores of CPU for computations and" << std::endl;
+    std::cout << "used its own dispatcher. The serial version runs in one-threaded mode" << std::endl;
+    std::cout << "and just runs the batteries from TestU01 without modification." << std::endl << std::endl;
+    std::cout << "Usage: test01th_lib battery generator_lib [test_id]" << std::endl;
+    std::cout << "  battery: battery name; supported batteries are:" << std::endl;
+    std::cout << "    Parallel versions of batteries:" << std::endl;
+    std::cout << "    - SmallCrush, Crush, BigCrush, pseudoDIEHARD" << std::endl;
+    std::cout << "    Serial versions of batteries:" << std::endl;
+    std::cout << "    - SmallCrush_ser, Crush_ser, BigCrush_ser, pseudoDIEHARD_ser" << std::endl;
+    std::cout << "    Special measurements:" << std::endl;
+    std::cout << "    - speed - measures performance of the supplied PRNG" << std::endl;
+    std::cout << "  generator: PRNG name (name of dynamic library). Should export the functions:" << std::endl;
+    std::cout << "    - int gen_initlib()" << std::endl;
+    std::cout << "    - int gen_getinfo(GenInfoC *gi)" << std::endl;
+    std::cout << "    - int gen_closelib()" << std::endl;
+    std::cout << "  test_id:   Optional argument with specific test ID" << std::endl << std::endl;
+}
+
 /**
  * @brief Program entry point.
  */
 int main(int argc, char *argv[]) 
 {
     if (argc < 3) {
-        std::cout << "Runs test batteries from TestU01 library in serial or parallel mode." << std::endl;
-        std::cout << "The parallel mode allows to use all cores of CPU for computations and" << std::endl;
-        std::cout << "used its own dispatcher. The serial version runs in one-threaded mode" << std::endl;
-        std::cout << "and just runs the batteries from TestU01 without modification." << std::endl << std::endl;
-        std::cout << "Usage: test01th_lib battery generator_lib [test_id]" << std::endl;
-        std::cout << "  battery: battery name; supported batteries are:" << std::endl;
-        std::cout << "    Parallel versions of batteries:" << std::endl;
-        std::cout << "    - SmallCrush, Crush, BigCrush, pseudoDIEHARD" << std::endl;
-        std::cout << "    Serial versions of batteries:" << std::endl;
-        std::cout << "    - SmallCrush_ser, Crush_ser, BigCrush_ser, pseudoDIEHARD_ser" << std::endl;
-        std::cout << "    Special measurements:" << std::endl;
-        std::cout << "    - speed - measures performance of the supplied PRNG" << std::endl;
-        std::cout << "  generator: PRNG name (name of dynamic library). Should export the functions:" << std::endl;
-        std::cout << "    - int gen_initlib()" << std::endl;
-        std::cout << "    - int gen_getinfo(GenInfoC *gi)" << std::endl;
-        std::cout << "    - int gen_closelib()" << std::endl;
-        std::cout << "  test_id:   Optional argument with specific test ID" << std::endl << std::endl;
+        print_help();
         return 0;
     }
 
@@ -301,10 +319,9 @@ int main(int argc, char *argv[])
     intf.malloc = malloc;
     intf.free = free;
 
-
-
     GenCModule mod;
     GenInfoC geninfo;
+    GenInfoC_init(&geninfo);
     int test_id = -1;
 
     if (!load_module(mod, argv[2])) {
@@ -353,6 +370,12 @@ int main(int argc, char *argv[])
         bbattery_pseudoDIEHARD(objptr->GetPtr());
     } else if (battery == "practrand32") {
         prng_bits32_to_file(create_gen());
+    } else if (battery == "practrand64") {
+        if (geninfo.get_bits64 == nullptr) {
+            std::cerr << "This PRNG doesn't support 64-bit mode" << std::endl;
+            return 1;
+        }
+        prng_bits64_to_file(create_gen());
     } else if (battery == "speed") {
         GenInfoC dummy_gen;
         init_dummy_cmodule();

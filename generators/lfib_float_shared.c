@@ -1,10 +1,13 @@
 #include "testu01_mt_cintf.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
 
 #define LFIB_A 17
 #define LFIB_B 5
+
+/////////////////////////////////////////////////
+///// Entry point for -nostdlib compilation /////
+/////////////////////////////////////////////////
+SHARED_ENTRYPOINT_CODE
 
 static CallerAPI intf;
 
@@ -53,8 +56,8 @@ static long unsigned int get_bits32(void *param, void *state)
 
 static void *init_state()
 {
-    LFibFloat *obj = (LFibFloat *) malloc(sizeof(LFibFloat));
-    uint32_t seed = prng_seed32();
+    LFibFloat *obj = (LFibFloat *) intf.malloc(sizeof(LFibFloat));
+    uint32_t seed = intf.get_seed64();
     obj->z = (double) seed / UINT_MAX;
     obj->w = obj->z;
     obj->w2 = obj->z;
@@ -73,7 +76,7 @@ static void *init_state()
 static void delete_state(void *param, void *state)
 {
     (void) param;
-    free(state);
+    intf.free(state);
 }
 
 int EXPORT gen_initlib(CallerAPI *intf_)

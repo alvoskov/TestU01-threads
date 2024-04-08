@@ -49,25 +49,26 @@ target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 # Executables that call TestU01-threads library
 add_executable(testu01th_demo testu01th_demo.cpp)
 add_executable(testu01th_lib testu01th_lib.cpp)
+
+# SplitMix generator in two variants: that calls TestU01-threads
+# and that is called by TestU01-threads as an external module
 add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
+add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins
-add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
-add_library(kiss93_shared SHARED kiss93_shared.c testu01_mt_cintf.h)
-add_library(mlfib17_5_shared SHARED mlfib17_5_shared.c testu01_mt_cintf.h)
-add_library(alfib_shared SHARED alfib_shared.c testu01_mt_cintf.h)
-add_library(alfib_mod_shared SHARED alfib_mod_shared.c testu01_mt_cintf.h)
-add_library(lfib_float_shared SHARED lfib_float_shared.c testu01_mt_cintf.h)
-add_library(lfib_vfloat_shared SHARED lfib_vfloat_shared.c testu01_mt_cintf.h)
-add_library(chacha_shared SHARED chacha_shared.c chacha_shared.h testu01_mt_cintf.h)
-set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
-set_target_properties(kiss93_shared PROPERTIES LINK_FLAGS "-nostdlib")
+foreach(prng_name alfib_mod alfib kiss93 lfib_float lfib_ranmar64 lfib_vfloat mlfib17_5  wyrand xorwow)
+    add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
+    set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
+endforeach()
 
-# Test for ChaCha PRNG
-add_executable(chacha_test chacha_test.c)
+# Module and test for ChaCha CSPRNG
+add_library(chacha_shared SHARED generators/chacha_shared.c generators/chacha_shared.h testu01_mt_cintf.h)
+set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
+add_executable(chacha_test generators/chacha_test.c)
 target_link_libraries(chacha_test chacha_shared)
 
 
+# Link executables
 foreach (program testu01th_demo testu01th_lib splitmix_exec)
     if(M_LIB)
         target_link_libraries (${program})

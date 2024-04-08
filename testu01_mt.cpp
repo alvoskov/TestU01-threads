@@ -21,6 +21,16 @@ unsigned long UniformGenerator::GetBits(void *param, void *state)
     return obj->GetBits();
 }
 
+/**
+ * @brief Returns 64 bits from PRNG. Not used by TestU01, reserved
+ * mainly for future use and testing 64-bit generators by PractRand.
+ */
+uint64_t UniformGenerator::GetBits64()
+{
+    return 0;
+}
+
+
 UniformGenerator::UniformGenerator(const std::string &name)
 {
     this->name = name;
@@ -48,6 +58,7 @@ UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
     gen.GetU01 = gi->get_u01;
     gen.GetBits = gi->get_bits32;
     gen.name = const_cast<char *>(name.c_str());
+    get_bits64 = gi->get_bits64;
     destroy = gi->delete_state;
 }
 
@@ -381,6 +392,10 @@ void set_bin_stdout()
 }
 
 
+/**
+ * @brief Dump an output of a 32-bit PRNG to the stdout in the format suitable
+ * for PractRand.
+ */
 void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
 {
     uint32_t buf[256];
@@ -392,6 +407,23 @@ void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
         fwrite(buf, sizeof(uint32_t), 256, stdout);
     }
 }
+
+/**
+ * @brief Dump an output of a 64-bit PRNG to the stdout in the format suitable
+ * for PractRand.
+ */
+void prng_bits64_to_file(std::shared_ptr<UniformGenerator> genptr)
+{
+    uint64_t buf[256];
+    set_bin_stdout();
+    while (1) {
+        for (int i = 0; i < 256; i++) {
+            buf[i] = genptr->GetBits64();
+        }
+        fwrite(buf, sizeof(uint64_t), 256, stdout);
+    }
+}
+
 
 
 ///////////////////////////////////////////////////////

@@ -37,6 +37,7 @@
 
 typedef double (*GetU01CallbackC)(void *param, void *state);
 typedef long unsigned int (*GetBits32CallbackC)(void *param, void *state);
+typedef uint64_t (*GetBits64CallbackC)(void *param, void *state);
 typedef void *(*InitStateCallbackC)(void);
 typedef void (*DeleteStateCallbackC)(void *param, void *state);
 typedef uint64_t (*GetSeed64CallbackC)(void);
@@ -52,6 +53,7 @@ typedef struct {
     DeleteStateCallbackC delete_state; /**< Function that deletes the PRNG state */
     GetU01CallbackC get_u01; /**< Function returns the double pseudorandom number */
     GetBits32CallbackC get_bits32; /**< Function returns the uint32_t pseudorandom number */
+    GetBits64CallbackC get_bits64; /**< Function returns the uint64_t pseudorandom number */
 } GenInfoC;
 
 
@@ -91,6 +93,10 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+void GenInfoC_init(GenInfoC *obj);
+
 /**
  * @brief Conversion of unsigned (pseudorandom) 64-bit integer
  * to the double that belongs to the [0;1) interval.
@@ -112,16 +118,6 @@ static inline double uint64_to_udouble(uint64_t val)
 #undef STDC_HEADERS
 #endif
 
-#undef ABC
-
-static inline uint32_t prng_seed32()
-{
-    uint32_t seed = (uint32_t) time(NULL);
-#if defined(__GNUC__) && defined(__x86_64__)
-    seed = seed * (__rdtsc() & 0xFFFFFFFF);
-#endif
-    return seed;
-}
 
 /**
  * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used

@@ -16,8 +16,11 @@
  * - The failed tests in BigCrush: `Gap, r = 0`; `Gap, r = 20`
  */
 #include "testu01_mt_cintf.h"
-#include <stdio.h>
-#include <stdlib.h>
+
+/////////////////////////////////////////////////
+///// Entry point for -nostdlib compilation /////
+/////////////////////////////////////////////////
+SHARED_ENTRYPOINT_CODE
 
 #define LFIB_A 607
 #define LFIB_B 273
@@ -55,10 +58,9 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    ALFib_State *obj = (ALFib_State *) malloc(sizeof(ALFib_State));
+    ALFib_State *obj = (ALFib_State *) intf.malloc(sizeof(ALFib_State));
     // pcg_rxs_m_xs64 for initialization
-    uint32_t seed = prng_seed32();
-    uint64_t state = seed;
+    uint64_t state = intf.get_seed64();
     for (size_t k = 1; k <= LFIB_A; k++) {    
         obj->U[k] = pcg_bits64(&state);
     }
@@ -69,7 +71,7 @@ static void *init_state()
 static void delete_state(void *param, void *state)
 {
     (void) param;
-    free(state);
+    intf.free(state);
 }
 
 int EXPORT gen_initlib(CallerAPI *intf_)

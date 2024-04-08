@@ -114,15 +114,12 @@ static inline void ChaCha_inc_counter(ChaChaState *obj)
  */
 void EXPORT ChaCha_block(ChaChaState *obj)
 {
-    for (size_t k = 0; k < 16; k++) {
-        obj->out[k] = obj->x[k];
-    }
-
 #ifdef CHACHA_VECTOR_INTR
-    __m128i a = _mm_loadu_si128((__m128i *) obj->out);
-    __m128i b = _mm_loadu_si128((__m128i *) (obj->out + 4));
-    __m128i c = _mm_loadu_si128((__m128i *) (obj->out + 8));
-    __m128i d = _mm_loadu_si128((__m128i *) (obj->out + 12));
+    __m128i a = _mm_loadu_si128((__m128i *) obj->x);
+    __m128i b = _mm_loadu_si128((__m128i *) (obj->x + 4));
+    __m128i c = _mm_loadu_si128((__m128i *) (obj->x + 8));
+    __m128i d = _mm_loadu_si128((__m128i *) (obj->x + 12));
+    __m128i ax = a, bx = b, cx = c, dx = d;
     for (size_t k = 0; k < obj->ncycles; k++) {
         /* Vertical qround */
         mm_qround_vert(&a, &b, &c, &d);
@@ -135,11 +132,20 @@ void EXPORT ChaCha_block(ChaChaState *obj)
         c = _mm_shuffle_epi32(c, 0x4E);
         d = _mm_shuffle_epi32(d, 0x39);
     }
+    a = _mm_add_epi32(a, ax);
+    b = _mm_add_epi32(b, bx);
+    c = _mm_add_epi32(c, cx);
+    d = _mm_add_epi32(d, dx);
+
     _mm_storeu_si128((__m128i *) obj->out, a);
     _mm_storeu_si128((__m128i *) (obj->out + 4), b);
     _mm_storeu_si128((__m128i *) (obj->out + 8), c);
     _mm_storeu_si128((__m128i *) (obj->out + 12), d);
 #else
+    for (size_t k = 0; k < 16; k++) {
+        obj->out[k] = obj->x[k];
+    }
+
     for (size_t k = 0; k < obj->ncycles; k++) {
         /* Vertical qrounds */
         qround(obj->out, 0, 4, 8,12);
@@ -152,11 +158,10 @@ void EXPORT ChaCha_block(ChaChaState *obj)
         qround(obj->out, 2, 7, 8,13);
         qround(obj->out, 3, 4, 9,14);
     }
-#endif
-
     for (size_t i = 0; i < 16; i++) {
         obj->out[i] += obj->x[i];
     }
+#endif
 }
 
 /**

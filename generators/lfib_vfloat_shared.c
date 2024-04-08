@@ -1,13 +1,14 @@
-/* gcc -nostdlib -shared lfib_vfloat_shared.c -o lfib_vfloat_shared.dll */
 #include "testu01_mt_cintf.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
-#include <math.h>
 
 #define LFIB_A 10
 #define LFIB_B 7
 // 17, 5
+
+/////////////////////////////////////////////////
+///// Entry point for -nostdlib compilation /////
+/////////////////////////////////////////////////
+SHARED_ENTRYPOINT_CODE
 
 //static uint32_t global_seed;
 
@@ -31,52 +32,6 @@ typedef struct {
     size_t pos;
     
 } LFibFloat;
-
-//////////////////////////////////////////
-///// Begin of Windows-specific part /////
-//////////////////////////////////////////
-/*
-#include <windows.h>
-int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
-{
-    (void) hinstDLL;
-    (void) fdwReason;
-    (void) lpvReserved;
-    return TRUE;
-}
-*/
-
-static void *malloc_util(size_t len)
-{
-    return malloc(len);
-}
-
-static void free_util(void *ptr)
-{
-    free(ptr);
-}
-
-
-
-
-////////////////////////////////////////
-///// End of Windows-specific part /////
-////////////////////////////////////////
-
-/*
-static void *malloc_util(size_t len)
-{
-    return malloc(len);
-}
-
-static void free_util(void *ptr)
-{
-    free(ptr);
-}
-*/
-
-
-
 
 
 void EXPORT fill_u01(void *param, void *state)
@@ -177,7 +132,7 @@ static void fill_wz(LFibFloat *obj, uint32_t seed)
 
 static void *init_state()
 {
-    LFibFloat *obj = (LFibFloat *) malloc_util(sizeof(LFibFloat));
+    LFibFloat *obj = (LFibFloat *) intf.malloc(sizeof(LFibFloat));
     fill_wz(obj, (uint32_t) intf.get_seed64());
 //    uint32_t seed = global_seed;
 //    obj->z = (double) seed / UINT_MAX;
@@ -209,7 +164,7 @@ static void *init_state()
 static void delete_state(void *param, void *state)
 {
     (void) param;
-    free_util(state);
+    intf.free(state);
 }
 
 int EXPORT gen_initlib(CallerAPI *intf_)

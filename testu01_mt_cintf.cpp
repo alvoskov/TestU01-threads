@@ -6,6 +6,17 @@
 
 static GenInfoC geninfo;
 
+void GenInfoC_init(GenInfoC *obj)
+{
+    obj->name = "";
+    obj->init_state = nullptr;
+    obj->delete_state = nullptr;
+    obj->get_u01 = nullptr;
+    obj->get_bits32 = nullptr;
+    obj->get_bits64 = nullptr;
+}
+
+
 void set_generator(const GenInfoC *gi)
 {
     geninfo = *gi;
