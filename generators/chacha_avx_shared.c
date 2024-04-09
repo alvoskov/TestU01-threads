@@ -74,7 +74,7 @@ static inline void mm_qround_vert(__m256i *a, __m256i *b, __m256i *c, __m256i *d
 /**
  * @brief Increase the value of 128-bit PRNG counter.
  */
-static inline void ChaCha_inc_counter(ChaChaState *obj)
+static inline void ChaChaAVX_inc_counter(ChaChaAVXState *obj)
 {
     uint64_t *cnt1 = (uint64_t *) &obj->x[24];
     uint64_t *cnt2 = (uint64_t *) &obj->x[28];
@@ -91,17 +91,17 @@ static inline void ChaCha_inc_counter(ChaChaState *obj)
  * The function is exported for debugging purposes.
  * @details The scheme of rounds are:
  *
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
- * | x . . . | => | . x . . | => | . . x . | => | . . . x |
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | x . . . | => | . x . . | => | . . x . | => | . . . x |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
  * 
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
- * | . x . . | => | . . x . | => | . . . x | => | x . . . |
- * | . . x . |    | . . . x |    | x . . . |    | . x . . |
- * | . . . x |    | x . . . |    | . x . . |    | . . x . |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | . x . . | => | . . x . | => | . . . x | => | x . . . |
+ *     | . . x . |    | . . . x |    | x . . . |    | . x . . |
+ *     | . . . x |    | x . . . |    | . x . . |    | . . x . |
  */
-void EXPORT ChaCha_block(ChaChaState *obj)
+void EXPORT ChaChaAVX_block(ChaChaAVXState *obj)
 {
     __m256i a = _mm256_loadu_si256((__m256i *) obj->x);
     __m256i b = _mm256_loadu_si256((__m256i *) (obj->x + 8));
@@ -138,7 +138,7 @@ void EXPORT ChaCha_block(ChaChaState *obj)
  * @param nrounds Number of rounds (8, 12, 20).
  * @param seed    Pointer to array of 8 uint32_t values (seeds).
  */
-void EXPORT ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
+void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *seed)
 {
     /* Constants: the upper row of the matrix */
     obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
@@ -158,7 +158,7 @@ void EXPORT ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
         uint64_t *cnt = (uint64_t *) &obj->x[28];
         cnt[0] = 1;
     }
-    ChaCha_inc_counter(obj);
+    ChaChaAVX_inc_counter(obj);
     /* Number of rounds => Number of cycles */
     obj->ncycles = nrounds / 2;
     /* Output state */
@@ -170,10 +170,10 @@ void EXPORT ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
 static long unsigned int get_bits32(void *param, void *state)
 {
     (void) param;
-    ChaChaState *obj = (ChaChaState *) state;
+    ChaChaAVXState *obj = (ChaChaAVXState *) state;
     if (obj->pos >= 32) {
-        ChaCha_inc_counter(obj);
-        ChaCha_block(obj);
+        ChaChaAVX_inc_counter(obj);
+        ChaChaAVX_block(obj);
         obj->pos = 0;
     }
     return obj->out[obj->pos++];
@@ -188,7 +188,7 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    ChaChaState *obj = (ChaChaState *) intf.malloc(sizeof(ChaChaState));
+    ChaChaAVXState *obj = (ChaChaAVXState *) intf.malloc(sizeof(ChaChaAVXState));
     uint32_t seeds[8];
     for (size_t i = 0; i < 4; i++) {
         uint64_t s = intf.get_seed64();
@@ -196,7 +196,7 @@ static void *init_state()
         seeds[2*i + 1] = s >> 32;
     }
 
-    ChaCha_init(obj, 12, seeds);
+    ChaChaAVX_init(obj, 12, seeds);
     return (void *) obj;
 }
 
@@ -223,7 +223,7 @@ int EXPORT gen_closelib()
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
-    static const char name[] = "ChaCha12";
+    static const char name[] = "ChaCha12AVX";
     gi->name = name;
     gi->init_state = init_state;
     gi->delete_state = delete_state;

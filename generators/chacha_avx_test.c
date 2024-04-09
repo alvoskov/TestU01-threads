@@ -58,9 +58,9 @@ int main()
         12,13,14,15, 12,13,14,15
     };
 
-    ChaChaState obj;
+    ChaChaAVXState obj;
 
-    ChaCha_init(&obj, 20, x_init);
+    ChaChaAVX_init(&obj, 20, x_init);
     memcpy(obj.x + 8, x_init, 4 * sizeof(uint32_t)); // Row 2
     memcpy(obj.x + 12, x_init, 4 * sizeof(uint32_t));
 
@@ -70,7 +70,7 @@ int main()
     memcpy(obj.x + 24, x_init + 8, 4 * sizeof(uint32_t)); // Row 4
     memcpy(obj.x + 28, x_init + 8, 4 * sizeof(uint32_t));
     printf("Input:\n"); print_matx(obj.x, 32);
-    ChaCha_block(&obj);
+    ChaChaAVX_block(&obj);
     printf("Output (real):\n"); print_matx(obj.out, 32);
     printf("Output (reference):\n"); print_matx(out_final, 16);
     for (size_t i = 0; i < 32; i++) {

@@ -1,5 +1,5 @@
 /**
- * @file crush.h
+ * @file bigcrush.h
  * @brief A multithreaded version of BigCrush battery from TestU01 library.
  * Based on the `bbattery.c` file.
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.

@@ -2,10 +2,11 @@
  * @file wyrand_shared.c
  * @brief wyrand pseudorandom number generator. Passes BigCrush and PractRand
  * batteries of statistical tests. Required 128-bit integers.
- * @details
- * References:
- * - https://github.com/lemire/testingRNG/blob/master/source/wyrand.h
- * - https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h
+ * @details References:
+ * - Wang Yi. wyhash project, public domain (Unlicense).
+ *   https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h
+ * - testingRNG, wyrand.h file by D. Lemire (Apache 2.0 license)
+ *   https://github.com/lemire/testingRNG/blob/master/source/wyrand.h
  *
  */
 #include "testu01_mt_cintf.h"

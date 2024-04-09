@@ -113,6 +113,19 @@ static inline double uint64_to_udouble(uint64_t val)
     return x.f;
 }
 
+
+/**
+ * @brief Conversion of unsigned (pseudorandom) 32-bit integer
+ * to the double that belongs to the [0;1) interval.
+ */
+static inline double uint32_to_udouble(uint32_t val)
+{
+    static const double INV32 = 2.3283064365386963E-10;
+    return val * INV32;
+}
+
+
+
 #if defined(__GNUC__) && defined(__x86_64__)
 #include <x86intrin.h>
 #undef STDC_HEADERS
@@ -130,6 +143,7 @@ static inline uint64_t pcg_bits64(uint64_t *state)
     *state = *state * 6364136223846793005ull + 1442695040888963407ull;
     return (word >> 43) ^ word;
 }
+
 
 void set_generator(const GenInfoC *gi);
 int run_smallcrush();

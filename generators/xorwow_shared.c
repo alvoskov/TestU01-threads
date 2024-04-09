@@ -3,7 +3,9 @@
  * @brief xorwow pseudorandom number generator.
  * @details Fails the next test from BigCrush:
  * - 81  LinearComp, r = 29             1 - eps1
+ *
  * References:
+ *
  * - https://doi.org/10.18637/jss.v008.i14
  * - https://docs.nvidia.com/cuda/curand/testing.html
  *
@@ -18,12 +20,12 @@ SHARED_ENTRYPOINT_CODE
 static CallerAPI intf;
 
 typedef struct {
-    uint32_t x; /**< Xorshift register */
-    uint32_t y; /**< Xorshift register */
-    uint32_t z; /**< Xorshift register */
-    uint32_t w; /**< Xorshift register */
-    uint32_t v; /**< Xorshift register */
-    uint32_t d; /**< "Weyl sequence" counter */
+    uint32_t x; ///< Xorshift register
+    uint32_t y; ///< Xorshift register
+    uint32_t z; ///< Xorshift register
+    uint32_t w; ///< Xorshift register
+    uint32_t v; ///< Xorshift register
+    uint32_t d; ///< "Weyl sequence" counter
 } XorWowState;
 
 static long unsigned int get_bits32(void *param, void *state)

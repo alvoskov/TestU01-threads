@@ -1,0 +1,23 @@
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the TestU01-threads library code.                 ==
+   =========================================================================
+TestU01-threads library code
+Copyright 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+
+The library contains some parts derived from TestU01 library also licensed
+under Apache 2.0 license.
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the TestU01 library code.                         ==
+   =========================================================================
+TestU01 library code.
+
+(c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+e-mail: lecuyer@iro.umontreal.ca
+
+In scientific publications which used this software, a reference to it
+would be appreciated.

@@ -33,9 +33,9 @@
 #endif
 
 typedef struct {
-    uint32_t x[16]; /**< Working state */
-    uint32_t out[16]; /**< Output state */
-    size_t ncycles; /**< Number of rounds / 2 */
+    uint32_t x[16]; ///< Working state
+    uint32_t out[16]; ///< Output state
+    size_t ncycles; ///< Number of rounds / 2
     size_t pos;
 } ChaChaState;
 

@@ -2,7 +2,8 @@
  * @file sqxor_shared.c
  * @brief PRNG inspired by the Von Neumann middle squares method and
  * its modification by B.Widynski. Requires 128-bit integers.
- *
+ * @details Passes SmallCrush, Crush and BigCrush batteries
+ * ("Weyl sequence" variant).
  */
 #include "testu01_mt_cintf.h"
 
@@ -28,7 +29,8 @@ static uint64_t get_bits64(void *param, void *state)
     const uint64_t s = UINT64_C(0x9E3779B97F4A7C15);
     SqXorState *obj = (SqXorState *) state;
     (void) param;
-    uint64_t ww = obj->w += s; // or ++obj->w ^ s;
+    uint64_t ww = obj->w += s; // "Weyl sequence" variant
+    //uint64_t ww = ++obj->w ^ s; // "Counter" variant
     // Round 1
     __int128 sq = ((__int128) ww) * ww; // |32bit|32bit||32bit|32bit||
     uint64_t x = (sq >> 64) ^ sq; // Middle squares (64 bits) + XORing
@@ -81,6 +83,8 @@ int EXPORT gen_closelib()
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
+    static const char name[] = "SqXor";
+    gi->name = name;
     gi->init_state = init_state;
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;

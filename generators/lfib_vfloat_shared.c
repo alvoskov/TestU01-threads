@@ -10,12 +10,10 @@
 /////////////////////////////////////////////////
 SHARED_ENTRYPOINT_CODE
 
-//static uint32_t global_seed;
-
 static CallerAPI intf;
 
-static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
-static const double r = 9007199254740881.0 / 9007199254740992.0; /**< base (prime) */
+static const double c = 5566755282872655.0 / 9007199254740992.0; ///< shift
+static const double r = 9007199254740881.0 / 9007199254740992.0; ///< base (prime)
 
 static inline double amb_mod_r(double a, double b)
 {
@@ -24,7 +22,7 @@ static inline double amb_mod_r(double a, double b)
 }
 
 typedef struct {
-    double U[LFIB_A]; /**< Buffer for pseudorandom number */
+    double U[LFIB_A]; ///< Buffer for pseudorandom number
     double z[LFIB_A];
     double w[LFIB_A];
     size_t up_ind[LFIB_A / LFIB_B + 2];

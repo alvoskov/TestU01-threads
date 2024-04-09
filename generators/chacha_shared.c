@@ -103,15 +103,15 @@ static inline void ChaCha_inc_counter(ChaChaState *obj)
  * The function is exported for debugging purposes.
  * @details The scheme of rounds are:
  *
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
- * | x . . . | => | . x . . | => | . . x . | => | . . . x |
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | x . . . | => | . x . . | => | . . x . | => | . . . x |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
  * 
- * | x . . . |    | . x . . |    | . . x . |    | . . . x |
- * | . x . . | => | . . x . | => | . . . x | => | x . . . |
- * | . . x . |    | . . . x |    | x . . . |    | . x . . |
- * | . . . x |    | x . . . |    | . x . . |    | . . x . |
+ *     | x . . . |    | . x . . |    | . . x . |    | . . . x |
+ *     | . x . . | => | . . x . | => | . . . x | => | x . . . |
+ *     | . . x . |    | . . . x |    | x . . . |    | . x . . |
+ *     | . . . x |    | x . . . |    | . x . . |    | . . x . |
  */
 void EXPORT ChaCha_block(ChaChaState *obj)
 {

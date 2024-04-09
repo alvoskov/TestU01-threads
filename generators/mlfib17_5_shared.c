@@ -24,7 +24,7 @@
 SHARED_ENTRYPOINT_CODE
 
 typedef struct {
-    uint64_t U[LFIB_A + 1]; /**< Ring buffer (only values 1..17 are used) */
+    uint64_t U[LFIB_A + 1]; ///< Ring buffer (only values 1..17 are used)
     int i;
     int j;
 } MLFib17_5_State;

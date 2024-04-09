@@ -23,21 +23,22 @@
 /**
  * @brief Contains the state for two parallel ChaCha states.
  * @details The next memory layout in 1D array is used:
- *
- * | 0   1  2  3 |  4  5  6  7 |
- * | 8   9 10 11 | 12 13 14 15 |
- * | 16 17 18 19 | 20 21 22 23 |
- * | 24 25 26 27 | 28 29 30 31 |
+ * 
+ *     | 0   1  2  3 |  4  5  6  7 |
+ *     | 8   9 10 11 | 12 13 14 15 |
+ *     | 16 17 18 19 | 20 21 22 23 |
+ *     | 24 25 26 27 | 28 29 30 31 |
+ * 
  */
 typedef struct {
-    uint32_t x[32]; /**< Working state */
-    uint32_t out[32]; /**< Output state */
-    size_t ncycles; /**< Number of rounds / 2 */
+    uint32_t x[32]; ///< Working state
+    uint32_t out[32]; ///< Output state
+    size_t ncycles; ///< Number of rounds / 2
     size_t pos;
-} ChaChaState;
+} ChaChaAVXState;
 
-void EXPORT ChaCha_block(ChaChaState *obj);
-void EXPORT ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed);
+void EXPORT ChaChaAVX_block(ChaChaAVXState *obj);
+void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *seed);
 int EXPORT gen_initlib(CallerAPI *api);
 int EXPORT gen_closelib();
 int EXPORT gen_getinfo(GenInfoC *gi);
