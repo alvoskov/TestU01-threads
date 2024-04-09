@@ -1,4 +1,5 @@
 /**
+ * @file xorwow_shared.c
  * @brief xorwow pseudorandom number generator.
  * @details Fails the next test from BigCrush:
  * - 81  LinearComp, r = 29             1 - eps1

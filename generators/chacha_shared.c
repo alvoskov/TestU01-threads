@@ -1,4 +1,5 @@
 /**
+ * @file chacha_shared.c
  * @brief ChaCha12 pseudorandom number generator. 
  * @details ChaCha12 PRNG is a modification of cryptographically secure
  * ChaCha20 with reduced number of rounds. Can be considered as CSPRNG

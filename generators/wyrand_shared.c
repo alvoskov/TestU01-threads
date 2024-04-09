@@ -1,5 +1,7 @@
 /**
- * @brief wyrand pseudorandom number generator.
+ * @file wyrand_shared.c
+ * @brief wyrand pseudorandom number generator. Passes BigCrush and PractRand
+ * batteries of statistical tests. Required 128-bit integers.
  * @details
  * References:
  * - https://github.com/lemire/testingRNG/blob/master/source/wyrand.h

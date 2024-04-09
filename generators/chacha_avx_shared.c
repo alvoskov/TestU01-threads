@@ -147,7 +147,6 @@ void EXPORT ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
     /* Rows 1-2: seed (key) */
     /* | 8   9 10 11 | 12 13 14 15 | */
     /* | 16 17 18 19 | 20 21 22 23 | */
-    (void) seed;
     memset(obj->x + 8, 0xFF, 24 * sizeof(uint32_t));
     memcpy(obj->x + 8,  seed,     4 * sizeof(uint32_t));
     memcpy(obj->x + 12, seed,     4 * sizeof(uint32_t));

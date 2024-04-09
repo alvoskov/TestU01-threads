@@ -70,7 +70,7 @@ class UniformGenerator
     UniformGenerator(const UniformGenerator &obj) = delete;
     UniformGenerator &operator=(const UniformGenerator &obj) = delete;
     static double GetU01Handle(void *param, void *state);
-    static unsigned long GetBits(void *param, void *state);
+    static unsigned long GetBits32(void *param, void *state);
 
 protected:
     unif01_Gen gen;
@@ -80,7 +80,7 @@ public:
     unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
     const std::string &GetName() { return name; }
     virtual double GetU01() = 0;
-    virtual uint32_t GetBits() = 0;
+    virtual uint32_t GetBits32() = 0;
     virtual uint64_t GetBits64();
 };
 
@@ -111,7 +111,7 @@ public:
     unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
     const std::string &GetName() { return name; }
     double GetU01() override { return gen.GetU01(gen.param, gen.state); }
-    uint32_t GetBits() override { return gen.GetBits(gen.param, gen.state); }
+    uint32_t GetBits32() override { return gen.GetBits(gen.param, gen.state); }
     uint64_t GetBits64() override { return get_bits64(gen.param, gen.state); }
     virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
 };

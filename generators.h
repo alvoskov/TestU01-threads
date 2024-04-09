@@ -20,7 +20,7 @@ class MT19937Generator : public UniformGenerator
 public:
     MT19937Generator();
     double GetU01() override;
-    uint32_t GetBits() override;
+    uint32_t GetBits32() override;
 };
 
 
@@ -36,7 +36,7 @@ class LcgGenerator : public UniformGenerator
 public:
     LcgGenerator(int seed = 1);
     double GetU01() override;
-    uint32_t GetBits() override;
+    uint32_t GetBits32() override;
 };
 
 
@@ -54,7 +54,7 @@ class LcgGenerator59 : public UniformGenerator
 public:
     LcgGenerator59(int seed = 1);
     double GetU01() override;
-    uint32_t GetBits() override;
+    uint32_t GetBits32() override;
 };
 
 
@@ -80,7 +80,7 @@ public:
     }
 
     double GetU01() override { return uint64_to_udouble(GetBits64()); }
-    uint32_t GetBits() override { return static_cast<uint32_t>(GetBits64() >> 32); }
+    uint32_t GetBits32() override { return static_cast<uint32_t>(GetBits64() >> 32); }
 };
 
 
@@ -102,7 +102,7 @@ class KISS93Generator : public UniformGenerator
 public:
     KISS93Generator(uint32_t s1 = 12345, uint32_t s2 = 6789, uint32_t s3 = 111213);
     double GetU01() override;
-    uint32_t GetBits() override;
+    uint32_t GetBits32() override;
 };
 
 /**
@@ -132,7 +132,7 @@ public:
     }
 
     double GetU01() override { return uint64_to_udouble(GetBits64()); }
-    uint32_t GetBits() override { return static_cast<uint32_t>(GetBits64() >> 32); }
+    uint32_t GetBits32() override { return static_cast<uint32_t>(GetBits64() >> 32); }
     inline uint64_t GetBits64()
     {
         uint64_t x = U[i] * U[j];

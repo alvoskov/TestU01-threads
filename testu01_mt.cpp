@@ -14,11 +14,11 @@ double UniformGenerator::GetU01Handle(void *param, void *state)
     return obj->GetU01();
 }
 
-unsigned long UniformGenerator::GetBits(void *param, void *state)
+unsigned long UniformGenerator::GetBits32(void *param, void *state)
 {
     (void) param;
     UniformGenerator *obj = static_cast<UniformGenerator *>(state);
-    return obj->GetBits();
+    return obj->GetBits32();
 }
 
 /**
@@ -38,7 +38,7 @@ UniformGenerator::UniformGenerator(const std::string &name)
     gen.param = nullptr;
     gen.Write = WrExternGen;
     gen.GetU01 = GetU01Handle;
-    gen.GetBits = GetBits;
+    gen.GetBits = GetBits32;
     gen.name = const_cast<char *>(name.c_str());
 }
 
@@ -402,7 +402,7 @@ void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
     set_bin_stdout();
     while (1) {
         for (int i = 0; i < 256; i++) {
-            buf[i] = genptr->GetBits();
+            buf[i] = genptr->GetBits32();
         }
         fwrite(buf, sizeof(uint32_t), 256, stdout);
     }
