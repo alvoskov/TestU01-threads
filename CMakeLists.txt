@@ -8,10 +8,10 @@ if (NOT MSVC)
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 -march=native -O3 -Wall -Werror -Wextra -Wno-attributes -static-libstdc++ -static-libgcc")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99 -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
     else()
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99 -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
     endif()
 endif()
 
@@ -56,7 +56,7 @@ add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
 add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins
-foreach(prng_name alfib_mod alfib kiss93 lfib_float lfib_ranmar64 lfib_vfloat mlfib17_5
+foreach(prng_name alfib_mod alfib isaac64 kiss93 lfib_float lfib_ranmar64 lfib_vfloat mlfib17_5
     philox rc4 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
@@ -71,6 +71,8 @@ set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
 add_executable(chacha_avx_test generators/chacha_avx_test.c)
 target_link_libraries(chacha_avx_test chacha_avx_shared)
 
+# Module and test for MT19937
+add_library(mt19937_shared SHARED generators/mt19937_shared.cpp testu01_mt_cintf.h)
 
 # Link executables
 foreach (program testu01th_demo testu01th_lib splitmix_exec)

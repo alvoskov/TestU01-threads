@@ -6,9 +6,14 @@
 
 static GenInfoC geninfo;
 
+/**
+ * @brief Initialize the structure with information about PRNG
+ * with empty values (pointers to empty strings and nullptrs)
+ */
 void GenInfoC_init(GenInfoC *obj)
 {
     obj->name = "";
+    obj->options = "";
     obj->init_state = nullptr;
     obj->delete_state = nullptr;
     obj->get_u01 = nullptr;

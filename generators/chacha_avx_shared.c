@@ -150,17 +150,21 @@ void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *
     /* Constants: the upper row of the matrix */
     obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
     obj->x[2] = 0x79622d32; obj->x[3] = 0x6b206574;
-    memcpy(obj->x + 4, obj->x, 4 * sizeof(uint32_t));
+    for (size_t i = 0; i < 4; i++) obj->x[i + 4] = obj->x[i];
     /* Rows 1-2: seed (key) */
     /* | 8   9 10 11 | 12 13 14 15 | */
     /* | 16 17 18 19 | 20 21 22 23 | */
-    memset(obj->x + 8, 0xFF, 24 * sizeof(uint32_t));
-    memcpy(obj->x + 8,  seed,     4 * sizeof(uint32_t));
-    memcpy(obj->x + 12, seed,     4 * sizeof(uint32_t));
-    memcpy(obj->x + 16, seed + 4, 4 * sizeof(uint32_t));
-    memcpy(obj->x + 20, seed + 4, 4 * sizeof(uint32_t));
+    for (size_t i = 0; i < 24; i++) {
+        obj->x[i + 8] = 0xFF;
+    }
+    for (size_t i = 0; i < 4; i++) {
+        obj->x[i + 8]  = seed[i];     obj->x[i + 12] = seed[i];
+        obj->x[i + 16] = seed[i + 4]; obj->x[i + 20] = seed[i + 4];
+    }
     /* Row 3: counter and nonce */
-    memset(obj->x + 24, 0, 8 * sizeof(uint32_t));
+    for (size_t i = 0; i < 8; i++) {
+        obj->x[i + 24] = 0;
+    }
     {
         uint64_t *cnt = (uint64_t *) &obj->x[28];
         cnt[0] = 1;
@@ -168,8 +172,10 @@ void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *
     ChaChaAVX_inc_counter(obj);
     /* Number of rounds => Number of cycles */
     obj->ncycles = nrounds / 2;
-    /* Output state */
-    memset(obj->out, 0, 32 * sizeof(uint32_t));
+    /* Output state: fill with zeros */
+    for (size_t i = 0; i < 32; i++) {
+        obj->out[i] = 0;
+    }
     /* Output counter */
     obj->pos = 32;
 }
@@ -255,14 +261,11 @@ static int run_self_test()
     ChaChaAVXState obj;
 
     ChaChaAVX_init(&obj, 20, x_init);
-    memcpy(obj.x + 8, x_init, 4 * sizeof(uint32_t)); // Row 2
-    memcpy(obj.x + 12, x_init, 4 * sizeof(uint32_t));
-
-    memcpy(obj.x + 16, x_init + 4, 4 * sizeof(uint32_t)); // Row 3
-    memcpy(obj.x + 20, x_init + 4, 4 * sizeof(uint32_t));
-
-    memcpy(obj.x + 24, x_init + 8, 4 * sizeof(uint32_t)); // Row 4
-    memcpy(obj.x + 28, x_init + 8, 4 * sizeof(uint32_t));
+    for (size_t i = 0; i < 4; i++) {
+        obj.x[i + 8]  = obj.x[i + 12] = x_init[i]; // Row 2
+        obj.x[i + 16] = obj.x[i + 20] = x_init[i + 4]; // Row 3
+        obj.x[i + 24] = obj.x[i + 28] = x_init[i + 8]; // Row 4
+    }
     intf.printf("Input:\n"); print_matx(obj.x, 8, 32);
     ChaChaAVX_block(&obj);
     intf.printf("Output (real):\n"); print_matx(obj.out, 8, 32);

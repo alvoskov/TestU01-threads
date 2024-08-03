@@ -16,18 +16,18 @@
  */
 #include "testu01_mt_cintf.h"
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
 
-static CallerAPI intf;
+PRNG_CMODULE_PROLOG
 
+/**
+ * @brief RC4 PRNG state.
+ */
 typedef struct {
     uint8_t s[256];
     uint8_t i;
     uint8_t j;
 } RC4State;
+
 
 unsigned long EXPORT get_bits32(void *param, void *state)
 {
@@ -47,10 +47,12 @@ unsigned long EXPORT get_bits32(void *param, void *state)
     return (unsigned long) v;
 }
 
+
 static double get_u01(void *param, void *state)
 {
     return uint32_to_udouble(get_bits32(param, state));
 }
+
 
 static void *init_state()
 {
@@ -74,22 +76,13 @@ static void *init_state()
     return (void *) obj;
 }
 
+
 static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
 }
 
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-int EXPORT gen_closelib()
-{
-    return 1;
-}
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {

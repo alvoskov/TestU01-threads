@@ -27,6 +27,7 @@
 #include "chacha_shared.h"
 
 static CallerAPI intf;
+static int gen_nrounds = 12;
 
 /////////////////////////////////////////////////
 ///// Entry point for -nostdlib compilation /////
@@ -253,7 +254,7 @@ static void *init_state()
         seeds[2*i + 1] = s >> 32;
     }
 
-    ChaCha_init(obj, 12, seeds);
+    ChaCha_init(obj, gen_nrounds, seeds);
     return (void *) obj;
 }
 
@@ -294,7 +295,7 @@ static int run_self_test()
        0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
     };
     ChaChaState obj;
-    ChaCha_init(&obj, 20, x_init);
+    ChaCha_init(&obj, 20, x_init); // 20 rounds
     for (size_t i = 0; i < 12; i++) {
         obj.x[i + 4] = x_init[i];
     }
@@ -332,8 +333,20 @@ int EXPORT gen_closelib()
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
-    static const char name[] = "ChaCha12";
-    gi->name = name;
+    if (!intf.strcmp(gi->options, "20")) {
+        gi->name = "ChaCha20";
+        gen_nrounds = 20;
+    } else if (!intf.strcmp(gi->options, "12")) {
+        gi->name = "ChaCha12";
+        gen_nrounds = 12;
+    } else if (!intf.strcmp(gi->options, "8")) {
+        gi->name = "ChaCha8";
+        gen_nrounds = 8;
+    } else {
+        gi->name = "ChaCha12";
+        gen_nrounds = 12;
+        intf.printf("Warning: unknown option '%s'\n", gi->options);
+    }
     gi->init_state = init_state;
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;

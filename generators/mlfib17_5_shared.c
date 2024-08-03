@@ -18,18 +18,17 @@
 #define LFIB_A 17
 #define LFIB_B 5
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
+PRNG_CMODULE_PROLOG
 
+/**
+ * @brief LFIB(LFIB_A, LFIB_B, *) PRNG state.
+ */
 typedef struct {
     uint64_t U[LFIB_A + 1]; ///< Ring buffer (only values 1..17 are used)
     int i;
     int j;
 } MLFib17_5_State;
 
-static CallerAPI intf;
 
 static uint64_t get_bits64(void *param, void *state)
 {
@@ -66,22 +65,13 @@ static void *init_state()
     return (void *) obj;
 }
 
+
 static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
 }
 
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-int EXPORT gen_closelib()
-{
-    return 1;
-}
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {

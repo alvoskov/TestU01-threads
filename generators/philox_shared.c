@@ -29,13 +29,7 @@
 
 #define Nw 4
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
-
-static CallerAPI intf;
-
+PRNG_CMODULE_PROLOG
 
 /////////////////////////////////
 ///// Philox implementation /////
@@ -219,18 +213,19 @@ static void get_array64(void *param, void *state, uint64_t *out, size_t len)
 }
 
 
-
 unsigned long EXPORT get_bits32(void *param, void *state)
 {
 
     return get_bits64(param, state) >> 32;
 }
 
+
 static double get_u01(void *param, void *state)
 {
     double u = uint64_to_udouble(get_bits64(param, state));
     return u;
 }
+
 
 static void *init_state()
 {
@@ -243,23 +238,12 @@ static void *init_state()
     return (void *) obj;
 }
 
+
 static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
 }
-
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-int EXPORT gen_closelib()
-{
-    return 1;
-}
-
 
 
 int EXPORT gen_getinfo(GenInfoC *gi)

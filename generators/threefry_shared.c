@@ -37,12 +37,7 @@
 
 #define Nw 4
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
-
-static CallerAPI intf;
+PRNG_CMODULE_PROLOG
 
 ///////////////////////////////////
 ///// Threefry implementation /////
@@ -285,19 +280,6 @@ static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
-}
-
-
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-
-int EXPORT gen_closelib()
-{
-    return 1;
 }
 
 

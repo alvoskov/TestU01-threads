@@ -2,8 +2,8 @@
 #define __PDIEHARD_H
 #include "testu01_mt.h"
 
-/*
- * As close as possible to the DIEHARD test suite.
+/**
+ * @brief As close as possible to the DIEHARD test suite.
  */
 class PseudoDiehardBattery : public TestsBattery
 {

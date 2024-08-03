@@ -7,13 +7,11 @@
  */
 #include "testu01_mt_cintf.h"
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
+PRNG_CMODULE_PROLOG
 
-static CallerAPI intf;
-
+/**
+ * @brief SQXOR 64-bit PRNG state.
+ */
 typedef struct {
     uint64_t w; /**< "Weyl sequence" counter state */
     union {
@@ -69,17 +67,6 @@ static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
-}
-
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-int EXPORT gen_closelib()
-{
-    return 1;
 }
 
 int EXPORT gen_getinfo(GenInfoC *gi)

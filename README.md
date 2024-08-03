@@ -60,6 +60,7 @@ Supplied PRNGs external modules
 - alfib
 - chacha_avx
 - chacha
+- isaac
 - kiss93
 - lfib_float
 - lfib_ranmar_float

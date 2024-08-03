@@ -6,19 +6,19 @@
  *
  * References:
  *
- * - https://doi.org/10.18637/jss.v008.i14
- * - https://docs.nvidia.com/cuda/curand/testing.html
+ * 1. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
+ *    V. 8. N 14. P. 1-6. https://doi.org/10.18637/jss.v008.i14
+ * 2. cuRAND library programming guide.
+ *    https://docs.nvidia.com/cuda/curand/testing.html
  *
  */
 #include "testu01_mt_cintf.h"
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
+PRNG_CMODULE_PROLOG
 
-static CallerAPI intf;
-
+/**
+ * @brief xorwow PRNG state.
+ */
 typedef struct {
     uint32_t x; ///< Xorshift register
     uint32_t y; ///< Xorshift register
@@ -27,6 +27,7 @@ typedef struct {
     uint32_t v; ///< Xorshift register
     uint32_t d; ///< "Weyl sequence" counter
 } XorWowState;
+
 
 static long unsigned int get_bits32(void *param, void *state)
 {
@@ -42,11 +43,13 @@ static long unsigned int get_bits32(void *param, void *state)
     return (obj->d += d_inc) + obj->v;
 }
 
+
 static double get_u01(void *param, void *state)
 {
     static const double INV32 = 2.3283064365386963E-10;
     return get_bits32(param, state) * INV32;
 }
+
 
 static void *init_state()
 {
@@ -63,22 +66,13 @@ static void *init_state()
     return (void *) obj;
 }
 
+
 static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
 }
 
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-int EXPORT gen_closelib()
-{
-    return 1;
-}
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {

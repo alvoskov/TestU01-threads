@@ -6,13 +6,7 @@
 
 #include "testu01_mt_cintf.h"
 
-/////////////////////////////////////////////////
-///// Entry point for -nostdlib compilation /////
-/////////////////////////////////////////////////
-SHARED_ENTRYPOINT_CODE
-
-static CallerAPI intf;
-
+PRNG_CMODULE_PROLOG
 
 static inline uint64_t rotl(const uint64_t x, int k) {
 	return (x << k) | (x >> (64 - k));
@@ -77,16 +71,6 @@ static void delete_state(void *param, void *state)
     intf.free(state);
 }
 
-int EXPORT gen_initlib(CallerAPI *intf_)
-{
-    intf = *intf_;
-    return 1;
-}
-
-int EXPORT gen_closelib()
-{
-    return 1;
-}
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {

@@ -52,6 +52,7 @@ typedef int (*SelfTestCallbackC)(void);
  */
 typedef struct {
     const char *name; /**< Generator name */
+    const char *options; /**< Generator options */
     InitStateCallbackC init_state; /**< Function that initializes the PRNG state */
     DeleteStateCallbackC delete_state; /**< Function that deletes the PRNG state */
     GetU01CallbackC get_u01; /**< Function returns the double pseudorandom number */
@@ -62,21 +63,30 @@ typedef struct {
     SelfTestCallbackC run_self_test; /**< Functions that runs the internal self-test */
 } GenInfoC;
 
-
+/**
+ * @brief Keeps pointers to the caller API that are used for PRNG modules.
+ * Some functions are intentionally duplicating the standard library to
+ * allow writing freestanding modules.
+ */
 typedef struct {
     GetSeed64CallbackC get_seed64; /**< Get random 64-bit seed */
     void *(*malloc)(size_t len); /**< Pointer to malloc function */
     void (*free)(void *); /**< Pointer to free function */
     int (*printf)(const char *format, ... ); /**< Pointer to printf function */
+    int (*strcmp)(const char *lhs, const char *rhs); /**< Pointer to strcmp function */
 } CallerAPI;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
 #define EXPORT __declspec( dllexport )
 #define USE_LOADLIBRARY
+#ifndef __cplusplus
 #define SHARED_ENTRYPOINT_CODE \
 int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
     (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
+#else
+#define SHARED_ENTRYPOINT_CODE
+#endif
 #else
 #define EXPORT
 #define SHARED_ENTRYPOINT_CODE
@@ -156,10 +166,6 @@ void set_generator(const GenInfoC *gi);
 int run_smallcrush();
 int run_crush();
 int run_bigcrush();
-#ifdef __cplusplus
-}
-#endif
-
 
 /*
  * External modules functions prototypes. They are needed for
@@ -168,5 +174,27 @@ int run_bigcrush();
 int gen_initlib(CallerAPI *intf);
 int gen_closelib(void);
 int gen_getinfo(GenInfoC *gi);
+
+
+/**
+ * @brief Default prolog of PRNG C module that contains default entry point
+ * and default `gen_initlib` and `gen_closelib` functions.
+ */
+#define PRNG_CMODULE_PROLOG SHARED_ENTRYPOINT_CODE /* Entry point for -nostdlib compilation */ \
+static CallerAPI intf; /* Keeps pointers to caller API functions */ \
+int EXPORT gen_initlib(CallerAPI *intf_) \
+{ \
+    intf = *intf_; \
+    return 1; \
+} \
+int EXPORT gen_closelib() \
+{ \
+    return 1; \
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

@@ -455,6 +455,7 @@ CallerAPI get_caller_api()
     intf.malloc = malloc;
     intf.free = free;
     intf.printf = printf;
+    intf.strcmp = strcmp;
     return intf;
 }
 
@@ -524,22 +525,15 @@ int main(int argc, char *argv[])
     CallerAPI intf = get_caller_api();
 
     GenCModule mod;
-    GenInfoC geninfo;
-    GenInfoC_init(&geninfo);
     int test_id = -1;
 
     if (!load_module(mod, argv[2])) {
         std::cerr << "Cannot load the module" << std::endl;
         return 1;
     }
-    mod.gen_initlib(&intf);
-    mod.gen_getinfo(&geninfo);
-
-    auto create_gen = [&geninfo] () -> std::shared_ptr<UniformGenerator> {
-        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
-    };
 
     std::string battery = argv[1];
+    std::string gen_options;
     if (argc >= 4) {
         test_id = std::stoi(argv[3]);
         if (test_id == 0) {
@@ -547,6 +541,21 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+    if (argc >= 5) {
+        gen_options = std::string(argv[4]);
+        std::cout << "Generator options: '" << gen_options << "'" << std::endl;
+    }
+
+    GenInfoC geninfo;
+    GenInfoC_init(&geninfo);
+    geninfo.options = gen_options.c_str();
+    mod.gen_initlib(&intf);
+    mod.gen_getinfo(&geninfo);
+
+    auto create_gen = [&geninfo] () -> std::shared_ptr<UniformGenerator> {
+        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
+    };
+
 
     if (battery == "SmallCrush") {
         SmallCrushBattery bat(create_gen);

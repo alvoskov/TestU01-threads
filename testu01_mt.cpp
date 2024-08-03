@@ -110,10 +110,10 @@ size_t BatteryIO::GetNTestsFailed() const
     return co;
 }
 
-/*
- * Write a p-value with a nice format.
+/**
+ * @brief Write a p-value with a nice format.
  */
-void BatteryIO::WritePValue (double p)
+void BatteryIO::WritePValue(double p)
 {
     if (p < gofw_Suspectp) {
         gofw_Writep0 (p);
