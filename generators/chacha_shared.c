@@ -208,6 +208,34 @@ static long unsigned int get_bits32(void *param, void *state)
     return obj->out[obj->pos++];
 }
 
+
+static void get_array32(void *param, void *state, uint32_t *out, size_t len)
+{
+    (void) param;
+    ChaChaState *obj = (ChaChaState *) state;
+    size_t pos = 0;
+    // Returns blocks of 16 uint32s.
+    for (size_t i = 0; i < len / 16; i++) {
+        ChaCha_inc_counter(obj);
+        ChaCha_block(obj);
+        for (size_t j = 0; j < 16; j++) {
+            out[pos++] = obj->out[j];
+        }        
+    }
+    // Returns the tail with less than 16 uint32s (if needed)
+    size_t tail_len = len % 16;
+    if (tail_len != 0) {
+        ChaCha_inc_counter(obj);
+        ChaCha_block(obj);
+        for (size_t j = 0; j < tail_len; j++) {
+            out[pos++] = obj->out[j];
+        }
+    }
+    // Invalidate cache for future get_bits32
+    obj->pos = 16;
+}
+
+
 static double get_u01(void *param, void *state)
 {
     static const double INV32 = 2.3283064365386963E-10;
@@ -235,6 +263,58 @@ static void delete_state(void *param, void *state)
     intf.free(state);
 }
 
+/**
+ * @brief Print the 4x4 matrix of uint32_t from the ChaCha PRNG state.
+ * @param x Pointer to the matrix (C-style)
+ */
+static void print_mat16(uint32_t *x)
+{
+    for (size_t i = 0; i < 16; i++) {
+        intf.printf("%10.8X ", x[i]);
+        if ((i + 1) % 4 == 0)
+            intf.printf("\n");
+    }
+}
+
+
+/**
+ * @brief Internal self-test. Based on reference values from RFC 7359.
+ */
+static int run_self_test()
+{
+    uint32_t x_init[] = { // Input values
+        0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
+        0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c,
+        0x00000001,  0x09000000,  0x4a000000,  0x00000000
+    };
+    uint32_t out_final[] = { // Refernce values from RFC 7359
+       0xe4e7f110,  0x15593bd1,  0x1fdd0f50,  0xc47120a3,
+       0xc7f4d1c7,  0x0368c033,  0x9aaa2204,  0x4e6cd4c3,
+       0x466482d2,  0x09aa9f07,  0x05d7c214,  0xa2028bd9,
+       0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
+    };
+    ChaChaState obj;
+    ChaCha_init(&obj, 20, x_init);
+    for (size_t i = 0; i < 12; i++) {
+        obj.x[i + 4] = x_init[i];
+    }
+    intf.printf("Input:\n"); print_mat16(obj.x);
+    ChaCha_block(&obj);
+    intf.printf("Output (real):\n"); print_mat16(obj.out);
+    intf.printf("Output (reference):\n"); print_mat16(out_final);
+    for (size_t i = 0; i < 16; i++) {
+        if (out_final[i] != obj.out[i]) {
+            intf.printf("TEST FAILED!\n");
+            return 0;
+        }        
+    }
+    intf.printf("Success.\n");
+    return 1;
+}
+
+
+
+
 /////////////////////////////////////////////////
 ///// Exported functions (module interface) /////
 /////////////////////////////////////////////////
@@ -258,5 +338,7 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
+    gi->get_array32 = get_array32;
+    gi->run_self_test = run_self_test;
     return 1;
 }

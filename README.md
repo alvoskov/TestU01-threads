@@ -27,6 +27,19 @@ The information about the original TestU01 library can be found at:
 - http://simul.iro.umontreal.ca/testu01/tu01.html
 
 
+Previous attemps to make multithreaded TestU01 were based on rewriting some
+tests using parallel programming, e.g. OpenMP. However, they were not completed
+and don't include full SmallCrush, Crush, BigCrush and pseudoDIEHARD batteries.
+
+- A. Suciu, R. A. Toma and K. Marton, "Parallel implementation of the TestU01
+  statistical test suite," 2012 IEEE 8th International Conference on Intelligent
+  Computer Communication and Processing, Cluj-Napoca, Romania, 2012, pp. 317-322
+  doi: 10.1109/ICCP.2012.6356206.
+- A. Suciu, R. A. Toma and K. Marton, "Parallel object-oriented implementation
+  of the TestU01 statistical test suites," 2014 IEEE 10th International Conference
+  on Intelligent Computer Communication and Processing (ICCP), Cluj-Napoca, Cluj,
+  Romania, 2014, pp. 311-315, doi: 10.1109/ICCP.2014.6937014.
+- https://github.com/adamsolomou/TestU01
 
 Executables
 ===========
@@ -43,6 +56,23 @@ Executables
 Supplied PRNGs external modules
 ===============================
 
+
+- alfib
+- chacha_avx
+- chacha
+- kiss93
+- lfib_float
+- lfib_ranmar_float
+- lfib_vfloat
+- mlfib17_5
+- philox
+- rc4
+- sqxor
+- sqxor32
+- threefry
+- wyrand
+- xoroshiro128stst
+- xorwow
 
 
 

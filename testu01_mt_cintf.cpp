@@ -14,6 +14,9 @@ void GenInfoC_init(GenInfoC *obj)
     obj->get_u01 = nullptr;
     obj->get_bits32 = nullptr;
     obj->get_bits64 = nullptr;
+    obj->get_array32 = nullptr;
+    obj->get_array64 = nullptr;
+    obj->run_self_test = nullptr;
 }
 
 
@@ -33,10 +36,18 @@ int run_smallcrush()
 
 int run_crush()
 {
+    CrushBattery bat([] () -> std::shared_ptr<UniformGenerator> {
+        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
+    });
+    bat.Run();
     return 1;
 }
 
 int run_bigcrush()
 {
+    BigCrushBattery bat([] () -> std::shared_ptr<UniformGenerator> {
+        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
+    });
+    bat.Run();
     return 1;
 }

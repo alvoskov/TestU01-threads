@@ -35,7 +35,8 @@ static uint64_t get_bits64(void *param, void *state)
     __int128 sq = ((__int128) ww) * ww; // |32bit|32bit||32bit|32bit||
     uint64_t x = (sq >> 64) ^ sq; // Middle squares (64 bits) + XORing
     // Round 2
-    sq = ((__int128) x) * ww;
+    //sq = ((__int128) x) * ww; // Slower but a little more reliable
+    sq = ((__int128) x) * x;
     x = (sq >> 64) ^ sq; // Middle squares (64 bits) + XORing
     // Return the result
     return x;

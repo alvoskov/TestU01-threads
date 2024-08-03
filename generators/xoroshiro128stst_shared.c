@@ -1,14 +1,9 @@
 /**
- * @file wyrand_shared.c
- * @brief wyrand pseudorandom number generator. Passes BigCrush and PractRand
- * batteries of statistical tests. Required 128-bit integers.
- * @details References:
- * - Wang Yi. wyhash project, public domain (Unlicense).
- *   https://github.com/wangyi-fudan/wyhash/blob/master/wyhash.h
- * - testingRNG, wyrand.h file by D. Lemire (Apache 2.0 license)
- *   https://github.com/lemire/testingRNG/blob/master/source/wyrand.h
- *
+ * @file xoroshiro128stst_shared.c
+ * @brief xoroshiro128** 1.0 PRNG. Designed by David Blackman and
+ * Sebastiano Vigna (vigna@acm.org).
  */
+
 #include "testu01_mt_cintf.h"
 
 /////////////////////////////////////////////////
@@ -18,33 +13,41 @@ SHARED_ENTRYPOINT_CODE
 
 static CallerAPI intf;
 
+
+static inline uint64_t rotl(const uint64_t x, int k) {
+	return (x << k) | (x >> (64 - k));
+}
+
 typedef struct {
-    uint64_t x;
-} WyRandState;
+    uint64_t s[2];
+} PrngState;
+
+
+static inline uint64_t get_bits64_inline(PrngState *obj)
+{
+    uint64_t *s = obj->s, s0 = s[0], s1 = s[1];
+	uint64_t result = rotl(s0 * 5, 7) * 9;
+	s1 ^= s0;
+	s[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+	s[1] = rotl(s1, 37); // c
+	return result;
+}
 
 
 uint64_t get_bits64(void *param, void *state)
 {
     (void) param;
-    const uint64_t c = UINT64_C(0xe7037ed1a0b428db);
-    WyRandState *obj = (WyRandState *) state;
-    obj->x += UINT64_C(0xa0761d6478bd642f);
-    __uint128_t t = (__uint128_t) obj->x * (obj->x ^ c);
-    return (t >> 64) ^ t;
+    return get_bits64_inline((PrngState *) state);
 }
 
+
 void get_array64(void *param, void *state, uint64_t *out, size_t len)
-{
+{    
     (void) param;
-    WyRandState *obj = (WyRandState *) state;
-    const uint64_t c = UINT64_C(0xe7037ed1a0b428db);
-    uint64_t x = obj->x;
+    PrngState *obj = (PrngState *) state;
     for (size_t i = 0; i < len; i++) {
-        x += UINT64_C(0xa0761d6478bd642f);
-        __uint128_t t = (__uint128_t) x * (x ^ c);
-        out[i] = (t >> 64) ^ t;
+        out[i] = get_bits64_inline(obj);
     }
-    obj->x = x;
 }
 
 static long unsigned int get_bits32(void *param, void *state)
@@ -59,8 +62,12 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    WyRandState *obj = (WyRandState *) intf.malloc(sizeof(WyRandState));
-    obj->x = intf.get_seed64();
+    const uint64_t phi = 0x9E3779B97F4A7C15ull; // Golden ratio
+    PrngState *obj = (PrngState *) intf.malloc(sizeof(PrngState));
+    obj->s[0] = intf.get_seed64();
+    obj->s[1] = intf.get_seed64();
+    if (obj->s[0] == 0) obj->s[0] = phi;
+    if (obj->s[1] == 0) obj->s[1] = phi;
     return (void *) obj;
 }
 
@@ -83,7 +90,7 @@ int EXPORT gen_closelib()
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
-    static const char name[] = "WyRand";
+    static const char name[] = "xoroshiro128**";
     gi->name = name;
     gi->init_state = init_state;
     gi->delete_state = delete_state;
@@ -93,3 +100,4 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     gi->get_array64 = get_array64;
     return 1;
 }
+

@@ -56,7 +56,8 @@ add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
 add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins
-foreach(prng_name alfib_mod alfib kiss93 lfib_float lfib_ranmar64 lfib_vfloat mlfib17_5 sqxor sqxor32 wyrand xorwow)
+foreach(prng_name alfib_mod alfib kiss93 lfib_float lfib_ranmar64 lfib_vfloat mlfib17_5
+    philox rc4 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
 endforeach()
@@ -64,8 +65,6 @@ endforeach()
 # Module and test for ChaCha CSPRNG
 add_library(chacha_shared SHARED generators/chacha_shared.c generators/chacha_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
-add_executable(chacha_test generators/chacha_test.c)
-target_link_libraries(chacha_test chacha_shared)
 
 add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c generators/chacha_avx_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")

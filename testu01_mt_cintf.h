@@ -38,9 +38,12 @@
 typedef double (*GetU01CallbackC)(void *param, void *state);
 typedef long unsigned int (*GetBits32CallbackC)(void *param, void *state);
 typedef uint64_t (*GetBits64CallbackC)(void *param, void *state);
+typedef void (*GetArray32CallbackC)(void *param, void *state, uint32_t *out, size_t len);
+typedef void (*GetArray64CallbackC)(void *param, void *state, uint64_t *out, size_t len);
 typedef void *(*InitStateCallbackC)(void);
 typedef void (*DeleteStateCallbackC)(void *param, void *state);
 typedef uint64_t (*GetSeed64CallbackC)(void);
+typedef int (*SelfTestCallbackC)(void);
 
 /**
  * @brief Keeps the information for initialization and destruction
@@ -54,6 +57,9 @@ typedef struct {
     GetU01CallbackC get_u01; /**< Function returns the double pseudorandom number */
     GetBits32CallbackC get_bits32; /**< Function returns the uint32_t pseudorandom number */
     GetBits64CallbackC get_bits64; /**< Function returns the uint64_t pseudorandom number */
+    GetArray32CallbackC get_array32; /**< Functions fills the uint32_t array buffer with pseudorandom numbers */
+    GetArray64CallbackC get_array64; /**< Functions fills the uint64_t array buffer with pseudorandom numbers */
+    SelfTestCallbackC run_self_test; /**< Functions that runs the internal self-test */
 } GenInfoC;
 
 
@@ -61,6 +67,7 @@ typedef struct {
     GetSeed64CallbackC get_seed64; /**< Get random 64-bit seed */
     void *(*malloc)(size_t len); /**< Pointer to malloc function */
     void (*free)(void *); /**< Pointer to free function */
+    int (*printf)(const char *format, ... ); /**< Pointer to printf function */
 } CallerAPI;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)

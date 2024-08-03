@@ -31,6 +31,36 @@ uint64_t UniformGenerator::GetBits64()
 }
 
 
+/**
+ * @brief Returns array of 32-bit unsigned integers. Designed for
+ * code vectorization and removing overhead for multiple calls
+ * of GetBits32.
+ * @param out  Pointer to output buffer
+ * @param len  Number of elements in the buffer.
+ */
+void UniformGenerator::GetArray32(uint32_t *out, size_t len)
+{
+    for (size_t i = 0; i < len; i++) {
+        out[i] = GetBits32();
+    }
+}
+
+/**
+ * @brief Returns array of 64-bit unsigned integers. Designed for
+ * code vectorization and removing overhead for multiple calls
+ * of GetBits64.
+ * @param out  Pointer to output buffer
+ * @param len  Number of elements in the buffer.
+ */
+void UniformGenerator::GetArray64(uint64_t *out, size_t len)
+{
+    for (size_t i = 0; i < len; i++) {
+        out[i] = GetBits64();
+    }
+}
+
+
+
 UniformGenerator::UniformGenerator(const std::string &name)
 {
     this->name = name;
@@ -59,6 +89,8 @@ UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
     gen.GetBits = gi->get_bits32;
     gen.name = const_cast<char *>(name.c_str());
     get_bits64 = gi->get_bits64;
+    get_array32 = gi->get_array32;
+    get_array64 = gi->get_array64;
     destroy = gi->delete_state;
 }
 
@@ -401,10 +433,25 @@ void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
     uint32_t buf[256];
     set_bin_stdout();
     while (1) {
-        for (int i = 0; i < 256; i++) {
+        for (size_t i = 0; i < 256; i++) {
             buf[i] = genptr->GetBits32();
         }
         fwrite(buf, sizeof(uint32_t), 256, stdout);
+    }
+}
+
+/**
+ * @brief Dump a VECTORIZED output of a 32-bit PRNG to the stdout
+ * in the format suitable for PractRand.
+ */
+void prng_array32_to_file(std::shared_ptr<UniformGenerator> genptr)
+{
+    constexpr size_t len = 1024;
+    uint32_t buf[len];
+    set_bin_stdout();
+    while (1) {
+        genptr->GetArray32(buf, len);
+        fwrite(buf, sizeof(uint32_t), len, stdout);
     }
 }
 
@@ -423,6 +470,23 @@ void prng_bits64_to_file(std::shared_ptr<UniformGenerator> genptr)
         fwrite(buf, sizeof(uint64_t), 256, stdout);
     }
 }
+
+
+/**
+ * @brief Dump a VECTORIZED output of a 64-bit PRNG to the stdout
+ * in the format suitable for PractRand.
+ */
+void prng_array64_to_file(std::shared_ptr<UniformGenerator> genptr)
+{
+    constexpr size_t len = 1024;
+    uint64_t buf[len];
+    set_bin_stdout();
+    while (1) {
+        genptr->GetArray64(buf, len);
+        fwrite(buf, sizeof(uint32_t), len, stdout);
+    }
+}
+
 
 
 

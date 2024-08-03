@@ -82,6 +82,8 @@ public:
     virtual double GetU01() = 0;
     virtual uint32_t GetBits32() = 0;
     virtual uint64_t GetBits64();
+    virtual void GetArray32(uint32_t *out, size_t len);
+    virtual void GetArray64(uint64_t *out, size_t len);
 };
 
 
@@ -102,6 +104,8 @@ class UniformGeneratorC : public UniformGenerator
     std::string name;
     DeleteStateCallbackC destroy;
     GetBits64CallbackC get_bits64;
+    GetArray32CallbackC get_array32;
+    GetArray64CallbackC get_array64;
 
     UniformGeneratorC(const UniformGeneratorC &obj) = delete;
     UniformGeneratorC &operator=(const UniformGeneratorC &obj) = delete;
@@ -113,6 +117,14 @@ public:
     double GetU01() override { return gen.GetU01(gen.param, gen.state); }
     uint32_t GetBits32() override { return gen.GetBits(gen.param, gen.state); }
     uint64_t GetBits64() override { return get_bits64(gen.param, gen.state); }
+    void GetArray32(uint32_t *out, size_t len) override
+    {
+        return get_array32(gen.param, gen.state, out, len);
+    }
+    void GetArray64(uint64_t *out, size_t len) override
+    {
+        return get_array64(gen.param, gen.state, out, len);
+    }
     virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
 };
 
@@ -253,7 +265,9 @@ public:
 
 void set_bin_stdout();
 void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr);
+void prng_array32_to_file(std::shared_ptr<UniformGenerator> genptr);
 void prng_bits64_to_file(std::shared_ptr<UniformGenerator> genptr);
+void prng_array64_to_file(std::shared_ptr<UniformGenerator> genptr);
 
 TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);

@@ -76,6 +76,13 @@ static inline void mm_qround_vert(__m256i *a, __m256i *b, __m256i *c, __m256i *d
  */
 static inline void ChaChaAVX_inc_counter(ChaChaAVXState *obj)
 {
+    // 32-bit counters
+/*
+    uint32_t *cnt1 = &obj->x[24], *cnt2 = &obj->x[28];
+    cnt1[0] += 2;
+    cnt2[0] += 2;
+*/
+    // 128-bit counters
     uint64_t *cnt1 = (uint64_t *) &obj->x[24];
     uint64_t *cnt2 = (uint64_t *) &obj->x[28];
     if (++cnt1[0] == 0) ++cnt1[1];
@@ -206,6 +213,71 @@ static void delete_state(void *param, void *state)
     intf.free(state);
 }
 
+
+/**
+ * @brief Print the ncols matrix of uint32_t from the ChaCha PRNG state.
+ * @param x      Pointer to the matrix (C-style)
+ * @param ncols  Number of columns.
+ * @param nelem  Number of elements.
+ */
+static void print_matx(uint32_t *x, size_t ncols, size_t nelem)
+{
+    for (size_t i = 0; i < nelem; i++) {
+        intf.printf("%10.8X ", x[i]);
+        if ((i + 1) % ncols == 0)
+            intf.printf("\n");
+    }
+}
+
+/**
+ * @brief Internal self-test. Based on reference values from RFC 7359.
+ */
+static int run_self_test()
+{
+    uint32_t x_init[] = { // Input values
+        0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
+        0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c,
+        0x00000001,  0x09000000,  0x4a000000,  0x00000000
+    };    
+    uint32_t out_final[] = { // Reference values from RFC 7359
+       0xe4e7f110,  0x15593bd1,  0x1fdd0f50,  0xc47120a3,
+       0xc7f4d1c7,  0x0368c033,  0x9aaa2204,  0x4e6cd4c3,
+       0x466482d2,  0x09aa9f07,  0x05d7c214,  0xa2028bd9,
+       0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
+    };
+    size_t mat32_map[] = { // Indexes for mapping 4x4 to 4x8 matrix
+         0, 1, 2, 3,  0, 1, 2, 3,
+         4, 5, 6, 7,  4, 5, 6, 7,
+         8, 9,10,11,  8, 9,10,11,
+        12,13,14,15, 12,13,14,15
+    };
+
+    ChaChaAVXState obj;
+
+    ChaChaAVX_init(&obj, 20, x_init);
+    memcpy(obj.x + 8, x_init, 4 * sizeof(uint32_t)); // Row 2
+    memcpy(obj.x + 12, x_init, 4 * sizeof(uint32_t));
+
+    memcpy(obj.x + 16, x_init + 4, 4 * sizeof(uint32_t)); // Row 3
+    memcpy(obj.x + 20, x_init + 4, 4 * sizeof(uint32_t));
+
+    memcpy(obj.x + 24, x_init + 8, 4 * sizeof(uint32_t)); // Row 4
+    memcpy(obj.x + 28, x_init + 8, 4 * sizeof(uint32_t));
+    intf.printf("Input:\n"); print_matx(obj.x, 8, 32);
+    ChaChaAVX_block(&obj);
+    intf.printf("Output (real):\n"); print_matx(obj.out, 8, 32);
+    intf.printf("Output (reference):\n"); print_matx(out_final, 4, 16);
+    for (size_t i = 0; i < 32; i++) {
+        if (out_final[mat32_map[i]] != obj.out[i]) {
+            intf.printf("TEST FAILED!\n");
+            return 0;
+        }        
+    }
+    intf.printf("Success.\n");
+    return 1;
+}
+
+
 /////////////////////////////////////////////////
 ///// Exported functions (module interface) /////
 /////////////////////////////////////////////////
@@ -229,5 +301,6 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
+    gi->run_self_test = run_self_test;
     return 1;
 }
