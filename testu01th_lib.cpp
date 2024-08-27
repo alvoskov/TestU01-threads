@@ -90,12 +90,12 @@ bool load_module(GenCModule &mod, const char *libname)
         return false;
     }
     mod.gen_closelib = reinterpret_cast<GenCloseLibFunc>((void *) GetProcAddress(hDll, "gen_closelib"));
-    if (mod.gen_initlib == nullptr) {
+    if (mod.gen_closelib == nullptr) {
         fprintf(stderr, "Cannot find the 'gen_closelib' function\n");
         return false;
     }
     mod.gen_getinfo = reinterpret_cast<GenGetInfoFunc>((void *) GetProcAddress(hDll, "gen_getinfo"));
-    if (mod.gen_initlib == nullptr) {
+    if (mod.gen_getinfo == nullptr) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         return false;
     }
@@ -459,6 +459,7 @@ CallerAPI get_caller_api()
     return intf;
 }
 
+
 static int run_self_test(const GenInfoC &geninfo)
 {
     std::cout << "----- Internal self-test -----" << std::endl;
@@ -512,45 +513,66 @@ void test_battery_speed(const GenFactoryFunc &create_gen, const GenInfoC &geninf
 }
 
 
+std::string get_gen_options(int argc, char *argv[])
+{
+    std::string gen_options;
+    if (argc >= 5) {
+        gen_options = std::string(argv[4]);
+    }
+    return gen_options;
+}
+
+/**
+ * @brief Returns test ID (from SmallCrush, Crush or BigCrush battery)
+ * selected by the user.
+ * @return -1 -- no test selected, 0 -- invalid test ID, >0 - test ID.
+ */
+int get_test_id(int argc, char *argv[])
+{
+    int test_id = -1;
+    if (argc >= 4) {
+        test_id = std::stoi(argv[3]);
+        if (test_id == 0) {
+            std::cerr << "Invalid test number " << argv[3] << std::endl;
+            return 0;
+        }
+    }
+    return test_id;
+}
+
 /**
  * @brief Program entry point.
  */
 int main(int argc, char *argv[]) 
 {
+    // Get command line arguments
     if (argc < 3) {
         print_help();
         return 0;
     }
-
-    CallerAPI intf = get_caller_api();
+    std::string battery = argv[1];
+    const char *module_name = argv[2];
+    int test_id = get_test_id(argc, argv);
+    std::string gen_options = get_gen_options(argc, argv);
+    if (test_id == 0) {
+        return 0;
+    }
 
     GenCModule mod;
-    int test_id = -1;
-
-    if (!load_module(mod, argv[2])) {
+    if (!load_module(mod, module_name)) {
         std::cerr << "Cannot load the module" << std::endl;
         return 1;
     }
 
-    std::string battery = argv[1];
-    std::string gen_options;
-    if (argc >= 4) {
-        test_id = std::stoi(argv[3]);
-        if (test_id == 0) {
-            std::cerr << "Invalid test number " << argv[3] << std::endl;
-            return 1;
-        }
-    }
-    if (argc >= 5) {
-        gen_options = std::string(argv[4]);
-        std::cout << "Generator options: '" << gen_options << "'" << std::endl;
-    }
-
+    CallerAPI intf = get_caller_api();
     GenInfoC geninfo;
     GenInfoC_init(&geninfo);
     geninfo.options = gen_options.c_str();
     mod.gen_initlib(&intf);
-    mod.gen_getinfo(&geninfo);
+    if (!mod.gen_getinfo(&geninfo)) {
+        std::cerr << "Error: PRNG `gen_getinfo` function failed" << std::endl;
+        return 1;
+    }
 
     auto create_gen = [&geninfo] () -> std::shared_ptr<UniformGenerator> {
         return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));

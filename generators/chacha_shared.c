@@ -336,7 +336,8 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     if (!intf.strcmp(gi->options, "20")) {
         gi->name = "ChaCha20";
         gen_nrounds = 20;
-    } else if (!intf.strcmp(gi->options, "12")) {
+    } else if (!intf.strcmp(gi->options, "12") ||
+        !intf.strcmp(gi->options, "")) {
         gi->name = "ChaCha12";
         gen_nrounds = 12;
     } else if (!intf.strcmp(gi->options, "8")) {

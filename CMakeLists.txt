@@ -56,8 +56,9 @@ add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
 add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins
-foreach(prng_name alfib_mod alfib isaac64 kiss93 lfib_float lfib_ranmar64 lfib_vfloat mlfib17_5
-    philox rc4 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
+foreach(prng_name alfib_mod alfib coveyou64 isaac64 kiss64 kiss93 kiss99
+    lcg64 lfib_float lfib_ranmar64 lfib_vfloat minstd mlfib17_5
+    philox randu rc4 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
 endforeach()

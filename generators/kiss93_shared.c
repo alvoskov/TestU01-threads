@@ -24,11 +24,12 @@ static long unsigned int get_bits32(void *param, void *state)
     return obj->S1 + obj->S2 + obj->S3;
 }
 
+
 static double get_u01(void *param, void *state)
 {
-    static const double INV32 = 2.3283064365386963E-10;
-    return get_bits32(param, state) * INV32;
+    return uint32_to_udouble(get_bits32(param, state));
 }
+
 
 static void *init_state()
 {
@@ -39,11 +40,13 @@ static void *init_state()
     return (void *) obj;
 }
 
+
 static void delete_state(void *param, void *state)
 {
     (void) param;
     intf.free(state);
 }
+
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
