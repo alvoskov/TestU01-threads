@@ -5,13 +5,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Compiler settings
 if (NOT MSVC)
     set(PROF_FLAGS "")
+    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes") # -march=native 
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 -march=native -O3 -Wall -Werror -Wextra -Wno-attributes -static-libstdc++ -static-libgcc")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -march=native -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -march=native -std=c99  -ffreestanding ${C_CXX_FLAGS}")
     else()
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding -march=native -O3 -Wall -Werror -Wextra -Wno-attributes")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -march=native -std=gnu++14 ${C_CXX_FLAGS}")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -march=native -std=c99  -ffreestanding ${C_CXX_FLAGS}")
     endif()
 endif()
 

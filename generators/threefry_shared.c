@@ -285,7 +285,7 @@ static void delete_state(void *param, void *state)
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
-    static const char name[] = "Threefry4x64x72";
+    static const char name[] = "Threefry4x64x20";
     gi->name = name;
     gi->init_state = init_state;
     gi->delete_state = delete_state;
