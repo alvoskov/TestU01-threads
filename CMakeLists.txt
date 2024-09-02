@@ -68,6 +68,11 @@ endforeach()
 add_library(chacha_shared SHARED generators/chacha_shared.c generators/chacha_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
 
+# Module for RANLUX++ PRNG
+add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c generators/ranluxpp_mulmod.h generators/ranluxpp_helpers.h testu01_mt_cintf.h)
+set_target_properties(ranluxpp_shared PROPERTIES LINK_FLAGS "-nostdlib")
+
+
 add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c generators/chacha_avx_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
 add_executable(chacha_avx_test generators/chacha_avx_test.c)
