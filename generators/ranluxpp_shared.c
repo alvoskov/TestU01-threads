@@ -64,6 +64,11 @@ PRNG_CMODULE_PROLOG
 ///////////////////////////////////
 
 /**
+ * @brief Default length of subsequence.
+ */
+#define DEFAULT_P 2048
+
+/**
  * @brief RANLUX++ internal state.
  */
 typedef struct {
@@ -177,7 +182,7 @@ static double get_u01_from32(void *param, void *state)
 static void *init_state()
 {
     RanluxppState *obj = intf.malloc(sizeof(RanluxppState));
-    RanluxppState_init(obj, intf.get_seed64(), 2048);
+    RanluxppState_init(obj, intf.get_seed64(), DEFAULT_P);
     return (void *) obj;
 }
 
@@ -214,7 +219,7 @@ static int run_self_test()
     };
     int passed = 1;
     RanluxppState *obj = intf.malloc(sizeof(RanluxppState));
-    RanluxppState_init(obj, 1, 2048);
+    RanluxppState_init(obj, 1, DEFAULT_P);
     for (size_t i = 0; i < sizeof(x_ref) / sizeof(x_ref[0]); i++) {
         uint64_t x = get_bits64_raw(NULL, obj);
         if (x != x_ref[i]) {
