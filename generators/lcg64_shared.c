@@ -27,7 +27,7 @@ static long unsigned int get_bits32(void *param, void *state)
 {
     Lcg64State *obj = (Lcg64State *) state;
     (void) param;
-    obj->x = obj->x * 0xd1342543de82ef95 + 12345;
+    obj->x = obj->x * 6906969069 /*0xd1342543de82ef95*/ + 1;
     return obj->x >> 32;
 }
 
