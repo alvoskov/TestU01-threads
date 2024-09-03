@@ -42,7 +42,7 @@
 ///// Some constants /////
 //////////////////////////
 
-constexpr size_t ELEMENTS_PER_BLOCK = 1024;
+constexpr size_t ELEMENTS_PER_BLOCK = 1000;
 
 
 
