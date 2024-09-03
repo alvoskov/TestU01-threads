@@ -20,7 +20,6 @@ static double get_u01(void *param, void *state)
     return uint32_to_udouble(get_bits32(param, state));
 }
 
-
 static void *init_state()
 {
     RanduState *obj = (RanduState *) intf.malloc(sizeof(RanduState));
