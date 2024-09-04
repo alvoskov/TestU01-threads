@@ -42,8 +42,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-add_library(testu01threads testu01_mt.h testu01_mt_cintf.h batteries.h bigcrush.h crush.h smallcrush.h pdiehard.h generators.h
-    testu01_mt.cpp testu01_mt_cintf.cpp bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp generators.cpp)
+add_library(testu01threads testu01_mt.h testu01_mt_cintf.h entropy.h batteries.h bigcrush.h crush.h smallcrush.h pdiehard.h generators.h
+    testu01_mt.cpp testu01_mt_cintf.cpp entropy.cpp bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp generators.cpp)
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE})
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 
@@ -59,7 +59,7 @@ add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen
 # Examples of plugins
 foreach(prng_name alfib_mod alfib coveyou64 isaac64 kiss64 kiss93 kiss99
     lcg64 lcg128 lcg69069 lfib_float lfib_ranmar64 lfib_vfloat minstd mwc32x mwc64x mwc128x mlfib17_5
-    philox randu rc4 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
+    philox randu rc4 seed64 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
 endforeach()

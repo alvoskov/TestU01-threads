@@ -151,7 +151,8 @@ static uint64_t get_bits64(void *param, void *state)
 
 /**
  * @brief Decomposes each 64-bit value into a pair of 32-bit
- * values.
+ * values. Needed for TestU01: its batteries should have
+ * an access to all bits.
  */
 static long unsigned int get_bits32(void *param, void *state)
 {

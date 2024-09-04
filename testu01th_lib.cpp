@@ -18,6 +18,7 @@
 
 #include "testu01_mt.h"
 #include "batteries.h"
+#include "entropy.h"
 #include "generators.h"
 
 #include <stdlib.h>
@@ -290,14 +291,23 @@ uint64_t seed64_rdtsc()
 
 
 /**
+ * @brief Seeds generation for PRNGs
+ */
+Entropy entropy;
+
+
+/**
  * @brief Obtain hardware generated seed (random number)
  * from the RDSEED instruction.
  */
 static uint64_t seed64()
 {
+/*
     long long unsigned int rd;
     while (!_rdseed64_step(&rd)) {}
     return static_cast<uint64_t>(rd);
+*/
+    return entropy.Seed64();
 }
 
 void print_help()
@@ -548,6 +558,9 @@ int main(int argc, char *argv[])
     // Get command line arguments
     if (argc < 3) {
         print_help();
+        //std::cout << entropy.XxteaTest() << std::endl;
+        //std::cout << entropy.Seed64() << std::endl;
+        //std::cout << entropy.Seed64() << std::endl;
         return 0;
     }
     std::string battery = argv[1];
