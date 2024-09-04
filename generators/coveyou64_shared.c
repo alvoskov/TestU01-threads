@@ -1,7 +1,7 @@
 /**
  * @file coveyou64_shared.c
  * @brief Coveyou64 PRNG.
- * @details Passes BigCrush but fails the next two tests
+ * @details Passes SmallCrush but fails the next two tests
  * from Crush:
  * - 17  BirthdaySpacings, t = 8
  * - 26  SimpPoker, d = 64

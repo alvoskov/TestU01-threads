@@ -87,16 +87,38 @@ public:
 };
 
 
+/**
+ * @brief Always returns 0, has no internal state.
+ */
+class DummyGenerator : public UniformGenerator
+{
+public:
+    DummyGenerator() : UniformGenerator("Dummy") {}
+    double GetU01() override { return 0.0; }
+    uint32_t GetBits32() override { return 0; }
+};
+
 
 /**
  * @brief A variant of UniformGenerator that is designed as an interface
  * for C program.
  * @details The next functions should be supplied by the C module:
+ *
  * - `double get_u01(void *param, void *state)` - that returns uniformly
  *    distributed pseudorandom numbers from the [0;1) interval.
- * - `uint32_t get_bits32(void *param, void *state)` - that returns
+ * - `unsigned long get_bits32(void *param, void *state)` - that returns
  *    uniformly distributed 32-bit unsigned pseudorandom numbers.
  * - `void gen_delete(void *param, void *state)` - destroys the generator.
+ *
+ * The module also can supply optional functions that are useful
+ * for PractRand and for performance measurements:
+ *
+ * - `uint64_t get_bits64(void *param, void *state)` - returns uniformly
+ *    distributed 64-bit unsigned pseudorandom numbers.
+ * - `void get_array32(void *param, void *state, uint32_t *out, size_t len)`
+ *   Returns array of 32-bit unsigned integer pseudorandom numbers.
+ * - `void get_array64(void *param, void *state, uint64_t *out, size_t len)`
+ *   Returns array of 64-bit unsigned integer pseudorandom numbers.
  */
 class UniformGeneratorC : public UniformGenerator
 {
@@ -182,7 +204,21 @@ public:
     inline size_t GetNResults() const { return results.size(); }
     inline const PValueRecord &GetPValueRecord(size_t ind) { return results[ind]; }
     void WritePValue(double p);
-    void WriteReport(const char *batName, const char *genName, chrono_Chrono *timer);    
+    void WriteReport(const char *batName, const char *genName, chrono_Chrono *timer);
+};
+
+
+/**
+ * @brief Array of p-values obtained from different tests from all threads.
+ */
+class PValueArray
+{
+public:
+    std::vector<std::vector<PValueRecord>> ary; ///< results[thread][test_ind]
+
+    PValueArray() {}
+    PValueArray(size_t nthreads) : ary(nthreads) {}
+    std::string ToString() const;
 };
 
 
@@ -239,7 +275,7 @@ public:
     TestsPull(const std::vector<TestDescr> &obj);
     const TestDescr *Get(std::string &pos_msg);
 
-    void Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+    PValueArray Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
         const std::string &battery_name);
 };
 
@@ -258,8 +294,8 @@ protected:
 
 public:
     TestsBattery(GenFactoryFunc genf);
-    void Run() const;
-    bool RunTest(int id) const;
+    PValueArray Run() const;
+    PValueArray RunTest(int id) const;
 };
 
 

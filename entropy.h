@@ -19,22 +19,32 @@ enum EntropyMethod
 };
 
 /**
- * @brief 
- */
-class SeedRecord
-{
-public:
-    uint64_t state;
-    uintptr_t thread_id;
-};
-
-/**
- * @brief Generates seeds for PRNGs using some entropy sources.
- * DON'T USE FOR CRYPTOGRAPHY! IT IS DESIGNED ONLY FOR STATISTCAL TESTS!
+ * @brief Generates seeds for PRNGs using some entropy sources: current time
+ * in seconds, RDTSC instruction and RDSEED built-in hardware RNG. Everything
+ * is mixed with PRNG counter and encrypted by XXTEA block cipher.
+ *
+ * DON'T USE FOR THIS CLASS FOR CRYPTOGRAPHY, E.G. GENERATION OF KEYS FOR
+ * ENCRYPTION! IT IS DESIGNED ONLY FOR STATISTCAL TESTS AND PRNG SEEDING!
+ *
+ * @details. It uses the next algorithm of generation of seeds:
+ *
+ * - RND(x) function is defined as RND(SplitMixHash(x) ^ RDSEED) where
+ *   RDSEED is RDSEED instruction, hardware RNG in CPU.
+ * - Internal counter CTR is "Weyl sequence" from SplitMix.
+ * - Output function is XXTEA(RND(CTR)) where XXTEA is block cipher with
+ *   64-bit block and 128-bit key.
+ * - XXTEA keys are made as RND(time(NULL)) and RND(~time(NULL)) ^ RND(RDTSC)
+ *
+ * XORing with RDSEED can be excluded if CPU doesn't support that instruction.
+ * RDTSC can be excluded if CPU doesn't support this instruction. Even if all
+ * hardware sources of entropy except time are excluded --- it will return
+ * high-quality pseudorandom seeds.
+ *
+ * Usage of XXTEA over RDSEED is also intended to exclude any biases.
  */
 class Entropy
 {
-    mutable std::mutex mut;
+    std::mutex mut;
     uint32_t key[4];
     uint64_t state;
     
@@ -44,11 +54,10 @@ class Entropy
     uint64_t MixRdSeed(const uint64_t x) const;
 
 public:
-    std::vector<SeedRecord> seeds_log;
+    std::vector<uint64_t> seeds_log;
     Entropy();
     bool XxteaTest();
-    uint64_t Seed64();
-    
+    uint64_t Seed64();    
 };
 
 #endif

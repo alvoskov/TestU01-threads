@@ -36,6 +36,7 @@
 #include <mutex>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include <thread>
 
@@ -261,35 +262,6 @@ static void init_dummy_cmodule()
 }
 
 
-/*
-uint64_t seed64_rdtsc()
-{
-    uint64_t s = 0;
-    char buf[16];
-    uint32_t lcg = (uint32_t) time(NULL);
-    lcg ^= (uint32_t) __rdtsc() & 0xFFFFFFFF;
-    for (size_t i = 0; i < 8; i++) {
-        uint64_t tic = __rdtsc();
-        for (size_t j = 0; j < 16; j++) {
-            for (size_t k = 0; k < 16; k++) {
-                lcg = (69069 * lcg + 1);
-                buf[k] = ((lcg >> 16) % 26) + 'A';
-            }
-            buf[15] = 0;
-            getenv(buf);
-            //printf("%s\n", buf);
-        }
-        //uint32_t ms = 1000;// + (lcg >> 30);
-        //std::this_thread::sleep_for(std::chrono::microseconds(ms));
-        uint64_t toc = __rdtsc();
-        s |= ((toc - tic) & 0xFF) << (i * 8);
-    }
-    s ^= __rdtsc();
-    return s;
-}
-*/
-
-
 /**
  * @brief Seeds generation for PRNGs
  */
@@ -302,11 +274,6 @@ Entropy entropy;
  */
 static uint64_t seed64()
 {
-/*
-    long long unsigned int rd;
-    while (!_rdseed64_step(&rd)) {}
-    return static_cast<uint64_t>(rd);
-*/
     return entropy.Seed64();
 }
 
@@ -550,6 +517,19 @@ int get_test_id(int argc, char *argv[])
     return test_id;
 }
 
+
+void SaveProtocol(const PValueArray &results, Entropy &ent)
+{
+    std::ofstream outfile;
+    outfile.open("report.txt");
+    outfile << results.ToString() << std::endl;
+    outfile << "===== List of seeeds =====" << std::endl;
+    for (size_t i = 0; i < ent.seeds_log.size(); i++) {
+        outfile << ent.seeds_log[i] << std::endl;
+    }
+    outfile << std::endl;
+}
+
 /**
  * @brief Program entry point.
  */
@@ -594,16 +574,16 @@ int main(int argc, char *argv[])
 
     if (battery == "SmallCrush") {
         SmallCrushBattery bat(create_gen);
-        bat.RunTest(test_id);
+        SaveProtocol(bat.RunTest(test_id), entropy);
     } else if (battery == "Crush") {
         CrushBattery bat(create_gen);
-        bat.RunTest(test_id);
+        SaveProtocol(bat.RunTest(test_id), entropy);
     } else if (battery == "BigCrush") {
         BigCrushBattery bat(create_gen);
-        bat.RunTest(test_id);
+        SaveProtocol(bat.RunTest(test_id), entropy);
     } else if (battery == "pseudoDIEHARD") {
         PseudoDiehardBattery bat(create_gen);
-        bat.RunTest(test_id);
+        SaveProtocol(bat.RunTest(test_id), entropy);
     } else if (battery == "SmallCrush_ser") {
         auto objptr = create_gen();
         bbattery_SmallCrush(objptr->GetPtr());

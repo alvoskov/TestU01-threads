@@ -109,5 +109,7 @@ Entropy::Entropy()
 uint64_t Entropy::Seed64()
 {
     std::lock_guard<std::mutex> guard(mut);
-    return Xxtea(NextState());
+    uint64_t seed = Xxtea(NextState());
+    seeds_log.push_back(seed);
+    return seed;
 }

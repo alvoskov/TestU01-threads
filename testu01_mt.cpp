@@ -191,6 +191,27 @@ void BatteryIO::WriteReport(const char *batName, const char *genName, chrono_Chr
 }
 
 
+////////////////////////////////////////////
+///// PValueArray class implementation /////
+////////////////////////////////////////////
+
+
+std::string PValueArray::ToString() const
+{
+    std::string txt;
+    for (size_t i = 0; i < ary.size(); i++) {
+        txt += "===== Tests for thread " + std::to_string(i) + " =====\n";
+        for (auto &rec : ary[i]) {
+            char buf[512];
+            snprintf(buf, 512, "  %5d %32s %.6g\n",
+                (int) rec.id, rec.name.c_str(), rec.pvalue);
+            txt += std::string(buf);
+        }
+    }
+    return txt;
+}
+
+
 //////////////////////////////////////////
 ///// TestsPull class implementation /////
 //////////////////////////////////////////
@@ -273,13 +294,14 @@ void TestsPull::ThreadFunc(TestsPull &pull, BatteryIO &io, int thread_id)
 }
 
 
-void TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+PValueArray TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
     const std::string &battery_name)
 {
     // Timers and threads number
     chrono_Chrono *timer = chrono_Create();
     size_t nthreads = GetNThreads();
     fprintf(stderr, "=====> Number of threads: %d\n", (int) nthreads);
+    PValueArray results(nthreads);
     std::vector<BatteryIO> threads_bats;
     for (size_t i = 0; i < nthreads; i++) {
         threads_bats.emplace_back(create_gen());
@@ -298,8 +320,15 @@ void TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_ge
     for (auto &th : threads) {
         th.join();
     }
-    // Merge results from different threads
-    auto gen = create_gen();
+    // Save p-values from different threads to output array
+    // (it preserves an exact order of calls).
+    for (size_t i = 0; i < threads_bats.size(); i++) {
+        for (size_t j = 0; j < threads_bats[i].GetNResults(); j++) {
+            results.ary[i].push_back(threads_bats[i].GetPValueRecord(j));
+        }
+    }
+    // Merge results from different threads.
+    auto gen = std::make_shared<DummyGenerator>();
     BatteryIO io(gen);
     for (auto &bat : threads_bats) {
         io.Add(bat);
@@ -316,6 +345,7 @@ void TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_ge
     // Print report
     io.WriteReport(battery_name.c_str(), gen.get()->GetName().c_str(), timer);
     chrono_Delete(timer);
+    return results;
 }
 
 /////////////////////////////////////////////
@@ -329,7 +359,7 @@ TestsBattery::TestsBattery(GenFactoryFunc genf)
 {
 }
 
-void TestsBattery::Run() const
+PValueArray TestsBattery::Run() const
 {
     printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
         "                 Starting %s\n"
@@ -338,23 +368,24 @@ void TestsBattery::Run() const
         battery_name.c_str(), PACKAGE_STRING);
 
     TestsPull pull(tests);
-    pull.Run(create_gen, battery_name);
+    return pull.Run(create_gen, battery_name);
 }
 
-bool TestsBattery::RunTest(int id) const
+PValueArray TestsBattery::RunTest(int id) const
 {
     if (id <= 0) {
-        Run();
-        return true;
+        return Run();
     }
 
     std::vector<TestDescr> t;
+    PValueArray results(1);
     for (size_t i = 0; i < tests.size(); i++) {
         if (tests[i].GetId() == id)
             t.push_back(tests[i]);
     }
-    if (t.size() == 0)
-        return false;
+    if (t.size() == 0) {
+        return results;
+    }
 
     printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
         "                 Starting %s test %d\n"
@@ -363,8 +394,7 @@ bool TestsBattery::RunTest(int id) const
         battery_name.c_str(), id, PACKAGE_STRING);
 
     TestsPull pull(t);
-    pull.Run(create_gen, battery_name + " test " + std::to_string(id));
-    return true;
+    return pull.Run(create_gen, battery_name + " test " + std::to_string(id));
 }
 
 
