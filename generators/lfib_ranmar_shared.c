@@ -1,17 +1,20 @@
 #include "testu01_mt_cintf.h"
 #include <limits.h>
 
-#define LFIB_A 17
-#define LFIB_B 5
+#define LFIB_A 98
+#define LFIB_B 33
 
 /////////////////////////////////////////////////
 ///// Entry point for -nostdlib compilation /////
 /////////////////////////////////////////////////
 SHARED_ENTRYPOINT_CODE
 
+
 static CallerAPI intf;
 
-static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
+//static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
+static const double c = 362436069876.0 / 9007199254740992.0; /**< original shift */
+
 
 static inline double amb_mod_r(double a, double b)
 {
@@ -21,10 +24,8 @@ static inline double amb_mod_r(double a, double b)
 }
 
 typedef struct {
-    double z;
-    double w;
-    double w2;
     double U[LFIB_A + 1];
+    double z;
     int i;
     int j;
 } LFibFloat;
@@ -33,18 +34,16 @@ static double get_u01(void *param, void *state)
 {
     LFibFloat *obj = (LFibFloat *) state;
     (void) param;
-    /* Subtractive Lagged Fibbonaci part */
+    // Subtractive Lagged Fibbonaci part
     double x = obj->U[obj->i] - obj->U[obj->j];
     if (x < 0.0) x += 1.0;
     obj->U[obj->i] = x;
     if(--obj->i == 0) obj->i = LFIB_A;
 	if(--obj->j == 0) obj->j = LFIB_A;
-    /* Nested Weyl sequence part */
+    // Weyl sequence part
     obj->z = amb_mod_r(obj->z, c);
-    obj->w = amb_mod_r(obj->w, obj->z);
-    obj->w2 = amb_mod_r(obj->w2, obj->w);
-    /* Combine two generators */
-    x -= obj->w2;
+    // Combine two generators
+    x -= obj->z;
     return (x < 0.0) ? (x + 1.0) : x;
 }
 
@@ -56,18 +55,20 @@ static long unsigned int get_bits32(void *param, void *state)
 
 static void *init_state()
 {
-    LFibFloat *obj = (LFibFloat *) intf.malloc(sizeof(LFibFloat));
-    uint32_t seed = intf.get_seed64();
-    obj->z = (double) seed / UINT_MAX;
-    obj->w = obj->z;
-    obj->w2 = obj->z;
-    double w2 = obj->z, w3 = obj->z;
-    for (size_t k = 1; k <= LFIB_A; k++) {
-        obj->z = amb_mod_r(obj->z, c);
-        obj->w = amb_mod_r(obj->w, obj->z);
-        w2 = amb_mod_r(w2, obj->w);
-        w3 = amb_mod_r(w3, w2);
-        obj->U[k] = w3;
+    LFibFloat *obj = intf.malloc(sizeof(LFibFloat));
+    uint64_t seed = intf.get_seed64();
+    uint32_t x = seed & 0xFFFFFFFF;
+    uint32_t y = seed >> 32;
+    for (size_t i = 1; i < LFIB_A; i++) {
+        double s = 0.0, t = 0.5;
+        for (size_t j = 1; j < 54; j++) {
+            x = (6969*x) % 65543;
+            y = (8888*y) % 65579; // Original work: y = (8888*x) % 65579;
+            if (((x ^ y) & 32) > 0)
+                s += t;
+            t *= 0.5;
+        }
+        obj->U[i] = s;
     }
     obj->i = LFIB_A; obj->j = LFIB_B;
     return (void *) obj;
@@ -92,7 +93,7 @@ int EXPORT gen_closelib()
 
 int EXPORT gen_getinfo(GenInfoC *gi)
 {
-    static const char name[] = "LFib_float";
+    static const char name[] = "LFib_RANMAR";
     gi->name = name;
     gi->init_state = init_state;
     gi->delete_state = delete_state;

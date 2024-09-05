@@ -517,17 +517,45 @@ int get_test_id(int argc, char *argv[])
     return test_id;
 }
 
-
-void SaveProtocol(const PValueArray &results, Entropy &ent)
+/**
+ * @brief Save the full protocol to the file
+ */
+void SaveProtocol(const BatteryResults &results, Entropy &entropy)
 {
     std::ofstream outfile;
+    char buf[256];
+    size_t nseeds = entropy.GetNSeeds();
+    size_t nthreads = results.pvalues.size();
+    size_t seeds_per_thread = nseeds / nthreads;
     outfile.open("report.txt");
     outfile << results.ToString() << std::endl;
+    outfile << "========= Seeds allocator report =========" << std::endl;
+    outfile << "  Number of threads: " << nthreads << std::endl;
+    outfile << "  Seeds generated:   " << nseeds << std::endl;
+    outfile << "  Seeds per thread:  " << nseeds / nthreads << std::endl;
+    outfile << "  Seeds outside threads: " <<
+        nseeds - nthreads * seeds_per_thread << std::endl << std::endl;
     outfile << "===== List of seeeds =====" << std::endl;
-    for (size_t i = 0; i < ent.seeds_log.size(); i++) {
-        outfile << ent.seeds_log[i] << std::endl;
+    snprintf(buf, 256, "  %3s %3s %25s   %16s\n",
+        "TH", "#", "DEC", "HEX");
+    outfile << std::string(buf);
+    for (size_t i = 0, pos = 0; i < nthreads; i++) {
+        for (size_t j = 0; j < seeds_per_thread; j++, pos++) {
+            uint64_t seed = entropy.seeds_log[pos];
+            snprintf(buf, 256, "  %3d %3d %25llu 0x%16.16llX\n",
+                (int) i, (int) j, seed, seed);
+            outfile << std::string(buf);
+        }
     }
     outfile << std::endl;
+}
+
+
+void RunBattery(TestsBattery &bat, int test_id, Entropy &entropy)
+{
+    auto results = bat.RunTest(test_id);
+    std::cout << results.report;
+    SaveProtocol(results, entropy);
 }
 
 /**
@@ -570,20 +598,19 @@ int main(int argc, char *argv[])
     auto create_gen = [&geninfo] () -> std::shared_ptr<UniformGenerator> {
         return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
     };
-
-
+    // Run the selected battery
     if (battery == "SmallCrush") {
         SmallCrushBattery bat(create_gen);
-        SaveProtocol(bat.RunTest(test_id), entropy);
+        RunBattery(bat, test_id, entropy);
     } else if (battery == "Crush") {
         CrushBattery bat(create_gen);
-        SaveProtocol(bat.RunTest(test_id), entropy);
+        RunBattery(bat, test_id, entropy);
     } else if (battery == "BigCrush") {
         BigCrushBattery bat(create_gen);
-        SaveProtocol(bat.RunTest(test_id), entropy);
+        RunBattery(bat, test_id, entropy);
     } else if (battery == "pseudoDIEHARD") {
         PseudoDiehardBattery bat(create_gen);
-        SaveProtocol(bat.RunTest(test_id), entropy);
+        RunBattery(bat, test_id, entropy);
     } else if (battery == "SmallCrush_ser") {
         auto objptr = create_gen();
         bbattery_SmallCrush(objptr->GetPtr());

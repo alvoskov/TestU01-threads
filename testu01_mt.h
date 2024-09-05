@@ -203,21 +203,24 @@ public:
     size_t GetNTestsFailed() const;
     inline size_t GetNResults() const { return results.size(); }
     inline const PValueRecord &GetPValueRecord(size_t ind) { return results[ind]; }
-    void WritePValue(double p);
-    void WriteReport(const char *batName, const char *genName, chrono_Chrono *timer);
+    std::string WritePValue(double p);
+    std::string WriteReport(const char *batName, const char *genName,
+        chrono_Chrono *timer, size_t ms_total);
 };
 
 
 /**
- * @brief Array of p-values obtained from different tests from all threads.
+ * @brief Array of p-values obtained from different tests from all threads
+ * + TestU01 report.
  */
-class PValueArray
+class BatteryResults
 {
 public:
-    std::vector<std::vector<PValueRecord>> ary; ///< results[thread][test_ind]
+    std::vector<std::vector<PValueRecord>> pvalues; ///< results[thread][test_ind]
+    std::string report;
 
-    PValueArray() {}
-    PValueArray(size_t nthreads) : ary(nthreads) {}
+    BatteryResults() {}
+    BatteryResults(size_t nthreads) : pvalues(nthreads) {}
     std::string ToString() const;
 };
 
@@ -275,7 +278,7 @@ public:
     TestsPull(const std::vector<TestDescr> &obj);
     const TestDescr *Get(std::string &pos_msg);
 
-    PValueArray Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+    BatteryResults Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
         const std::string &battery_name);
 };
 
@@ -291,11 +294,12 @@ protected:
     std::vector<TestDescr> tests;
     GenFactoryFunc create_gen;
     std::string battery_name;
+    std::string generator_name;
 
 public:
     TestsBattery(GenFactoryFunc genf);
-    PValueArray Run() const;
-    PValueArray RunTest(int id) const;
+    BatteryResults Run() const;
+    BatteryResults RunTest(int id) const;
 };
 
 

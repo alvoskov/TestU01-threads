@@ -56,25 +56,52 @@ Executables
 Supplied PRNGs external modules
 ===============================
 
+ Module name      | Generator
+------------------|------------------------------------------------------------
+ alfib            | LFib(+,2^{64},607,203)
+ chacha_avx       | ChaCha12 CSPRNG: AVX2 implementation
+ chacha           | ChaCha12 CSPRNG: Cross-platform implementation 
+ coveyou64        |
+ isaac64          | ISAAC64 CSPRNG
+ kiss93           | KISS93 (doesn't pass Crush and BigCrush)
+ kiss99           | KISS99
+ kiss64           | 64-bit version of KISS
+ lcg64            | LCG(2^{64},6906969069,1) that returns upper 32 bits
+ lcg128           | LCG(2^{128},18000690696906969069,1), returns upper 32 bits
+ lcg69069         | LCG(2^{32},69069,1), returns whole 32 bits
+ lfib_ranmar      | RANMAR: subtractive lagged Fibonacci + "Weyl sequence"
+ minstd           |
+ mlfib17_5        | LFib(x,2^{64},17,5)
+ mt19937          | Mersenne twister from C++ standard library.
+ mwc32x           | Similar to MWC64X, but x and c are 16-bit
+ mwc64x           | MWC64X: 32-bit Multiply-With-Carry with XORing x and c
+ mwc128x          | MWC128X: similar to MWC64X but x and c are 64-bit
+ philox           | Philox4x64x10 (weakened and altered ThreeFish)
+ randu            | LCG(2^{32},65539,1), returns whole 32 bits
+ ranluxpp         | RANLUX++, RANLUX reformulated as LCG
+ rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
+ sqxor            | sqxor
+ sqxor32          | sqxor32
+ threefry         | Threefry4x64x20 (ThreeFish with reduced number of rounds) 
+ wyrand           | wyrand: output function of wyhash + Weyl sequence
+ xoroshiro128stst | xoroshiro128**
+ xorwow           | xorwow
 
-- alfib
-- chacha_avx
-- chacha
-- isaac
-- kiss93
-- lfib_float
-- lfib_ranmar_float
-- lfib_vfloat
-- mlfib17_5
-- philox
-- rc4
-- sqxor
-- sqxor32
-- threefry
-- wyrand
-- xoroshiro128stst
-- xorwow
 
+The supplied generators can be divided into several groups:
+
+1. Cryptographically secure pseudorandom numbers generators (CSPRNG):
+   ChaCha12, ISAAC64
+2. Simplified generators based on CSPRNG: Philox, Threefry.
+3. High-quality PRNGs that pass BigCrush: KISS99, KISS64, LCG128,
+   multiplicative lagged Fibonacci, MWC64X, MWC128X, RANLUX++,
+   sqxor, wyrand, xoroshiro128**.
+4. RC4: passes BigCrush but fails PractRand (obsolete and slow CSPRNG).
+5. PRNGs that pass SmallCrush but fail more complex tests: Coveyou64, KISS93,
+   LCG64, Mersenne Twister, MWC32X, sqxor32, xorwow.
+6. Low-quality PRNGs: lcg69069, minstd
+7. RANDU
+   
 
 
 C module interface

@@ -55,9 +55,11 @@ class Entropy
 
 public:
     std::vector<uint64_t> seeds_log;
+
     Entropy();
     bool XxteaTest();
-    uint64_t Seed64();    
+    uint64_t Seed64();
+    inline size_t GetNSeeds() const { return seeds_log.size(); }
 };
 
 #endif

@@ -2,7 +2,7 @@
  * @file mwc32x_shared.c
  * @brief MWC32X - 32-bit PRNG based on MWC method.
  * @details Multiply-with-carry PRNG with a simple output function x ^ c.
- * Has a period about 2^31. Generates 16-bit numbers that are concatenated
+ * Has a period about 2^30. Generates 16-bit numbers that are concatenated
  * to 32-bit numbers. Passes SmallCrush but not Crush or BigCrush.
  * Passes PractRand on 64MiB of data.
  *
@@ -34,7 +34,7 @@ typedef struct {
  */
 static inline uint32_t get_bits16(void *param, void *state)
 {
-    const uint16_t A0 = 65184; //  2^16 - 1081
+    const uint16_t A0 = 63885; // Selected from Knuth spectral test
     MWC32XState *obj = state;
     (void) param;
     uint16_t c = obj->data >> 16;

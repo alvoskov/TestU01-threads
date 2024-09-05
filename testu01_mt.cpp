@@ -1,7 +1,140 @@
 #include "testu01_mt.h"
+#include <iostream>
 #include <chrono>
 #include <random>
 #include <fcntl.h>
+
+static std::string printf_tos(const char *format, ...)
+{
+    char buffer[256];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, 256, format, args);
+    va_end(args);
+    return std::string(buffer);
+}
+
+/**
+ * @brief C++ version of num_writeD function. It writes to string, not
+ * to stdout.
+ * @param I  Minimal width in characters
+ * @param J  Number of digits after . (%f format, without exponent)
+ * @param K  Number of significant digits in scientific notation
+ */
+std::string double_tostring(double x, int I, int J, int K)
+{
+    std::string txt;
+    int PosEntier = 0; // Number of positions occupied by x integer part (%f format)
+    int EntierSign; // 0-based position of . in string (%f format)
+    int Neg = 0;    // Number is negative
+    char S[100];
+    char *p;
+
+    if (x == 0.0) {
+        EntierSign = 1;
+    } else {
+        EntierSign = PosEntier = floor(log10(fabs(x)) + 1);
+        if (x < 0.0)
+            Neg = 1;
+    }
+    if (EntierSign <= 0) {
+        PosEntier = 1;
+    }
+
+    if ((x == 0.0) ||
+        (((EntierSign + J) >= K) && (I >= (PosEntier + J + Neg + 1)))) {
+        txt += printf_tos("%*.*f", I, J, x);
+    } else { // Use scientific (exponential) notation
+        snprintf(S, 100, "%*.*e", I, K - 1, x);
+        p = strstr(S, "e+0");
+        if (NULL == p) {
+            p = strstr(S, "e-0");
+        }
+        // Remove the 0 in e-0 and in e+0
+        if (p) {
+            p += 2;
+            while ((*p = *(p + 1)))
+	            p++;
+            txt += " "; // Output must have at least 'I' spaces
+        }
+        txt += std::string(S);
+    }
+    return txt;
+}
+
+
+/**
+ * @brief Prints the significance level of a test, without a descriptor
+ */
+std::string p0_tostring(double p)
+{
+    if ((p >= 0.01) && (p <= 0.99)) {
+        return double_tostring(p, 8, 2, 1);
+    } else if (p < gofw_Epsilonp) {
+        return "   eps  ";
+    } else if (p < 0.01) {
+        return double_tostring(p, 8, 2, 2);
+   } else if (p >= 1.0 - gofw_Epsilonp1) {
+        return " 1 - eps1";
+   } else if (p < 1.0 - 1.0e-4) {
+        return printf_tos("    %.4f", p);
+   } else {
+        return " 1 - " + double_tostring(1.0 - p, 7, 2, 2);
+   }
+}
+
+
+std::string chrono_tostring(chrono_Chrono *C, chrono_TimeFormat Form)
+{
+    std::string txt;
+    long centieme;
+    long minute;
+    long heure;
+    long seconde;
+    double temps;
+    if (Form != chrono_hms) {
+        temps = chrono_Val(C, Form);
+    } else {
+        temps = 0.0;
+    }
+    switch (Form) {
+    case chrono_sec:
+        txt += double_tostring(temps, 10, 2, 1);
+        txt += " seconds";
+        break;
+    case chrono_min:
+        txt += double_tostring(temps, 10, 2, 1);
+        txt += " minutes";
+        break;
+    case chrono_hours:
+        txt += double_tostring(temps, 10, 2, 1);
+        txt += " hours";
+        break;
+    case chrono_days:
+        txt += double_tostring(temps, 10, 2, 1);
+        txt += " days";
+        break;
+    case chrono_hms:
+        temps = chrono_Val(C, chrono_sec);
+        heure = (long) (temps * 2.777777778E-4);
+        if (heure > 0)
+            temps -= (double) (heure) * 3600.0;
+        minute = (long) (temps * 1.666666667E-2);
+        if (minute > 0)
+            temps -= (double) (minute) * 60.0;
+        seconde = (long) (temps);
+        centieme = (long) (100.0 * (temps - (double) (seconde)));
+        txt += printf_tos("%02ld:", heure);
+        txt += printf_tos("%02ld:", minute);
+        txt += printf_tos("%02ld.", seconde);
+        txt += printf_tos("%02ld", centieme);
+        break;
+    }
+    return txt;
+}
+
+
+
 
 /////////////////////////////////////////////////
 ///// UniformGenerator class implementation /////
@@ -113,22 +246,24 @@ size_t BatteryIO::GetNTestsFailed() const
 /**
  * @brief Write a p-value with a nice format.
  */
-void BatteryIO::WritePValue(double p)
+std::string BatteryIO::WritePValue(double p)
 {
+    std::string txt;
     if (p < gofw_Suspectp) {
-        gofw_Writep0 (p);
+        txt += p0_tostring(p);
     } else if (p > 1.0 - gofw_Suspectp) {
         if (p >= 1.0 - gofw_Epsilonp1) {
-            printf (" 1 - eps1");
+            txt += printf_tos(" 1 - eps1");
         } else if (p >= 1.0 - 1.0e-4) {
-            printf (" 1 - ");
-            num_WriteD (1.0 - p, 7, 2, 2);
+            txt += printf_tos(" 1 - ");
+            txt += double_tostring(1.0 - p, 7, 2, 2);
         } else if (p >= 1.0 - 1.0e-2) {
-            printf ("  %.4f ", p);
+            txt += printf_tos("  %.4f ", p);
         } else {
-            printf ("   %.2f", p);
+            txt += printf_tos("   %.2f", p);
         }
     }
+    return txt;
 }
 
 void BatteryIO::Add(const BatteryIO &obj)
@@ -139,69 +274,95 @@ void BatteryIO::Add(const BatteryIO &obj)
     std::sort(results.begin(), results.end());
 }
 
-void BatteryIO::WriteReport(const char *batName, const char *genName, chrono_Chrono *timer)
+/**
+ * @brief Convert milliseconds to the hh:mm:ss.msec text format.
+ */
+static std::string ms_to_hms(size_t ms_total)
 {
-    printf("\n========= Summary results of %s", batName);
-    printf(" =========\n\n");
-    printf(" Version:          %s\n", PACKAGE_STRING);
-    printf(" Generator:        "); printf ("%s", genName);
+    size_t ms = ms_total % 1000;
+    size_t s = (ms_total / 1000) % 60;
+    size_t m = (ms_total / 60000) % 60;
+    size_t h = (ms_total / 3600000);
+    return printf_tos("%.2d:%.2d:%.2d.%.3d",
+        (int) h, (int) m, (int) s, (int) ms);
+}
 
 
-    printf("\n Number of statistics:  %1d\n", (int) results.size());
-    //for (auto &r : results) {
-    //    printf("-->%d %s\n", r.id, r.name.c_str());
-    //}
-    printf(" Total CPU time:   ");
-    chrono_Write(timer, chrono_hms);
+/**
+ * @brief Generate battery run report and return it as a string
+ * @param bat_name  Battery name.
+ * @param gen_name  Generator name.
+ * @param timer     TestU01 timer that calculated CPU time for all cores.
+ * @param ms_time   Elapsed time, milliseconds.
+ * @return Battery run report (ASCII string).
+ */
+std::string BatteryIO::WriteReport(const char *bat_name, const char *gen_name,
+    chrono_Chrono *timer, size_t ms_total)
+{
+    std::string txt;
+    txt += printf_tos("\n========= Summary results of %s", bat_name);
+    txt += printf_tos(" =========\n\n");
+    txt += printf_tos(" Version:                      %s\n", PACKAGE_STRING);
+    txt += printf_tos(" Generator:                    ") + gen_name;
+
+    txt += printf_tos("\n Number of statistics:         %1d\n",
+        (int) results.size());
+    txt += printf_tos(" Total CPU time (all cores):   ");
+    txt += chrono_tostring(timer, chrono_hms);
+    txt += printf_tos("\n Elapsed time:                 ");
+    txt += ms_to_hms(ms_total);
 
     if (GetNTestsFailed() == 0) {
-        printf ("\n\n All tests were passed\n\n\n\n");
-        return;
+        txt += printf_tos("\n\n All tests were passed\n\n\n\n");
+        return txt;
     }
 
-    if (gofw_Suspectp >= 0.01)
-        printf ("\n The following tests gave p-values outside [%.4g, %.2f]",
+    if (gofw_Suspectp >= 0.01) {
+        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.2f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
-    else if (gofw_Suspectp >= 0.0001)
-        printf ("\n The following tests gave p-values outside [%.4g, %.4f]",
+    } else if (gofw_Suspectp >= 0.0001) {
+        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.4f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
-    else if (gofw_Suspectp >= 0.000001)
-        printf ("\n The following tests gave p-values outside [%.4g, %.6f]",
+    } else if (gofw_Suspectp >= 0.000001) {
+        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.6f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
-    else
-        printf ("\n The following tests gave p-values outside [%.4g, %.14f]",
+    } else {
+        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.14f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
-    printf (":\n (eps  means a value < %6.1e)", gofw_Epsilonp);
-    printf (":\n (eps1 means a value < %6.1e)", gofw_Epsilonp1);
-    printf (":\n\n       Test                          p-value\n");
-    printf (" ----------------------------------------------\n");
+    }
+    txt += printf_tos(":\n (eps  means a value < %6.1e)", gofw_Epsilonp);
+    txt += printf_tos(":\n (eps1 means a value < %6.1e)", gofw_Epsilonp1);
+    txt += printf_tos(":\n\n       Test                          p-value\n");
+    txt += printf_tos(" ----------------------------------------------\n");
 
     for (auto &r : results) {
         if ((r.pvalue >= gofw_Suspectp) && (r.pvalue <= 1.0 - gofw_Suspectp))
             continue; // That test was passed
-        printf(" %2d ", r.id);
-        printf(" %-30s", r.name.c_str());
-        WritePValue(r.pvalue);
-        printf("\n");
+        txt += printf_tos(" %2d ", r.id);
+        txt += printf_tos(" %-30s", r.name.c_str());
+        txt += WritePValue(r.pvalue);
+        txt += "\n";
     }
 
-    printf (" ----------------------------------------------\n");
-    printf (" All other tests were passed\n");
-    printf ("\n\n\n");
+    txt += printf_tos(" ----------------------------------------------\n");
+    txt += printf_tos(" All other tests were passed\n");
+    txt += printf_tos("\n\n\n");
+    return txt;
 }
 
 
-////////////////////////////////////////////
-///// PValueArray class implementation /////
-////////////////////////////////////////////
+///////////////////////////////////////////////
+///// BatteryResults class implementation /////
+///////////////////////////////////////////////
 
 
-std::string PValueArray::ToString() const
+std::string BatteryResults::ToString() const
 {
     std::string txt;
-    for (size_t i = 0; i < ary.size(); i++) {
+    txt += report;
+    for (size_t i = 0; i < pvalues.size(); i++) {
         txt += "===== Tests for thread " + std::to_string(i) + " =====\n";
-        for (auto &rec : ary[i]) {
+        for (auto &rec : pvalues[i]) {
             char buf[512];
             snprintf(buf, 512, "  %5d %32s %.6g\n",
                 (int) rec.id, rec.name.c_str(), rec.pvalue);
@@ -294,14 +455,14 @@ void TestsPull::ThreadFunc(TestsPull &pull, BatteryIO &io, int thread_id)
 }
 
 
-PValueArray TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
+BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
     const std::string &battery_name)
 {
     // Timers and threads number
     chrono_Chrono *timer = chrono_Create();
     size_t nthreads = GetNThreads();
     fprintf(stderr, "=====> Number of threads: %d\n", (int) nthreads);
-    PValueArray results(nthreads);
+    BatteryResults results(nthreads);
     std::vector<BatteryIO> threads_bats;
     for (size_t i = 0; i < nthreads; i++) {
         threads_bats.emplace_back(create_gen());
@@ -324,26 +485,25 @@ PValueArray TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> cr
     // (it preserves an exact order of calls).
     for (size_t i = 0; i < threads_bats.size(); i++) {
         for (size_t j = 0; j < threads_bats[i].GetNResults(); j++) {
-            results.ary[i].push_back(threads_bats[i].GetPValueRecord(j));
+            results.pvalues[i].push_back(threads_bats[i].GetPValueRecord(j));
         }
     }
     // Merge results from different threads.
-    auto gen = std::make_shared<DummyGenerator>();
-    BatteryIO io(gen);
+    const char *gen_name;
+    if (nthreads > 0) {
+        gen_name = threads_bats[0].Gen()->name;
+    } else {
+        gen_name = "Dummy";
+    }
+    BatteryIO io(std::make_shared<DummyGenerator>());
     for (auto &bat : threads_bats) {
         io.Add(bat);
     }
     // Estimate the elapsed time
     auto toc = std::chrono::high_resolution_clock::now();    
     size_t ms_total = std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic).count();
-    size_t ms = ms_total % 1000;
-    size_t s = (ms_total / 1000) % 60;
-    size_t m = (ms_total / 60000) % 60;
-    size_t h = (ms_total / 3600000);
-    fprintf(stderr, "=====> Elapsed time: %.2d:%.2d:%.2d.%.3d\n",
-        (int) h, (int) m, (int) s, (int) ms);
     // Print report
-    io.WriteReport(battery_name.c_str(), gen.get()->GetName().c_str(), timer);
+    results.report = io.WriteReport(battery_name.c_str(), gen_name, timer, ms_total);
     chrono_Delete(timer);
     return results;
 }
@@ -359,7 +519,10 @@ TestsBattery::TestsBattery(GenFactoryFunc genf)
 {
 }
 
-PValueArray TestsBattery::Run() const
+/**
+ * @brief Run all tests from the battery.
+ */
+BatteryResults TestsBattery::Run() const
 {
     printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
         "                 Starting %s\n"
@@ -371,14 +534,19 @@ PValueArray TestsBattery::Run() const
     return pull.Run(create_gen, battery_name);
 }
 
-PValueArray TestsBattery::RunTest(int id) const
+/**
+ * @brief Run selected test(s) from the battery.
+ * @param id  Test ID (if it is <= 0 -- all tests will be run)
+ */
+BatteryResults TestsBattery::RunTest(int id) const
 {
+    // Run all tests
     if (id <= 0) {
         return Run();
     }
-
+    // Run selected tests
     std::vector<TestDescr> t;
-    PValueArray results(1);
+    BatteryResults results(1);
     for (size_t i = 0; i < tests.size(); i++) {
         if (tests[i].GetId() == id)
             t.push_back(tests[i]);
@@ -386,7 +554,6 @@ PValueArray TestsBattery::RunTest(int id) const
     if (t.size() == 0) {
         return results;
     }
-
     printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
         "                 Starting %s test %d\n"
         "                 Version: %s\n"
