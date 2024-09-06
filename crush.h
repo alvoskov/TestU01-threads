@@ -19,11 +19,8 @@
 #define __CRUSH_H
 #include "testu01_mt.h"
 
-/*
- * A battery of stringent statistical tests for Random Number Generators
- * used in simulation.
- * Rep[i] gives the number of times that test i will be done. The default
- * values are Rep[i] = 1 for all i.
+/**
+ * @brief Crush battery from TestU01 optimized for multithreading.
  */
 class CrushBattery : public TestsBattery
 {

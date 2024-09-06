@@ -97,11 +97,45 @@ The supplied generators can be divided into several groups:
    multiplicative lagged Fibonacci, MWC64X, MWC128X, RANLUX++,
    sqxor, wyrand, xoroshiro128**.
 4. RC4: passes BigCrush but fails PractRand (obsolete and slow CSPRNG).
-5. PRNGs that pass SmallCrush but fail more complex tests: Coveyou64, KISS93,
+5. RANMAR: passes BigCrush after some modification, fails PractRand.
+6. PRNGs that pass SmallCrush but fail more complex tests: Coveyou64, KISS93,
    LCG64, Mersenne Twister, MWC32X, sqxor32, xorwow.
-6. Low-quality PRNGs: lcg69069, minstd
-7. RANDU
+7. Low-quality PRNGs: lcg69069, minstd
+8. RANDU
    
+
+
+ Module name      | Type   | SmallCrush | Crush | BigCrush | PractRand
+------------------|--------|------------|-------|----------|-----------
+ alfib            | u32    | +          |       |          |
+ chacha_avx       | u32    | +          |       |          |
+ chacha           | u32    | +          |       |          |
+ coveyou64        | u32    | +          | -     | -        | 256 KiB
+ isaac64          | u64    | +          |       |          |
+ kiss93           | u32    | +          |       |          | 1 MiB
+ kiss99           | u32    | +          |       |          |
+ kiss64           | u64    | +          |       |          |
+ lcg64            | u32    | +          | -     | -        | 16 MiB
+ lcg128           | u32/64 | +          |       |          |
+ lcg69069         | u32    | -          |       |          | 2 KiB
+ lfib_ranmar      | double | +          | +     | +        | < 1KiB
+ minstd           | u32    | -          | -     | -        | 1 KiB
+ mlfib17_5        | u32    | +          |       |          |
+ mt19937          | u32    | +          | -     | -        |
+ mwc32x           | u32    | +          | -     | -        | 256MiB
+ mwc64x           | u32    | +          | +     |          | 
+ mwc128x          | u64    | +          |       |          |
+ philox           | u64    | +          | +     |          |
+ randu            | u32    | -          | -     | -        | 1 KiB
+ ranluxpp         | u64    | +          |       |          | 
+ rc4              | u32    | +          |       |          |
+ sqxor            | u64    | +          |       |          |
+ sqxor32          | u32    | +          |       |          | 16 GiB
+ threefry         | u64    | +          |       |          |
+ wyrand           | u64    | +          |       |          |
+ xoroshiro128stst | u64    | +          |       |          |
+ xorwow           | u32    | +          | -     | -        | 128 KiB
+
 
 
 C module interface

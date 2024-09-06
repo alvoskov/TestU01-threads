@@ -53,7 +53,7 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    XorWowState *obj = (XorWowState *) intf.malloc(sizeof(XorWowState));
+    XorWowState *obj = intf.malloc(sizeof(XorWowState));
     uint64_t s1 = intf.get_seed64();
     uint64_t s2 = intf.get_seed64();
     uint64_t s3 = intf.get_seed64();

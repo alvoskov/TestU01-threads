@@ -12,7 +12,7 @@ typedef struct {
     uint32_t S3;
 } KISS93State;
 
-static long unsigned int get_bits32(void *param, void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     KISS93State *obj = (KISS93State *) state;
     (void) param;
@@ -25,12 +25,6 @@ static long unsigned int get_bits32(void *param, void *state)
 }
 
 
-static double get_u01(void *param, void *state)
-{
-    return uint32_to_udouble(get_bits32(param, state));
-}
-
-
 static void *init_state()
 {
     KISS93State *obj = (KISS93State *) intf.malloc(sizeof(KISS93State));
@@ -40,21 +34,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "KISS93";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    return 1;
-}
+MAKE_UINT32_PRNG("KISS93")

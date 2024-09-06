@@ -21,46 +21,19 @@ typedef struct {
     uint64_t x;
 } Lcg64State;
 
-
-
-static long unsigned int get_bits32(void *param, void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
-    Lcg64State *obj = (Lcg64State *) state;
+    Lcg64State *obj = state;
     (void) param;
     obj->x = obj->x * 6906969069 /*0xd1342543de82ef95*/ + 1;
     return obj->x >> 32;
 }
 
-
-static double get_u01(void *param, void *state)
-{
-    return uint32_to_udouble(get_bits32(param, state));
-}
-
-
 static void *init_state()
 {
-    Lcg64State *obj = (Lcg64State *) intf.malloc(sizeof(Lcg64State));
+    Lcg64State *obj = intf.malloc(sizeof(Lcg64State));
     obj->x = intf.get_seed64();
     return (void *) obj;
 }
 
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "Lcg64";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    return 1;
-}
-
+MAKE_UINT32_PRNG("LCG64")

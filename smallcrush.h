@@ -19,7 +19,9 @@
 #define __SMALLCRUSH_H
 #include "testu01_mt.h"
 
-
+/**
+ * @brief SmallCrush battery from TestU01 optimized for multithreading.
+ */
 class SmallCrushBattery : public TestsBattery
 {
 public:

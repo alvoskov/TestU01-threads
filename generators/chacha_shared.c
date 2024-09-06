@@ -239,8 +239,7 @@ static void get_array32(void *param, void *state, uint32_t *out, size_t len)
 
 static double get_u01(void *param, void *state)
 {
-    static const double INV32 = 2.3283064365386963E-10;
-    return get_bits32(param, state) * INV32;
+    return uint32_to_udouble(get_bits32(param, state));
 }
 
 

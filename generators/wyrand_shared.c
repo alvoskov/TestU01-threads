@@ -26,9 +26,9 @@ typedef struct {
 uint64_t get_bits64(void *param, void *state)
 {
     (void) param;
-    const uint64_t c = UINT64_C(0xe7037ed1a0b428db);
+    const uint64_t c = 0xe7037ed1a0b428db;
     WyRandState *obj = (WyRandState *) state;
-    obj->x += UINT64_C(0xa0761d6478bd642f);
+    obj->x += 0xa0761d6478bd642f;
     __uint128_t t = (__uint128_t) obj->x * (obj->x ^ c);
     return (t >> 64) ^ t;
 }
@@ -37,10 +37,10 @@ void get_array64(void *param, void *state, uint64_t *out, size_t len)
 {
     (void) param;
     WyRandState *obj = (WyRandState *) state;
-    const uint64_t c = UINT64_C(0xe7037ed1a0b428db);
+    const uint64_t c = 0xe7037ed1a0b428db;
     uint64_t x = obj->x;
     for (size_t i = 0; i < len; i++) {
-        x += UINT64_C(0xa0761d6478bd642f);
+        x += 0xa0761d6478bd642f;
         __uint128_t t = (__uint128_t) x * (x ^ c);
         out[i] = (t >> 64) ^ t;
     }
@@ -59,7 +59,7 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    WyRandState *obj = (WyRandState *) intf.malloc(sizeof(WyRandState));
+    WyRandState *obj = intf.malloc(sizeof(WyRandState));
     obj->x = intf.get_seed64();
     return (void *) obj;
 }

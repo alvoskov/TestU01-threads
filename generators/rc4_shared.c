@@ -56,8 +56,8 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    RC4State *obj = (RC4State *) intf.malloc(sizeof(RC4State));
-    uint64_t v = UINT64_C(0x9E3779B97F4A7C15) ^ intf.get_seed64();
+    RC4State *obj = intf.malloc(sizeof(RC4State));
+    uint64_t v = 0x9E3779B97F4A7C15 ^ intf.get_seed64();
     for (size_t i = 0; i < 256; i++) {
         obj->s[i] = i;
     }

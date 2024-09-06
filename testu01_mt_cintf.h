@@ -192,6 +192,43 @@ int EXPORT gen_closelib() \
     return 1; \
 }
 
+
+/**
+ * @brief Some default boilerplate code for scalar PRNG that returns
+ * unsigned 32-bit numbers. Requires the next functions to be defined:
+ *
+ * - `static inline unsigned long get_bits32(void *param, void *state);`
+ * - `static void *init_state();`
+ *
+ * It also relies on default prolog (intf static variable, some exports etc.),
+ * see PRNG_CMODULE_PROLOG
+ */
+#define MAKE_UINT32_PRNG(prng_name) \
+static long unsigned int get_bits32(void *param, void *state) { \
+    return get_bits32_raw(param, state) & 0xFFFFFFFF; \
+} \
+static double get_u01(void *param, void *state) { \
+    return uint32_to_udouble(get_bits32_raw(param, state)); \
+} \
+static void get_array32(void *param, void *state, uint32_t *out, size_t len) { \
+    for (size_t i = 0; i < len; i++) \
+        out[i] = get_bits32_raw(param, state); \
+} \
+static void delete_state(void *param, void *state) {\
+    (void) param; intf.free(state); \
+} \
+int EXPORT gen_getinfo(GenInfoC *gi) { \
+    gi->name = prng_name; \
+    gi->init_state = init_state; \
+    gi->delete_state = delete_state; \
+    gi->get_u01 = get_u01; \
+    gi->get_bits32 = get_bits32; \
+    gi->get_array32 = get_array32; \
+    return 1; \
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif

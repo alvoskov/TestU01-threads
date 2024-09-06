@@ -5,14 +5,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Compiler settings
 if (NOT MSVC)
     set(PROF_FLAGS "")
-    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes") # -march=native 
+    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -march=native -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -march=native -std=c99  -ffreestanding ${C_CXX_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding ${C_CXX_FLAGS}")
     else()
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -march=native -std=gnu++14 ${C_CXX_FLAGS}")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -march=native -std=c99  -ffreestanding ${C_CXX_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS}")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding ${C_CXX_FLAGS}")
     endif()
 endif()
 
@@ -42,47 +42,49 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-add_library(testu01threads testu01_mt.h testu01_mt_cintf.h entropy.h batteries.h bigcrush.h crush.h smallcrush.h pdiehard.h generators.h
-    testu01_mt.cpp testu01_mt_cintf.cpp entropy.cpp bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp generators.cpp)
+add_library(testu01threads  testu01_mt.h testu01_mt_cintf.h entropy.h
+    batteries.h bigcrush.h crush.h smallcrush.h pdiehard.h generators.h
+    testu01_mt.cpp testu01_mt_cintf.cpp entropy.cpp
+    bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp generators.cpp)
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE})
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 
 # Executables that call TestU01-threads library
+add_executable(testu01th_run testu01th_run.cpp)
 add_executable(testu01th_demo testu01th_demo.cpp)
-add_executable(testu01th_lib testu01th_lib.cpp)
 
 # SplitMix generator in two variants: that calls TestU01-threads
 # and that is called by TestU01-threads as an external module
 add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
-add_library(splitmix_shared SHARED splitmix_shared.c splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
+add_library(splitmix_shared SHARED splitmix_shared.c
+    splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
-# Examples of plugins
+# Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib_mod alfib coveyou64 isaac64 kiss64 kiss93 kiss99
     lcg64 lcg128 lcg69069 lfib_ranmar minstd mwc32x mwc64x mwc128x mlfib17_5
-    philox randu rc4 seed64 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
+    philox randu rc4 seed64 sezgin63 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
 endforeach()
 
-# Module and test for ChaCha CSPRNG
-add_library(chacha_shared SHARED generators/chacha_shared.c generators/chacha_shared.h testu01_mt_cintf.h)
+# Modules (with internal self-tests) for ChaCha CSPRNG
+add_library(chacha_shared SHARED generators/chacha_shared.c
+    generators/chacha_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
+add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c
+    generators/chacha_avx_shared.h testu01_mt_cintf.h)
+set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
 
 # Module for RANLUX++ PRNG
-add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c generators/ranluxpp_mulmod.h generators/ranluxpp_helpers.h testu01_mt_cintf.h)
+add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c
+    generators/ranluxpp_mulmod.h generators/ranluxpp_helpers.h testu01_mt_cintf.h)
 set_target_properties(ranluxpp_shared PROPERTIES LINK_FLAGS "-nostdlib")
-
-
-add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c generators/chacha_avx_shared.h testu01_mt_cintf.h)
-set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
-add_executable(chacha_avx_test generators/chacha_avx_test.c)
-target_link_libraries(chacha_avx_test chacha_avx_shared)
 
 # Module and test for MT19937
 add_library(mt19937_shared SHARED generators/mt19937_shared.cpp testu01_mt_cintf.h)
 
 # Link executables
-foreach (program testu01th_demo testu01th_lib splitmix_exec)
+foreach (program testu01th_demo testu01th_run splitmix_exec)
     if(M_LIB)
         target_link_libraries (${program})
     endif()

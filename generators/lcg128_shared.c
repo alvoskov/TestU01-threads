@@ -12,8 +12,6 @@ typedef struct {
 
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
- //   static const unsigned __int128 a = ((unsigned __int128) 6906969069) * 100000 * 100000 + 6906969069;
-    //static const unsigned __int128 a = (((unsigned __int128) 0xdb36357734e34abb) << 64) | 0x0050d0761fcdfc15ull;
     Lcg128State *obj = (Lcg128State *) state;
     (void) param;
     obj->x = obj->x * 18000690696906969069ull + 1;

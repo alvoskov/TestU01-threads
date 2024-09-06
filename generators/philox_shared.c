@@ -175,8 +175,8 @@ static int run_self_test()
 
 static uint64_t get_bits64(void *param, void *state)
 {
+    PhiloxState *obj = state;
     (void) param;
-    PhiloxState *obj = (PhiloxState *) state;
     if (obj->pos >= Nw) {
         PhiloxState_inc_counter(obj);
         PhiloxState_block10(obj);
@@ -188,9 +188,9 @@ static uint64_t get_bits64(void *param, void *state)
 
 static void get_array64(void *param, void *state, uint64_t *out, size_t len)
 {
-    (void) param;
-    PhiloxState *obj = (PhiloxState *) state;
+    PhiloxState *obj = state;
     size_t pos = 0;
+    (void) param;
     // Returns blocks of Nw uint64s.
     for (size_t i = 0; i < len / Nw; i++) {
         PhiloxState_inc_counter(obj);
@@ -230,7 +230,7 @@ static double get_u01(void *param, void *state)
 static void *init_state()
 {
     uint64_t k[Nw];
-    PhiloxState *obj = (PhiloxState *) intf.malloc(sizeof(PhiloxState));
+    PhiloxState *obj = intf.malloc(sizeof(PhiloxState));
     for (size_t i = 0; i < Nw; i++) {
         k[i] = intf.get_seed64();
     }

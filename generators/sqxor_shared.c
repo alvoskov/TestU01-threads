@@ -55,9 +55,17 @@ static double get_u01(void *param, void *state)
     return uint64_to_udouble(get_bits64(param, state));
 }
 
+void get_array64(void *param, void *state, uint64_t *out, size_t len)
+{    
+    for (size_t i = 0; i < len; i++) {
+        out[i] = get_bits64(param, state);
+    }
+}
+
+
 static void *init_state()
 {
-    SqXorState *obj = (SqXorState *) intf.malloc(sizeof(SqXorState));
+    SqXorState *obj = intf.malloc(sizeof(SqXorState));
     obj->w = intf.get_seed64();
     obj->pos_32b = 2;
     return (void *) obj;
@@ -78,5 +86,6 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
     gi->get_bits64 = get_bits64;
+    gi->get_array64 = get_array64;
     return 1;
 }

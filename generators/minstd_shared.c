@@ -6,7 +6,7 @@ typedef struct {
     uint32_t x;
 } MinstdState;
 
-static long unsigned int get_bits32(void *param, void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
     MinstdState *obj = (MinstdState *) state;
@@ -17,13 +17,6 @@ static long unsigned int get_bits32(void *param, void *state)
     return obj->x << 1;
 }
 
-
-static double get_u01(void *param, void *state)
-{
-    return uint32_to_udouble(get_bits32(param, state));
-}
-
-
 static void *init_state()
 {
     MinstdState *obj = (MinstdState *) intf.malloc(sizeof(MinstdState));
@@ -32,20 +25,4 @@ static void *init_state()
 }
 
 
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "Minstd";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    return 1;
-}
+MAKE_UINT32_PRNG("Minstd")

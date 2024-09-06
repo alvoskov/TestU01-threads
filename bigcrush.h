@@ -20,7 +20,7 @@
 #include "testu01_mt.h"
 
 /**
- * @brief A multi-threaded version of BigCrush test battery.
+ * @brief BigCrush battery from TestU01 optimized for multithreading.
  */
 class BigCrushBattery : public TestsBattery
 {

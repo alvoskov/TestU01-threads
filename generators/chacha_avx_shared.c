@@ -76,7 +76,7 @@ static inline void mm_qround_vert(__m256i *a, __m256i *b, __m256i *c, __m256i *d
  */
 static inline void ChaChaAVX_inc_counter(ChaChaAVXState *obj)
 {
-    // 32-bit counters
+    // 32-bit counters (will fail PractRand)
 /*
     uint32_t *cnt1 = &obj->x[24], *cnt2 = &obj->x[28];
     cnt1[0] += 2;
@@ -194,8 +194,7 @@ static long unsigned int get_bits32(void *param, void *state)
 
 static double get_u01(void *param, void *state)
 {
-    static const double INV32 = 2.3283064365386963E-10;
-    return get_bits32(param, state) * INV32;
+    return uint32_to_udouble(get_bits32(param, state));
 }
 
 

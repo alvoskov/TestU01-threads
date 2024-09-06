@@ -1,3 +1,23 @@
+/**
+ * @brief RANMAR algorithm for double precision.
+ * @details Passes SmallCrush and Crush. But fails BigCrush
+ * if the original c constant is used in "Weyl sequence":
+ *
+ *     59  WeightDistrib, r = 0           2.6e-13
+ *
+ * The new c constant allows this PRNG to pass BigCrush:
+ * it is very close to \f$ (\sqrt{5} - 1) / 2 \f$ but differs in
+ * the last digits to make mantissa odd. It is very similar to
+ * "Weyl sequence" in SplitMix.
+ *
+ * RANMAR fails PractRand.
+ *
+ * References:
+ *
+ * 1. George Marsaglia, Wai Wan Tsang. The 64-bit universal RNG //
+ *    // Statistics & Probability Letters. 2004. V. 66. N 2. P.183-187.
+ *    https://doi.org/10.1016/j.spl.2003.11.001.
+ */
 #include "testu01_mt_cintf.h"
 #include <limits.h>
 
@@ -12,8 +32,8 @@ SHARED_ENTRYPOINT_CODE
 
 static CallerAPI intf;
 
-//static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
-static const double c = 362436069876.0 / 9007199254740992.0; /**< original shift */
+static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
+//static const double c = 362436069876.0 / 9007199254740992.0; /**< original shift */
 
 
 static inline double amb_mod_r(double a, double b)
@@ -50,7 +70,7 @@ static double get_u01(void *param, void *state)
 static long unsigned int get_bits32(void *param, void *state)
 {
     const double m_2_pow_32 = 4294967296.0;
-    return get_u01(param, state) * m_2_pow_32;
+    return (uint32_t) (get_u01(param, state) * m_2_pow_32);
 }
 
 static void *init_state()
@@ -59,7 +79,7 @@ static void *init_state()
     uint64_t seed = intf.get_seed64();
     uint32_t x = seed & 0xFFFFFFFF;
     uint32_t y = seed >> 32;
-    for (size_t i = 1; i < LFIB_A; i++) {
+    for (size_t i = 1; i <= LFIB_A; i++) {
         double s = 0.0, t = 0.5;
         for (size_t j = 1; j < 54; j++) {
             x = (6969*x) % 65543;
@@ -70,6 +90,12 @@ static void *init_state()
         }
         obj->U[i] = s;
     }
+/*
+    for (size_t i = 1; i <= LFIB_A; i++) {
+        obj->U[i] = uint64_to_udouble(intf.get_seed64());
+    }
+*/
+
     obj->i = LFIB_A; obj->j = LFIB_B;
     return (void *) obj;
 }

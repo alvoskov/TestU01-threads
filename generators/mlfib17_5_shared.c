@@ -30,7 +30,7 @@ typedef struct {
 } MLFib17_5_State;
 
 
-static uint64_t get_bits64(void *param, void *state)
+static inline uint64_t get_bits64(void *param, void *state)
 {
     MLFib17_5_State *obj = (MLFib17_5_State *) state;
     (void) param;
@@ -42,7 +42,7 @@ static uint64_t get_bits64(void *param, void *state)
 }
 
 
-static long unsigned int get_bits32(void *param, void *state)
+static inline unsigned long get_bits32(void *param, void *state)
 {
     return get_bits64(param, state) >> 32;
 }
