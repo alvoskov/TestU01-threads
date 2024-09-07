@@ -129,7 +129,7 @@ The supplied generators can be divided into several groups:
  mlfib17_5        | u32    | +          |       |          |           | 0.38
  mt19937          | u32    | +          | -     | -        |           |
  mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.45
- mwc64x           | u32    | +          | +     |          |           | 0.57
+ mwc64x           | u32    | +          | +     | +        | >=8TiB    | 0.57
  mwc128x          | u64    | +          | +     |          |           | 
  philox           | u64    | +          | +     |          |           |
  randu            | u32    | -          | -     | -        | 1 KiB     | 
