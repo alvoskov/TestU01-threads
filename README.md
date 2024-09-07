@@ -126,7 +126,7 @@ The supplied generators can be divided into several groups:
  lcg69069         | u32    | -          | -     | -        | 2 KiB     | 0.40
  lfib_ranmar      | double | +          | +     | +        | < 1KiB    | 6.07
  minstd           | u32    | -          | -     | -        | 1 KiB     | 2.71
- mlfib17_5        | u32    | +          |       |          |           | 0.38
+ mlfib17_5        | u32    | +          | +     |          |           | 0.38
  mt19937          | u32    | +          | -     | -        |           |
  mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.45
  mwc64x           | u32    | +          | +     |          |           | 0.57
@@ -140,7 +140,7 @@ The supplied generators can be divided into several groups:
  sqxor            | u64    | +          |       |          |           |
  sqxor32          | u32    | +          |       |          | 16 GiB    |
  threefry         | u64    | +          | +     |          |           | 1.14
- wyrand           | u64    | +          |       |          |           | ~0.1
+ wyrand           | u64    | +          | +     |          |           | ~0.1
  xoroshiro128stst | u64    | +          |       |          |           |
  xorwow           | u32    | +          | -     | -        | 128 KiB   |
 
