@@ -110,39 +110,39 @@ The supplied generators can be divided into several groups:
    
 
 
- Module name      | Type   | SmallCrush | Crush | BigCrush | PractRand | cpbARY | cpbCALL
-------------------|--------|------------|-------|----------|-----------|--------|---------
- alfib            | u32    | +          | -     | -        | 128 GiB   | 0.61   | 0.61
- alfib_mod        | u32    | +          | +     | +        | 1 TiB     |        |
- chacha_avx       | u32    | +          |       |          |           | ---    | 0.95
- chacha           | u32    | +          |       |          |           | 2.31   | 2.04
- coveyou64        | u32    | +          | -     | -        | 256 KiB   | 0.64   | 0.82
- isaac64          | u64    | +          |       |          |           |        |
- kiss93           | u32    | +          | -     | -        | 1 MiB     | 1.17   | 0.41
- kiss99           | u32    | +          | +     |          |           | 1.17   | 0.66
- kiss64           | u64    | +          | +     |          |           | 0.59   | 0.35
- lcg64            | u32    | +          | -     | -        | 16 MiB    |        |
- lcg128           | u32/64 | +          |       |          |           |        |
- lcg69069         | u32    | -          | -     | -        | 2 KiB     | 0.62   | <0.1
- lfib_ranmar      | double | +          | +     | +        | < 1KiB    | ----   | 2.50
- minstd           | u32    | -          | -     | -        | 1 KiB     |        |
- mlfib17_5        | u32    | +          |       |          |           |        |
- mt19937          | u32    | +          | -     | -        |           |        |
- mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.63   | 1.03
- mwc64x           | u32    | +          | +     |          |           | 0.82   | <0.1
- mwc128x          | u64    | +          | +     |          |           | 0.74   | 0.17
- philox           | u64    | +          | +     |          |           | 1.16   | 0.91
- randu            | u32    | -          | -     | -        | 1 KiB     |        |
- ranluxpp         | u64    | +          | +     |          |           |        |
- rc4              | u32    | +          |       |          |           | 6.23   |
- rrmxmx           | u64    | +          | +     |          |           | 0.33   |
- seigzin63        | u32    | +          | +     | -+       | >= 2TiB   | 3.43   |
- sqxor            | u64    | +          |       |          |           |        |
- sqxor32          | u32    | +          |       |          | 16 GiB    |        |
- threefry         | u64    | +          | +     |          |           | 1.25   | 0.96
- wyrand           | u64    | +          |       |          |           | 0.22   |
- xoroshiro128stst | u64    | +          |       |          |           | 0.33   | 
- xorwow           | u32    | +          | -     | -        | 128 KiB   | 0.96   | 0.84
+ Module name      | Type   | SmallCrush | Crush | BigCrush | PractRand | cpb
+------------------|--------|------------|-------|----------|-----------|------
+ alfib            | u32    | +          | -     | -        | 128 GiB   | 0.34
+ alfib_mod        | u32    | +          | +     | +        | 1 TiB     | 0.40
+ chacha_avx       | u32    | +          |       |          |           |
+ chacha           | u32    | +          |       |          |           |
+ coveyou64        | u32    | +          | -     | -        | 256 KiB   | 0.46
+ isaac64          | u64    | +          |       |          |           |
+ kiss93           | u32    | +          | -     | -        | 1 MiB     | 0.85
+ kiss99           | u32    | +          | +     |          |           | 1.08
+ kiss64           | u64    | +          | +     |          |           | 0.41
+ lcg64            | u32    | +          | -     | -        | 16 MiB    | 0.41
+ lcg128           | u32/64 | +          |       |          |           | 
+ lcg69069         | u32    | -          | -     | -        | 2 KiB     | 0.40
+ lfib_ranmar      | double | +          | +     | +        | < 1KiB    | 6.07
+ minstd           | u32    | -          | -     | -        | 1 KiB     | 2.71
+ mlfib17_5        | u32    | +          |       |          |           | 0.38
+ mt19937          | u32    | +          | -     | -        |           |
+ mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.45
+ mwc64x           | u32    | +          | +     |          |           | 0.57
+ mwc128x          | u64    | +          | +     |          |           | 
+ philox           | u64    | +          | +     |          |           |
+ randu            | u32    | -          | -     | -        | 1 KiB     | 
+ ranluxpp         | u64    | +          | +     |          |           |
+ rc4              | u32    | +          |       |          |           |
+ rrmxmx           | u64    | +          | +     |          |           |
+ seigzin63        | u32    | +          | +     | -+       | >= 2TiB   | 3.50
+ sqxor            | u64    | +          |       |          |           |
+ sqxor32          | u32    | +          |       |          | 16 GiB    |
+ threefry         | u64    | +          | +     |          |           | 1.14
+ wyrand           | u64    | +          |       |          |           | ~0.1
+ xoroshiro128stst | u64    | +          |       |          |           |
+ xorwow           | u32    | +          | -     | -        | 128 KiB   |
 
 
 

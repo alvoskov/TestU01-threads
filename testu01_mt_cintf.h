@@ -264,6 +264,18 @@ EXPORT void get_array64(void *param, void *state, uint64_t *out, size_t len) { \
     for (size_t i = 0; i < len; i++) \
         out[i] = get_bits64_raw(param, state); \
 } \
+EXPORT uint32_t get_sum32(void *param, void *state, size_t len) { \
+    uint32_t sum = 0; \
+    for (size_t i = 0; i < len; i++) \
+        sum += get_bits64_raw(param, state) >> 32; \
+    return sum; \
+} \
+EXPORT uint64_t get_sum64(void *param, void *state, size_t len) { \
+    uint64_t sum = 0; \
+    for (size_t i = 0; i < len; i++) \
+        sum += get_bits64_raw(param, state); \
+    return sum; \
+} \
 static void delete_state(void *param, void *state) {\
     (void) param; intf.free(state); \
 } \
@@ -275,6 +287,8 @@ int EXPORT gen_getinfo(GenInfoC *gi) { \
     gi->get_bits32 = get_bits32; \
     gi->get_bits64 = get_bits64; \
     gi->get_array64 = get_array64; \
+    gi->get_sum32 = get_sum32; \
+    gi->get_sum64 = get_sum64; \
     gi->run_self_test = selftest_func; \
     return 1; \
 }

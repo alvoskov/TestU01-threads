@@ -5,7 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Compiler settings
 if (NOT MSVC)
     set(PROF_FLAGS "")
-    set(C_CXX_FLAGS "-O3 -Wall -Werror -Wextra -Wno-attributes -march=native")
+    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")

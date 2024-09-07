@@ -42,9 +42,6 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return x;
 }
 
-
-
-
 static void *init_state()
 {
     ALFib_State *obj = (ALFib_State *) intf.malloc(sizeof(ALFib_State));

@@ -128,13 +128,7 @@ class UniformGeneratorC : public UniformGenerator
 {
     static void WrExternGen(void *junk2) { (void) junk2; }
     std::string name;
-    DeleteStateCallbackC destroy;
-    GetBits64CallbackC get_bits64;
-    GetArray32CallbackC get_array32;
-    GetArray64CallbackC get_array64;
-    GetSum32CallbackC get_sum32;
-    GetSum64CallbackC get_sum64;
-
+    const GenInfoC gen_module;
     UniformGeneratorC(const UniformGeneratorC &obj) = delete;
     UniformGeneratorC &operator=(const UniformGeneratorC &obj) = delete;
     
@@ -144,24 +138,30 @@ public:
     const std::string &GetName() { return name; }
     double GetU01() override { return gen.GetU01(gen.param, gen.state); }
     uint32_t GetBits32() override { return gen.GetBits(gen.param, gen.state); }
-    uint64_t GetBits64() override { return get_bits64(gen.param, gen.state); }
+    uint64_t GetBits64() override
+    {
+        return gen_module.get_bits64(gen.param, gen.state);
+    }
     void GetArray32(uint32_t *out, size_t len) override
     {
-        return get_array32(gen.param, gen.state, out, len);
+        return gen_module.get_array32(gen.param, gen.state, out, len);
     }
     void GetArray64(uint64_t *out, size_t len) override
     {
-        return get_array64(gen.param, gen.state, out, len);
+        return gen_module.get_array64(gen.param, gen.state, out, len);
     }
     uint32_t GetSum32(size_t len) override
     {
-        return get_sum32(gen.param, gen.state, len);
+        return gen_module.get_sum32(gen.param, gen.state, len);
     }
     uint64_t GetSum64(size_t len) override
     {
-        return get_sum64(gen.param, gen.state, len);
+        return gen_module.get_sum64(gen.param, gen.state, len);
     }
-    virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
+    virtual ~UniformGeneratorC()
+    {
+        gen_module.delete_state(gen.param, gen.state);
+    }
 };
 
 

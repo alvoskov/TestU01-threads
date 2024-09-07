@@ -242,7 +242,7 @@ UniformGenerator::UniformGenerator(const std::string &name)
 
 
 UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
-: UniformGenerator("")
+: UniformGenerator(""), gen_module(*gi)
 {
     this->name = std::string(gi->name);
     gen.state = gi->init_state();
@@ -251,12 +251,6 @@ UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
     gen.GetU01 = gi->get_u01;
     gen.GetBits = gi->get_bits32;
     gen.name = const_cast<char *>(name.c_str());
-    get_bits64 = gi->get_bits64;
-    get_array32 = gi->get_array32;
-    get_array64 = gi->get_array64;
-    get_sum32 = gi->get_sum32;
-    get_sum64 = gi->get_sum64;
-    destroy = gi->delete_state;
 }
 
 //////////////////////////////////////////

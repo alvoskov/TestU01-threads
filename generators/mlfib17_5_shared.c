@@ -30,9 +30,9 @@ typedef struct {
 } MLFib17_5_State;
 
 
-static inline uint64_t get_bits64(void *param, void *state)
+static inline uint64_t get_bits64_raw(void *param, void *state)
 {
-    MLFib17_5_State *obj = (MLFib17_5_State *) state;
+    MLFib17_5_State *obj = state;
     (void) param;
     uint64_t x = obj->U[obj->i] * obj->U[obj->j];
     obj->U[obj->i] = x;
@@ -42,20 +42,9 @@ static inline uint64_t get_bits64(void *param, void *state)
 }
 
 
-static inline unsigned long get_bits32(void *param, void *state)
-{
-    return get_bits64(param, state) >> 32;
-}
-
-static double get_u01(void *param, void *state)
-{
-    double u = uint64_to_udouble(get_bits64(param, state));
-    return u;
-}
-
 static void *init_state()
 {
-    MLFib17_5_State *obj = (MLFib17_5_State *) intf.malloc(sizeof(MLFib17_5_State));
+    MLFib17_5_State *obj = intf.malloc(sizeof(MLFib17_5_State));
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf.get_seed64();
     for (size_t k = 1; k <= LFIB_A; k++) {    
@@ -65,22 +54,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "MLFib17_5";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    gi->get_bits64 = get_bits64;
-    return 1;
-}
+MAKE_UINT64_UPTO32_PRNG("MLFib17_5", NULL)

@@ -229,6 +229,33 @@ static void dummy_get_array64(void *param, void *state, uint64_t *out, size_t le
 }
 
 
+EXPORT uint32_t dummy_get_sum32(void *param, void *state, size_t len)
+{
+    uint32_t data[] = {9338, 34516, 60623, 45281,
+        9064,   60090,  62764,  5557,
+        44347,  35277,  25712,  20552,
+        50645,  61072,  26719,  21307};
+    uint32_t sum = 0;
+    (void) param; (void) state;
+    for (size_t i = 0; i < len; i++) {
+        sum += data[i & 0xF];
+    }
+    return sum;
+}
+
+static uint64_t dummy_get_sum64(void *param, void *state, size_t len)
+{
+    uint64_t data[] = {9338, 34516, 60623, 45281,
+        9064,   60090,  62764,  5557,
+        44347,  35277,  25712,  20552,
+        50645,  61072,  26719,  21307};
+    uint64_t sum = 0;
+    (void) param; (void) state;
+    for (size_t i = 0; i < len; i++) {
+        sum += data[i & 0xF];
+    }
+    return sum;
+}
 
 static void *dummy_init_state() { return nullptr; }
 
@@ -251,6 +278,8 @@ static int dummy_gen_getinfo(GenInfoC *gi)
     dummy_info.get_bits64 = dummy_get_bits64;
     dummy_info.get_array32 = dummy_get_array32;
     dummy_info.get_array64 = dummy_get_array64;
+    dummy_info.get_sum32 = dummy_get_sum32;
+    dummy_info.get_sum64 = dummy_get_sum64;
     dummy_info.run_self_test = nullptr;
     *gi = dummy_info;
     return 1;
@@ -402,7 +431,7 @@ static SpeedResults measure_speed(GenFactoryFunc create_gen,
 {
     auto objptr = create_gen();
     SpeedResults results;
-    for (size_t niter = 65536, ms_total = 0; ms_total < 500; niter <<= 1) {
+    for (size_t niter = 2, ms_total = 0; ms_total < 500; niter <<= 1) {
         auto tic = std::chrono::high_resolution_clock::now();
         uint64_t tic_proc = __rdtsc();
         run_block_func(objptr, niter);
@@ -510,6 +539,7 @@ void test_battery_speed(const GenFactoryFunc &create_gen, const GenInfoC &geninf
     } else {
         std::cout << "----- Array of uint64 generator is not implemented -----" << std::endl;
     }
+
     // Part 3. Inlining tests
     if (geninfo.get_sum32 != nullptr) {
         std::cout << "----- Speed test for sum of uint32 generation -----" << std::endl;
@@ -521,7 +551,7 @@ void test_battery_speed(const GenFactoryFunc &create_gen, const GenInfoC &geninf
 
     if (geninfo.get_sum64 != nullptr) {
         std::cout << "----- Speed test for sum of uint64 generation -----" << std::endl;
-        test_speed(create_gen, geninfo, run_sum64_block, ELEMENTS_PER_BLOCK * 32);
+        test_speed(create_gen, geninfo, run_sum64_block, ELEMENTS_PER_BLOCK * 64);
         std::cout << std::endl;
     } else {
         std::cout << "----- Sum of uint64 generator is not implemented -----" << std::endl;
