@@ -34,4 +34,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("KISS93")
+MAKE_UINT32_PRNG("KISS93", NULL)

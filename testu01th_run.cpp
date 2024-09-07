@@ -40,11 +40,13 @@
 #include <chrono>
 #include <thread>
 
+using namespace testu01_threads;
+
 //////////////////////////
 ///// Some constants /////
 //////////////////////////
 
-constexpr size_t ELEMENTS_PER_BLOCK = 1000;
+constexpr size_t ELEMENTS_PER_BLOCK = 1024;
 
 
 
@@ -212,16 +214,18 @@ static void dummy_get_array32(void *param, void *state, uint32_t *out, size_t le
 {
     (void) param;
     (void) state;
-    (void) out;
-    (void) len;
+    for (size_t i = 0; i < len; i++) {
+        out[i] = 0;
+    }
 }
 
 static void dummy_get_array64(void *param, void *state, uint64_t *out, size_t len)
 {
     (void) param;
     (void) state;
-    (void) out;
-    (void) len;
+    for (size_t i = 0; i < len; i++) {
+        out[i] = 0;
+    }
 }
 
 
@@ -337,9 +341,9 @@ static size_t run_uint64_block(std::shared_ptr<UniformGenerator> &objptr, size_t
 
 static size_t run_array32_block(std::shared_ptr<UniformGenerator> &objptr, size_t niter)
 {
-    uint64_t sum = 0;
+    uint32_t sum = 0;
     std::vector<uint32_t> buf(ELEMENTS_PER_BLOCK);
-    for (size_t k = 0; k < niter; k++) {
+    for (size_t i = 0; i < niter; i++) {
         objptr->GetArray32(buf.data(), ELEMENTS_PER_BLOCK);
         sum += buf[0];
     }
@@ -351,12 +355,31 @@ static size_t run_array64_block(std::shared_ptr<UniformGenerator> &objptr, size_
 {
     uint64_t sum = 0;
     std::vector<uint64_t> buf(ELEMENTS_PER_BLOCK);
-    for (size_t k = 0; k < niter; k++) {
+    for (size_t i = 0; i < niter; i++) {
         objptr->GetArray64(buf.data(), ELEMENTS_PER_BLOCK);
         sum += buf[0];
     }
     return static_cast<size_t>(sum);
 }
+
+static size_t run_sum32_block(std::shared_ptr<UniformGenerator> &objptr, size_t niter)
+{
+    uint32_t sum = 0;
+    for (size_t i = 0; i < niter; i++) {
+        sum += objptr->GetSum32(ELEMENTS_PER_BLOCK);
+    }
+    return static_cast<size_t>(sum);
+}
+
+static size_t run_sum64_block(std::shared_ptr<UniformGenerator> &objptr, size_t niter)
+{
+    uint64_t sum = 0;
+    for (size_t i = 0; i < niter; i++) {
+        sum += objptr->GetSum64(ELEMENTS_PER_BLOCK);
+    }
+    return static_cast<size_t>(sum);
+}
+
 
 
 /**
@@ -477,7 +500,7 @@ void test_battery_speed(const GenFactoryFunc &create_gen, const GenInfoC &geninf
         std::cout << "----- Speed test for array of uint32 generation -----" << std::endl;
         test_speed(create_gen, geninfo, run_array32_block, ELEMENTS_PER_BLOCK * 32);
     } else {
-        std::cout << "----- Array of uint32 generatior is not implemented -----" << std::endl;
+        std::cout << "----- Array of uint32 generator is not implemented -----" << std::endl;
     }
 
     if (geninfo.get_array64 != nullptr) {
@@ -485,7 +508,23 @@ void test_battery_speed(const GenFactoryFunc &create_gen, const GenInfoC &geninf
         test_speed(create_gen, geninfo, run_array64_block, ELEMENTS_PER_BLOCK * 64);
         std::cout << std::endl;
     } else {
-        std::cout << "----- Array of uint64 generatior is not implemented -----" << std::endl;
+        std::cout << "----- Array of uint64 generator is not implemented -----" << std::endl;
+    }
+    // Part 3. Inlining tests
+    if (geninfo.get_sum32 != nullptr) {
+        std::cout << "----- Speed test for sum of uint32 generation -----" << std::endl;
+        test_speed(create_gen, geninfo, run_sum32_block, ELEMENTS_PER_BLOCK * 32);
+        std::cout << std::endl;
+    } else {
+        std::cout << "----- Sum of uint32 generator is not implemented -----" << std::endl;
+    }
+
+    if (geninfo.get_sum64 != nullptr) {
+        std::cout << "----- Speed test for sum of uint64 generation -----" << std::endl;
+        test_speed(create_gen, geninfo, run_sum64_block, ELEMENTS_PER_BLOCK * 32);
+        std::cout << std::endl;
+    } else {
+        std::cout << "----- Sum of uint64 generator is not implemented -----" << std::endl;
     }
 }
 

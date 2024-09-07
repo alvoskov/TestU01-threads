@@ -2,6 +2,8 @@
 #include <time.h>
 #include <x86intrin.h>
 
+using namespace testu01_threads;
+
 uint64_t Entropy::SplitMixHash(uint64_t z) const
 {
     z = (z ^ (z >> 30)) * UINT64_C(0xBF58476D1CE4E5B9);

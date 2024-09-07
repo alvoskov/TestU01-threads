@@ -1,5 +1,7 @@
 #include "bigcrush.h"
 
+using namespace testu01_threads;
+
 BigCrushBattery::BigCrushBattery(GenFactoryFunc genf)
     : TestsBattery(genf)
 {

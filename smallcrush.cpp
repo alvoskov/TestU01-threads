@@ -1,5 +1,7 @@
 #include "smallcrush.h"
 
+using namespace testu01_threads;
+
 SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
     : TestsBattery(genf)
 {

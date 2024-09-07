@@ -3,6 +3,8 @@
 #include "testu01_mt.h"
 #include <random>
 
+namespace testu01_threads {
+
 /**
  * @brief A wrapper for Mersenne twister from the C++ standard library.
  * @details Fails the next tests from the Crush batter:
@@ -142,5 +144,7 @@ public:
         return x;
     }
 };
+
+} // namespace testu01_threads
 
 #endif

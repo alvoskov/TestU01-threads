@@ -11,6 +11,8 @@
 #include <iostream>
 
 
+namespace testu01_threads {
+
 enum EntropyMethod
 {
     ENTROPY_TIME, ///< Seed is from system time.
@@ -61,5 +63,7 @@ public:
     uint64_t Seed64();
     inline size_t GetNSeeds() const { return seeds_log.size(); }
 };
+
+} // namespace testu01_threads
 
 #endif

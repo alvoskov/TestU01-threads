@@ -63,4 +63,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("MWC32X")
+MAKE_UINT32_PRNG("MWC32X", NULL)

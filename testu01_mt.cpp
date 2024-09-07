@@ -4,6 +4,8 @@
 #include <random>
 #include <fcntl.h>
 
+using namespace testu01_threads;
+
 static std::string printf_tos(const char *format, ...)
 {
     char buffer[256];
@@ -193,6 +195,32 @@ void UniformGenerator::GetArray64(uint64_t *out, size_t len)
 }
 
 
+/**
+ * @brief Returns the modulo-32 sum of pseudorandom sequence.
+ * Designed for performance measurements.
+ */
+uint32_t UniformGenerator::GetSum32(size_t len)
+{
+    uint32_t sum = 0;
+    for (size_t i = 0; i < len; i++) {
+        sum += GetBits32();
+    }
+    return sum;
+}
+
+/**
+ * @brief Returns the modulo-64 sum of pseudorandom sequence.
+ * Designed for performance measurements.
+ */
+uint64_t UniformGenerator::GetSum64(size_t len)
+{
+    uint64_t sum = 0;
+    for (size_t i = 0; i < len; i++) {
+        sum += GetBits64();
+    }
+    return sum;
+}
+
 
 UniformGenerator::UniformGenerator(const std::string &name)
 {
@@ -224,6 +252,8 @@ UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
     get_bits64 = gi->get_bits64;
     get_array32 = gi->get_array32;
     get_array64 = gi->get_array64;
+    get_sum32 = gi->get_sum32;
+    get_sum64 = gi->get_sum64;
     destroy = gi->delete_state;
 }
 
@@ -569,6 +599,8 @@ BatteryResults TestsBattery::RunTest(int id) const
 //////////////////////////
 ///// Some functions /////
 //////////////////////////
+
+namespace testu01_threads {
 
 /**
  * @brief Get the p-values in a swalk_RandomWalk1 test
@@ -1109,3 +1141,5 @@ TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
         sres_DeleteChi2(res);
     };
 }
+
+} // namespace testu01_threads

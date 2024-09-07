@@ -1,7 +1,10 @@
 /**
  * @file sezgin63_shared.c
  * @brief Implementation of 63-bit LCG with prime modulus.
- * @details References:
+ * @details Passes SmallCrush and Crush, but systematically gives
+ * suspect p-values at BigCrush test N13 (BirthdaySpacings, t = 2).
+ *
+ * References:
  * - F. Sezgin, T.M. Sezgin. Finding the best portable
  *   congruential random number generators // Computer Physics
  *   Communications. 2013. V. 184. N 8. P. 1889-1897.
@@ -39,6 +42,14 @@ static inline unsigned long get_bits32(void *param, void *state)
     return get_bits63_raw(param, state) >> 31;
 }
 
+static void get_array32(void *param, void *state, uint32_t *out, size_t len)
+{
+    for (size_t i = 0; i < len; i++) {
+        out[i] = get_bits63_raw(param, state) >> 31;
+    }
+}
+
+
 static double get_u01(void *param, void *state)
 {
     uint64_t x = get_bits63_raw(param, state);
@@ -68,5 +79,6 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
+    gi->get_array32 = get_array32;
     return 1;
 }

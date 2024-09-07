@@ -25,4 +25,4 @@ static void *init_state()
 }
 
 
-MAKE_UINT32_PRNG("Minstd")
+MAKE_UINT32_PRNG("Minstd", NULL)

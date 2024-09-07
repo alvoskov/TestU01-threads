@@ -28,9 +28,9 @@ typedef struct {
 } KISS64State;
 
 
-static uint64_t get_bits64(void *param, void *state)
+static uint64_t get_bits64_raw(void *param, void *state)
 {
-    KISS64State *obj = (KISS64State *) state;
+    KISS64State *obj = state;
     (void) param;
     // MWC generator
     uint64_t t = (obj->x << 58) + obj->c;
@@ -50,19 +50,6 @@ static uint64_t get_bits64(void *param, void *state)
 }
 
 
-static long unsigned int get_bits32(void *param, void *state)
-{
-    uint64_t x = get_bits64(param, state);
-    return x >> 32;
-}
-
-
-static double get_u01(void *param, void *state)
-{
-    return uint64_to_udouble(get_bits64(param, state));
-}
-
-
 static void *init_state()
 {
     const uint64_t mask58 = 0x3FFFFFFFFFFFFFFULL;
@@ -72,13 +59,6 @@ static void *init_state()
     do { obj->y = intf.get_seed64(); } while (obj->y == 0);
     obj->z = intf.get_seed64();
     return (void *) obj;
-}
-
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
 }
 
 
@@ -93,7 +73,7 @@ static int run_self_test()
     obj.y = 362436362436362436ULL;  obj.z = 1066149217761810ULL;
     uint64_t val;
     for (size_t i = 0; i < 100000000; i++) {
-        val = get_bits64(NULL, &obj);
+        val = get_bits64_raw(NULL, &obj);
     }
     intf.printf("Reference value: %llu\n", refval);
     intf.printf("Obtained value:  %llu\n", val);
@@ -103,15 +83,4 @@ static int run_self_test()
 }
 
 
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "KISS64";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    gi->get_bits64 = get_bits64;
-    gi->run_self_test = run_self_test;
-    return 1;
-}
+MAKE_UINT64_UPTO32_PRNG("KISS64", run_self_test)

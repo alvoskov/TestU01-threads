@@ -1,5 +1,6 @@
 #include "pdiehard.h"
 
+using namespace testu01_threads;
 
 PseudoDiehardBattery::PseudoDiehardBattery(GenFactoryFunc genf)
     : TestsBattery(genf)

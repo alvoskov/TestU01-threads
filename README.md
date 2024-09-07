@@ -2,7 +2,8 @@ TestU01-threads is an extension of TestU01 library that allows to run
 SmallCrush, Crush, BigCrush and pseudoDIEHARD test batteries in
 a multi-threaded mode. TestU01-threads doesn't modify the original
 library and just calls tests from it using its own multi-threaded
-dispatcher. The key features are:
+dispatcher. It also allows to send PRNG output to stdout that is
+required for testing with PractRand. The key features are:
 
 - Multi-threaded test batteries from TestU01 without modification
   of TestU01 itself. It allows to use the precompiled library
@@ -16,7 +17,6 @@ dispatcher. The key features are:
   Both 32-bit and 64-bit PRNGs are supported.
 - Some examples of PRNG including CSPRNG ChaCha12.
 
-
 The information about the original TestU01 library can be found at:
 
 - Pierre L'Ecuyer, Richard Simard. TestU01: A C library for empirical
@@ -25,7 +25,6 @@ The information about the original TestU01 library can be found at:
   https://doi.org/10.1145/1268776.1268777
 - https://github.com/umontreal-simul/TestU01-2009
 - http://simul.iro.umontreal.ca/testu01/tu01.html
-
 
 Previous attemps to make multithreaded TestU01 were based on rewriting some
 tests using parallel programming, e.g. OpenMP. However, they were not completed
@@ -41,16 +40,20 @@ and don't include full SmallCrush, Crush, BigCrush and pseudoDIEHARD batteries.
   Romania, 2014, pp. 311-315, doi: 10.1109/ICCP.2014.6937014.
 - https://github.com/adamsolomou/TestU01
 
+TestU01-threads uses an entirely different approach: it doesn't modify the original
+TestU01 library but just replaces single-threaded batteries implementation from
+`bbattery.c` (sequental call of statistical tests) to its own multithreaded version
+(parallel call of statistical tests from different threads). These statistical tests
+are reentrant.
+
 Executables
 ===========
 
   Executable        | Function
---------------------|----------------------
- `chacha_avx_test`  |
- `chacha_test`      |
- `testu01th_lib`    |
- `testu01th_demo`   |
- `splitmix_exec`    |
+--------------------|------------------------------------------------------
+ `testu01th_run`    | Runs PRNGs tests for arbitrary PRNG from C module
+ `testu01th_demo`   | Demonstration of calling batteries from C++ program
+ `splitmix_exec`    | Demonstration of calling batteries from C program
 
 
 Supplied PRNGs external modules
@@ -59,6 +62,7 @@ Supplied PRNGs external modules
  Module name      | Generator
 ------------------|------------------------------------------------------------
  alfib            | LFib(+,2^{64},607,203)
+ alfib_mod        | LFib(+,2^{64},52,24) XORed by "Weyl sequence"
  chacha_avx       | ChaCha12 CSPRNG: AVX2 implementation
  chacha           | ChaCha12 CSPRNG: Cross-platform implementation 
  coveyou64        |
@@ -80,6 +84,7 @@ Supplied PRNGs external modules
  randu            | LCG(2^{32},65539,1), returns whole 32 bits
  ranluxpp         | RANLUX++, RANLUX reformulated as LCG
  rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
+ seigzin63        | LCG(2^{63}-25,a,0)
  sqxor            | sqxor
  sqxor32          | sqxor32
  threefry         | Threefry4x64x20 (ThreeFish with reduced number of rounds) 
@@ -105,36 +110,39 @@ The supplied generators can be divided into several groups:
    
 
 
- Module name      | Type   | SmallCrush | Crush | BigCrush | PractRand
-------------------|--------|------------|-------|----------|-----------
- alfib            | u32    | +          |       |          |
- chacha_avx       | u32    | +          |       |          |
- chacha           | u32    | +          |       |          |
- coveyou64        | u32    | +          | -     | -        | 256 KiB
- isaac64          | u64    | +          |       |          |
- kiss93           | u32    | +          |       |          | 1 MiB
- kiss99           | u32    | +          |       |          |
- kiss64           | u64    | +          |       |          |
- lcg64            | u32    | +          | -     | -        | 16 MiB
- lcg128           | u32/64 | +          |       |          |
- lcg69069         | u32    | -          |       |          | 2 KiB
- lfib_ranmar      | double | +          | +     | +        | < 1KiB
- minstd           | u32    | -          | -     | -        | 1 KiB
- mlfib17_5        | u32    | +          |       |          |
- mt19937          | u32    | +          | -     | -        |
- mwc32x           | u32    | +          | -     | -        | 256MiB
- mwc64x           | u32    | +          | +     |          | 
- mwc128x          | u64    | +          |       |          |
- philox           | u64    | +          | +     |          |
- randu            | u32    | -          | -     | -        | 1 KiB
- ranluxpp         | u64    | +          |       |          | 
- rc4              | u32    | +          |       |          |
- sqxor            | u64    | +          |       |          |
- sqxor32          | u32    | +          |       |          | 16 GiB
- threefry         | u64    | +          |       |          |
- wyrand           | u64    | +          |       |          |
- xoroshiro128stst | u64    | +          |       |          |
- xorwow           | u32    | +          | -     | -        | 128 KiB
+ Module name      | Type   | SmallCrush | Crush | BigCrush | PractRand | cpbARY | cpbCALL
+------------------|--------|------------|-------|----------|-----------|--------|---------
+ alfib            | u32    | +          | -     | -        | 128 GiB   | 0.61   | 0.61
+ alfib_mod        | u32    | +          | +     | +        | 1 TiB     |        |
+ chacha_avx       | u32    | +          |       |          |           | ---    | 0.95
+ chacha           | u32    | +          |       |          |           | 2.31   | 2.04
+ coveyou64        | u32    | +          | -     | -        | 256 KiB   | 0.64   | 0.82
+ isaac64          | u64    | +          |       |          |           |        |
+ kiss93           | u32    | +          | -     | -        | 1 MiB     | 1.17   | 0.41
+ kiss99           | u32    | +          | +     |          |           | 1.17   | 0.66
+ kiss64           | u64    | +          | +     |          |           | 0.59   | 0.35
+ lcg64            | u32    | +          | -     | -        | 16 MiB    |        |
+ lcg128           | u32/64 | +          |       |          |           |        |
+ lcg69069         | u32    | -          | -     | -        | 2 KiB     | 0.62   | <0.1
+ lfib_ranmar      | double | +          | +     | +        | < 1KiB    | ----   | 2.50
+ minstd           | u32    | -          | -     | -        | 1 KiB     |        |
+ mlfib17_5        | u32    | +          |       |          |           |        |
+ mt19937          | u32    | +          | -     | -        |           |        |
+ mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.63   | 1.03
+ mwc64x           | u32    | +          | +     |          |           | 0.82   | <0.1
+ mwc128x          | u64    | +          | +     |          |           | 0.74   | 0.17
+ philox           | u64    | +          | +     |          |           | 1.16   | 0.91
+ randu            | u32    | -          | -     | -        | 1 KiB     |        |
+ ranluxpp         | u64    | +          | +     |          |           |        |
+ rc4              | u32    | +          |       |          |           | 6.23   |
+ rrmxmx           | u64    | +          | +     |          |           | 0.33   |
+ seigzin63        | u32    | +          | +     | -+       | >= 2TiB   | 3.43   |
+ sqxor            | u64    | +          |       |          |           |        |
+ sqxor32          | u32    | +          |       |          | 16 GiB    |        |
+ threefry         | u64    | +          | +     |          |           | 1.25   | 0.96
+ wyrand           | u64    | +          |       |          |           | 0.22   |
+ xoroshiro128stst | u64    | +          |       |          |           | 0.33   | 
+ xorwow           | u32    | +          | -     | -        | 128 KiB   | 0.96   | 0.84
 
 
 
@@ -142,16 +150,46 @@ C module interface
 ==================
 
 A module with PRNG implementation that supports C API should export the next
-functions:
+three functions:
 
 - `int gen_initlib(CallerAPI *intf)` - initializes the library and gets
    a pointer to the structure with pointers to some functions of TestU01-threads
-   library (e.g. for obtaining seeds, controlling dynamic memory.
+   library, e.g. for obtaining seeds, controlling dynamic memory.
 - `int gen_closelib(void)` - called before closing the library.
 - `int gen_getinfo(GenInfoC *gi)` - should fill the `GenInfoC` structure
    with information about generator (mainly with pointer to its callback
    functions)
 
+C modules should be compiled as freestanding, i.e. don't use any functions from
+standard library and other libraries. However, CallerAPI structure contains
+pointer to some functions useful for PRNG construction:
+
+- `get_seed64` - get random 64-bit seed using RDSEED and/or XXTEA CSPRNG.
+- `malloc` - pointer to malloc function from C standard library.
+- `free` - pointer to free function from C standard library.
+- `printf` - pointer to printf function.
+- `strcmp` - pointer to strcmp function from C standard library.
+
+
+The next fields in GenInfoC structure should be filled by `gen_getinfo`:
+
+- `name` - generator name, will be used in reports.
+- `init_state` - initializes the generator state.
+- `delete_state` - deletes the generator state.
+- `get_u01` - returns the double pseudorandom number.
+- `get_bits32` - returns the uint32_t pseudorandom number.
+
+The next fields are optional but may be filled:
+
+- `get_bits64` - returns the uint64_t pseudorandom number.
+- `get_array32` - fills the uint32_t array buffer with pseudorandom numbers.
+- `get_array64` - fills the uint64_t array buffer with pseudorandom numbers.
+- `run_self_test` - runs the internal self-test.
+
+The next fields are filled in GenInfoC before `gen_getinfo` is called and used
+to transfer information to the PRNG initialization
+
+- `options` - string with generator options
 
 
 Compilation

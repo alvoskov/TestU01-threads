@@ -36,4 +36,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("LCG64")
+MAKE_UINT32_PRNG("LCG64", NULL)

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <iostream>
 
+using namespace testu01_threads;
 
 int main(int argc, char *argv[]) 
 {

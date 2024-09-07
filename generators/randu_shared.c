@@ -21,4 +21,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("RANDU")
+MAKE_UINT32_PRNG("RANDU", NULL)

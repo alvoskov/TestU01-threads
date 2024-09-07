@@ -1,19 +1,16 @@
 /**
  * @file alfib_mod_shared.c
- * @brief A shared library that implements the additive
+ * @brief A shared library that implements the modified additive
  * Lagged Fibbonaci generator \f$ LFib(2^{64}, 55, 24, +) \f$.
  * @details It uses the next recurrent formula:
  * \f[
- * X_{n} = X_{n - 17} + X_{n - 5}
+ * X_{n} = X_{n - 55} + X_{n - 24}
  * \f]
  * and returns either higher 32 bits (as unsigned integer) or higher
  * 52 bits (as double). The initial values in the ring buffer are filled
  * by the 64-bit PCG generator.
  *
- * It passes SmallCrush test battery but fails Crush and BigCrush.
- *
- * - The failed tests in Crush: `Gap, r = 0`; `Gap, r = 22`
- * - The failed tests in BigCrush: `Gap, r = 0`; `Gap, r = 20`
+ * It passes SmallCrush, Crush and BigCrush batteries.
  */
 #include "testu01_mt_cintf.h"
 
@@ -22,8 +19,8 @@
 /////////////////////////////////////////////////
 SHARED_ENTRYPOINT_CODE
 
-#define LFIB_A 98
-#define LFIB_B 33
+#define LFIB_A 607
+#define LFIB_B 273
 
 typedef struct {
     uint64_t U[LFIB_A + 1]; /**< Ring buffer (only values 1..17 are used) */
@@ -40,7 +37,7 @@ static uint64_t get_bits64(void *param, void *state)
     (void) param;
     uint64_t x = obj->U[obj->i] + obj->U[obj->j];
     obj->U[obj->i] = x;
-    obj->w = UINT64_C(0xd1342543de82ef95)*obj->w + 1;
+    obj->w += 0x9E3779B97F4A7C15;//UINT64_C(0xd1342543de82ef95)*obj->w + 1;
     if(--obj->i == 0) obj->i = LFIB_A;
 	if(--obj->j == 0) obj->j = LFIB_A;
     return x ^ obj->w;

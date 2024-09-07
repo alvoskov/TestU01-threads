@@ -1,5 +1,7 @@
 #include "crush.h"
 
+using namespace testu01_threads;
+
 CrushBattery::CrushBattery(GenFactoryFunc genf)
     : TestsBattery(genf)
 {

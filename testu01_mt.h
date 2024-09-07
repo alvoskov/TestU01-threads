@@ -58,6 +58,8 @@ extern "C" {
 #include <algorithm>
 
 
+namespace testu01_threads {
+
 /**
  * @brief Object-oriented envelope for TestU01 structures.
  * Allows to use RAII paradigm instead of manual calloc/free.
@@ -84,6 +86,8 @@ public:
     virtual uint64_t GetBits64();
     virtual void GetArray32(uint32_t *out, size_t len);
     virtual void GetArray64(uint64_t *out, size_t len);
+    virtual uint32_t GetSum32(size_t len);
+    virtual uint64_t GetSum64(size_t len);
 };
 
 
@@ -128,6 +132,8 @@ class UniformGeneratorC : public UniformGenerator
     GetBits64CallbackC get_bits64;
     GetArray32CallbackC get_array32;
     GetArray64CallbackC get_array64;
+    GetSum32CallbackC get_sum32;
+    GetSum64CallbackC get_sum64;
 
     UniformGeneratorC(const UniformGeneratorC &obj) = delete;
     UniformGeneratorC &operator=(const UniformGeneratorC &obj) = delete;
@@ -146,6 +152,14 @@ public:
     void GetArray64(uint64_t *out, size_t len) override
     {
         return get_array64(gen.param, gen.state, out, len);
+    }
+    uint32_t GetSum32(size_t len) override
+    {
+        return get_sum32(gen.param, gen.state, len);
+    }
+    uint64_t GetSum64(size_t len) override
+    {
+        return get_sum64(gen.param, gen.state, len);
     }
     virtual ~UniformGeneratorC() { destroy(gen.param, gen.state); }
 };
@@ -347,5 +361,7 @@ TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k);
 TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g);
 TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
     double alpha, double beta);
+
+} // namespace testu01_threads
 
 #endif

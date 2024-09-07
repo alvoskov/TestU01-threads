@@ -29,9 +29,9 @@ typedef struct {
 } RC4State;
 
 
-unsigned long EXPORT get_bits32(void *param, void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
-    RC4State *obj = (RC4State *) state;
+    RC4State *obj = state;
     uint32_t v = 0;
     uint8_t *s = obj->s, i = obj->i, j = obj->j;
     (void) param;    
@@ -45,12 +45,6 @@ unsigned long EXPORT get_bits32(void *param, void *state)
     }
     obj->i = i; obj->j = j;
     return (unsigned long) v;
-}
-
-
-static double get_u01(void *param, void *state)
-{
-    return uint32_to_udouble(get_bits32(param, state));
 }
 
 
@@ -71,26 +65,10 @@ static void *init_state()
     obj->i = 0;
     obj->j = 0;
     for (size_t k = 0; k < 64; k++) {
-        (void) get_bits32(NULL, (void *) obj);
+        (void) get_bits32_raw(NULL, (void *) obj);
     }
     return (void *) obj;
 }
 
 
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "RC4";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    return 1;
-}
+MAKE_UINT32_PRNG("RC4", NULL)

@@ -4,6 +4,8 @@
 #include "crush.h"
 #include "bigcrush.h"
 
+using namespace testu01_threads;
+
 static GenInfoC geninfo;
 
 /**
@@ -21,6 +23,8 @@ void GenInfoC_init(GenInfoC *obj)
     obj->get_bits64 = nullptr;
     obj->get_array32 = nullptr;
     obj->get_array64 = nullptr;
+    obj->get_sum32 = nullptr;
+    obj->get_sum64 = nullptr;
     obj->run_self_test = nullptr;
 }
 

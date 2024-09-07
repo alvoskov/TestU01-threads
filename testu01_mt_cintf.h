@@ -40,6 +40,8 @@ typedef long unsigned int (*GetBits32CallbackC)(void *param, void *state);
 typedef uint64_t (*GetBits64CallbackC)(void *param, void *state);
 typedef void (*GetArray32CallbackC)(void *param, void *state, uint32_t *out, size_t len);
 typedef void (*GetArray64CallbackC)(void *param, void *state, uint64_t *out, size_t len);
+typedef uint32_t (*GetSum32CallbackC)(void *param, void *state, size_t len);
+typedef uint64_t (*GetSum64CallbackC)(void *param, void *state, size_t len);
 typedef void *(*InitStateCallbackC)(void);
 typedef void (*DeleteStateCallbackC)(void *param, void *state);
 typedef uint64_t (*GetSeed64CallbackC)(void);
@@ -60,6 +62,8 @@ typedef struct {
     GetBits64CallbackC get_bits64; /**< Function returns the uint64_t pseudorandom number */
     GetArray32CallbackC get_array32; /**< Functions fills the uint32_t array buffer with pseudorandom numbers */
     GetArray64CallbackC get_array64; /**< Functions fills the uint64_t array buffer with pseudorandom numbers */
+    GetSum32CallbackC get_sum32; /**< Function that returns the sum of 32-bit pseudorandom numbers */
+    GetSum64CallbackC get_sum64; /**< Function that returns the sum of 64-bit pseudorandom numbers */
     SelfTestCallbackC run_self_test; /**< Functions that runs the internal self-test */
 } GenInfoC;
 
@@ -197,22 +201,28 @@ int EXPORT gen_closelib() \
  * @brief Some default boilerplate code for scalar PRNG that returns
  * unsigned 32-bit numbers. Requires the next functions to be defined:
  *
- * - `static inline unsigned long get_bits32(void *param, void *state);`
+ * - `static inline unsigned long get_bits32_raw(void *param, void *state);`
  * - `static void *init_state();`
  *
  * It also relies on default prolog (intf static variable, some exports etc.),
  * see PRNG_CMODULE_PROLOG
  */
-#define MAKE_UINT32_PRNG(prng_name) \
-static long unsigned int get_bits32(void *param, void *state) { \
+#define MAKE_UINT32_PRNG(prng_name, selftest_func) \
+EXPORT long unsigned int get_bits32(void *param, void *state) { \
     return get_bits32_raw(param, state) & 0xFFFFFFFF; \
 } \
-static double get_u01(void *param, void *state) { \
+EXPORT double get_u01(void *param, void *state) { \
     return uint32_to_udouble(get_bits32_raw(param, state)); \
 } \
-static void get_array32(void *param, void *state, uint32_t *out, size_t len) { \
+EXPORT void get_array32(void *param, void *state, uint32_t *out, size_t len) { \
     for (size_t i = 0; i < len; i++) \
         out[i] = get_bits32_raw(param, state); \
+} \
+EXPORT uint32_t get_sum32(void *param, void *state, size_t len) { \
+    uint32_t sum = 0; \
+    for (size_t i = 0; i < len; i++) \
+        sum += get_bits32_raw(param, state); \
+    return sum; \
 } \
 static void delete_state(void *param, void *state) {\
     (void) param; intf.free(state); \
@@ -224,8 +234,51 @@ int EXPORT gen_getinfo(GenInfoC *gi) { \
     gi->get_u01 = get_u01; \
     gi->get_bits32 = get_bits32; \
     gi->get_array32 = get_array32; \
+    gi->get_sum32 = get_sum32; \
+    gi->run_self_test = selftest_func; \
     return 1; \
 }
+
+
+/**
+ * @brief Some default boilerplate code for scalar PRNG that returns
+ * unsigned 64-bit numbers. Requires the next functions to be defined:
+ *
+ * - `static inline unsigned long get_bits64_raw(void *param, void *state);`
+ * - `static void *init_state();`
+ *
+ * It also relies on default prolog (intf static variable, some exports etc.),
+ * see PRNG_CMODULE_PROLOG
+ */
+#define MAKE_UINT64_UPTO32_PRNG(prng_name, selftest_func) \
+EXPORT uint64_t get_bits64(void *param, void *state) { \
+    return get_bits64_raw(param, state); \
+} \
+EXPORT long unsigned int get_bits32(void *param, void *state) { \
+    return get_bits64_raw(param, state) >> 32; \
+} \
+EXPORT double get_u01(void *param, void *state) { \
+    return uint64_to_udouble(get_bits64_raw(param, state)); \
+} \
+EXPORT void get_array64(void *param, void *state, uint64_t *out, size_t len) { \
+    for (size_t i = 0; i < len; i++) \
+        out[i] = get_bits64_raw(param, state); \
+} \
+static void delete_state(void *param, void *state) {\
+    (void) param; intf.free(state); \
+} \
+int EXPORT gen_getinfo(GenInfoC *gi) { \
+    gi->name = prng_name; \
+    gi->init_state = init_state; \
+    gi->delete_state = delete_state; \
+    gi->get_u01 = get_u01; \
+    gi->get_bits32 = get_bits32; \
+    gi->get_bits64 = get_bits64; \
+    gi->get_array64 = get_array64; \
+    gi->run_self_test = selftest_func; \
+    return 1; \
+}
+
 
 
 

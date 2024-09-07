@@ -19,6 +19,8 @@
 #define __BIGCRUSH_H
 #include "testu01_mt.h"
 
+namespace testu01_threads {
+
 /**
  * @brief BigCrush battery from TestU01 optimized for multithreading.
  */
@@ -27,5 +29,7 @@ class BigCrushBattery : public TestsBattery
 public:
     BigCrushBattery(GenFactoryFunc genf);
 };
+
+} // namespace testu01_threads
 
 #endif

@@ -41,9 +41,9 @@ typedef struct {
 } KISS99State;
 
 
-static long unsigned int get_bits32(void *param, void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
-    KISS99State *obj = (KISS99State *) state;
+    KISS99State *obj = state;
     (void) param;
     // LCG generator
     obj->jcong = 69069 * obj->jcong + 1234567;
@@ -62,27 +62,14 @@ static long unsigned int get_bits32(void *param, void *state)
 }
 
 
-static double get_u01(void *param, void *state)
-{
-    return uint32_to_udouble(get_bits32(param, state));
-}
-
-
 static void *init_state()
 {
-    KISS99State *obj = (KISS99State *) intf.malloc(sizeof(KISS99State));
-    do { obj->z = intf.get_seed64(); } while (obj->z == 0);
-    do { obj->w = intf.get_seed64(); } while (obj->w == 0);
+    KISS99State *obj = intf.malloc(sizeof(KISS99State));
+    do { obj->z = intf.get_seed64(); } while (obj->z == 0 || obj->z == 0xFFFFFFFF);
+    do { obj->w = intf.get_seed64(); } while (obj->w == 0 || obj->z == 0xFFFFFFFF);
     do { obj->jsr = intf.get_seed64(); } while (obj->jsr == 0);
     obj->jcong = intf.get_seed64();
     return (void *) obj;
-}
-
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
 }
 
 
@@ -97,7 +84,7 @@ static int run_self_test()
     obj.z   = 12345; obj.w     = 65435;
     obj.jsr = 34221; obj.jcong = 12345; 
     for (size_t i = 1; i < 1000001 + 256; i++) {
-        val = get_bits32(NULL, &obj);
+        val = get_bits32_raw(NULL, &obj);
     }
     intf.printf("Reference value: %u\n", refval);
     intf.printf("Obtained value:  %u\n", val);
@@ -106,14 +93,4 @@ static int run_self_test()
 }
 
 
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "KISS99";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    gi->run_self_test = run_self_test;
-    return 1;
-}
+MAKE_UINT32_PRNG("KISS99", run_self_test)

@@ -1,5 +1,6 @@
 #include "generators.h"
 
+using namespace testu01_threads;
 
 /////////////////////////////////////////////////
 ///// MT19937Generator class implementation /////

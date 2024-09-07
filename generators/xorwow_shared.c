@@ -29,7 +29,7 @@ typedef struct {
 } XorWowState;
 
 
-static long unsigned int get_bits32(void *param, void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     const uint32_t d_inc = 362437;
     XorWowState *obj = (XorWowState *) state;
@@ -42,14 +42,6 @@ static long unsigned int get_bits32(void *param, void *state)
     obj->v = (obj->v ^ (obj->v << 4)) ^ (t ^ (t << 1));
     return (obj->d += d_inc) + obj->v;
 }
-
-
-static double get_u01(void *param, void *state)
-{
-    static const double INV32 = 2.3283064365386963E-10;
-    return get_bits32(param, state) * INV32;
-}
-
 
 static void *init_state()
 {
@@ -66,21 +58,4 @@ static void *init_state()
     return (void *) obj;
 }
 
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "XorWow";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    return 1;
-}
+MAKE_UINT32_PRNG("xorwow", NULL)

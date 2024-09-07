@@ -19,6 +19,8 @@
 #define __CRUSH_H
 #include "testu01_mt.h"
 
+namespace testu01_threads {
+
 /**
  * @brief Crush battery from TestU01 optimized for multithreading.
  */
@@ -27,5 +29,7 @@ class CrushBattery : public TestsBattery
 public:
     CrushBattery(GenFactoryFunc genf);
 };
+
+} // namespace testu01_threads
 
 #endif

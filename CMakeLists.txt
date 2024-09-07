@@ -5,7 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Compiler settings
 if (NOT MSVC)
     set(PROF_FLAGS "")
-    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
+    set(C_CXX_FLAGS "-O3 -Wall -Werror -Wextra -Wno-attributes -march=native")
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
@@ -60,9 +60,9 @@ add_library(splitmix_shared SHARED splitmix_shared.c
     splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_mod alfib coveyou64 isaac64 kiss64 kiss93 kiss99
+foreach(prng_name alfib_mod alfib coveyou64 dummy isaac64 kiss64 kiss93 kiss99
     lcg64 lcg128 lcg69069 lfib_ranmar minstd mwc32x mwc64x mwc128x mlfib17_5
-    philox randu rc4 seed64 sezgin63 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
+    philox randu rc4 rrmxmx seed64 sezgin63 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
 endforeach()

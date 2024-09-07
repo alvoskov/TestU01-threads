@@ -237,10 +237,10 @@ static int run_self_test()
 ///// Module external interface /////
 /////////////////////////////////////
 
-static uint64_t get_bits64(void *param, void *state)
+static inline uint64_t get_bits64_raw(void *param, void *state)
 {
+    Tf256State *obj = state;
     (void) param;
-    Tf256State *obj = (Tf256State *) state;
     if (obj->pos >= Nw) {
         Tf256State_inc_counter(obj);
         Tf256State_block20(obj);
@@ -250,24 +250,10 @@ static uint64_t get_bits64(void *param, void *state)
 }
 
 
-unsigned long EXPORT get_bits32(void *param, void *state)
-{
-
-    return get_bits64(param, state) >> 32;
-}
-
-
-static double get_u01(void *param, void *state)
-{
-    double u = uint64_to_udouble(get_bits64(param, state));
-    return u;
-}
-
-
 static void *init_state()
 {
     uint64_t k[Nw];
-    Tf256State *obj = (Tf256State *) intf.malloc(sizeof(Tf256State));
+    Tf256State *obj = intf.malloc(sizeof(Tf256State));
     for (size_t i = 0; i < Nw; i++) {
         k[i] = intf.get_seed64();
     }
@@ -276,22 +262,4 @@ static void *init_state()
 }
 
 
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "Threefry4x64x20";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    gi->get_bits64 = get_bits64;
-    gi->run_self_test = run_self_test;
-    return 1;
-}
+MAKE_UINT64_UPTO32_PRNG("Threefry4x64x20", run_self_test)
