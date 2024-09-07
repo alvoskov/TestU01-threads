@@ -1,8 +1,10 @@
 #include "testu01_mt.h"
 #include <iostream>
 #include <chrono>
+#include <cstring>
 #include <random>
 #include <fcntl.h>
+#include <stdarg.h>
 
 using namespace testu01_threads;
 

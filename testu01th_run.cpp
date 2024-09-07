@@ -582,7 +582,8 @@ void SaveProtocol(const BatteryResults &results, Entropy &entropy)
         for (size_t j = 0; j < seeds_per_thread; j++, pos++) {
             uint64_t seed = entropy.seeds_log[pos];
             snprintf(buf, 256, "  %3d %3d %25llu 0x%16.16llX\n",
-                (int) i, (int) j, seed, seed);
+                (int) i, (int) j,
+                (unsigned long long) seed, (unsigned long long) seed);
             outfile << std::string(buf);
         }
     }
