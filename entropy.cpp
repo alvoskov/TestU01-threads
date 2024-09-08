@@ -115,3 +115,8 @@ uint64_t Entropy::Seed64()
     seeds_log.push_back(seed);
     return seed;
 }
+
+uint64_t Entropy::CpuClock()
+{
+    return __rdtsc();
+}

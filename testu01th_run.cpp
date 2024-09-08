@@ -20,6 +20,7 @@
 #include "batteries.h"
 #include "entropy.h"
 #include "generators.h"
+#include "dummy_module.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -47,14 +48,6 @@ using namespace testu01_threads;
 //////////////////////////
 
 constexpr size_t ELEMENTS_PER_BLOCK = 1024;
-
-
-
-////////////////////////////////////////////
-///// Platform-dependent include files /////
-////////////////////////////////////////////
-#include <immintrin.h>
-#include <x86intrin.h>
 
 #ifdef USE_LOADLIBRARY
 //////////////////////////////////////////
@@ -166,134 +159,10 @@ bool load_module(GenCModule &mod, const char *libname)
 /////////////////////////////////////
 #endif
 
-
-
-////////////////////////////////////////////////////////////////////
-///// An implementation of "dummy" PRNG that always returns 0. /////
-///// It is used only for performance measurements!            /////
-////////////////////////////////////////////////////////////////////
-
-static GenCModule dummy_cmodule;
-
-static int dummy_initlib(CallerAPI *intf)
-{
-    (void) intf;
-    return 1;
-}
-
-static int dummy_closelib(void)
-{
-    return 1;
-}
-
-
-
-static double dummy_get_u01(void *param, void *state)
-{
-    (void) param;
-    (void) state;
-    return 0.0;
-}
-
-
-static long unsigned int dummy_get_bits32(void *param, void *state)
-{
-    (void) param;
-    (void) state;
-    return 0;
-}
-
-static uint64_t dummy_get_bits64(void *param, void *state)
-{
-    (void) param;
-    (void) state;
-    return 0;
-}
-
-static void dummy_get_array32(void *param, void *state, uint32_t *out, size_t len)
-{
-    (void) param;
-    (void) state;
-    for (size_t i = 0; i < len; i++) {
-        out[i] = 0;
-    }
-}
-
-static void dummy_get_array64(void *param, void *state, uint64_t *out, size_t len)
-{
-    (void) param;
-    (void) state;
-    for (size_t i = 0; i < len; i++) {
-        out[i] = 0;
-    }
-}
-
-
-EXPORT uint32_t dummy_get_sum32(void *param, void *state, size_t len)
-{
-    uint32_t data[] = {9338, 34516, 60623, 45281,
-        9064,   60090,  62764,  5557,
-        44347,  35277,  25712,  20552,
-        50645,  61072,  26719,  21307};
-    uint32_t sum = 0;
-    (void) param; (void) state;
-    for (size_t i = 0; i < len; i++) {
-        sum += data[i & 0xF];
-    }
-    return sum;
-}
-
-static uint64_t dummy_get_sum64(void *param, void *state, size_t len)
-{
-    uint64_t data[] = {9338, 34516, 60623, 45281,
-        9064,   60090,  62764,  5557,
-        44347,  35277,  25712,  20552,
-        50645,  61072,  26719,  21307};
-    uint64_t sum = 0;
-    (void) param; (void) state;
-    for (size_t i = 0; i < len; i++) {
-        sum += data[i & 0xF];
-    }
-    return sum;
-}
-
-static void *dummy_init_state() { return nullptr; }
-
-static void dummy_delete_state(void *param, void *state)
-{
-    (void) param;
-    free(state);
-}
-
-
-static int dummy_gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "Dummy";
-    static GenInfoC dummy_info;
-    dummy_info.name = name;
-    dummy_info.init_state = dummy_init_state;
-    dummy_info.delete_state = dummy_delete_state;
-    dummy_info.get_u01 = dummy_get_u01;
-    dummy_info.get_bits32 = dummy_get_bits32;
-    dummy_info.get_bits64 = dummy_get_bits64;
-    dummy_info.get_array32 = dummy_get_array32;
-    dummy_info.get_array64 = dummy_get_array64;
-    dummy_info.get_sum32 = dummy_get_sum32;
-    dummy_info.get_sum64 = dummy_get_sum64;
-    dummy_info.run_self_test = nullptr;
-    *gi = dummy_info;
-    return 1;
-}
-
-
-
-static void init_dummy_cmodule()
-{
-    dummy_cmodule.gen_initlib = dummy_initlib;
-    dummy_cmodule.gen_closelib = dummy_closelib;
-    dummy_cmodule.gen_getinfo = dummy_gen_getinfo;
-}
-
+/**
+ * @brief C module emulation for "dummy" prng.
+ */
+static GenCModule dummy_cmodule = dummy_init_cmodule();
 
 /**
  * @brief Seeds generation for PRNGs
@@ -433,9 +302,9 @@ static SpeedResults measure_speed(GenFactoryFunc create_gen,
     SpeedResults results;
     for (size_t niter = 2, ms_total = 0; ms_total < 500; niter <<= 1) {
         auto tic = std::chrono::high_resolution_clock::now();
-        uint64_t tic_proc = __rdtsc();
+        uint64_t tic_proc = Entropy::CpuClock();
         run_block_func(objptr, niter);
-        uint64_t toc_proc = __rdtsc();
+        uint64_t toc_proc = Entropy::CpuClock();
         auto toc = std::chrono::high_resolution_clock::now();
         ms_total = std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic).count();
         results.ns_per_call = static_cast<double>(ms_total) / niter * 1e6;
@@ -451,7 +320,7 @@ static void test_speed(GenFactoryFunc create_gen,
     size_t nbits = 32)
 {
     GenInfoC dummy_gen;
-    init_dummy_cmodule();
+/*    init_dummy_cmodule(); */
     dummy_cmodule.gen_getinfo(&dummy_gen);
     auto create_dummy_gen = [&dummy_gen] () -> std::shared_ptr<UniformGenerator> {
         return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&dummy_gen));

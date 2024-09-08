@@ -62,6 +62,7 @@ public:
     bool XxteaTest();
     uint64_t Seed64();
     inline size_t GetNSeeds() const { return seeds_log.size(); }
+    static uint64_t CpuClock();
 };
 
 } // namespace testu01_threads

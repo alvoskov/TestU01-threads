@@ -114,10 +114,10 @@ The supplied generators can be divided into several groups:
 ------------------|--------|------------|-------|----------|-----------|------
  alfib            | u32    | +          | -     | -        | 128 GiB   | 0.34
  alfib_mod        | u32    | +          | +     | +        | 1 TiB     | 0.40
- chacha_avx       | u32    | +          |       |          |           |
- chacha           | u32    | +          |       |          |           |
+ chacha_avx       | u32    | +          |       |          |           | 1.86
+ chacha           | u32    | +          | +     |          |           | 2.42
  coveyou64        | u32    | +          | -     | -        | 256 KiB   | 0.46
- isaac64          | u64    | +          |       |          |           |
+ isaac64          | u64    | +          |       |          |           | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB     | 0.85
  kiss99           | u32    | +          | +     |          |           | 1.08
  kiss64           | u64    | +          | +     |          |           | 0.41
@@ -127,22 +127,22 @@ The supplied generators can be divided into several groups:
  lfib_ranmar      | double | +          | +     | +        | < 1KiB    | 6.07
  minstd           | u32    | -          | -     | -        | 1 KiB     | 2.71
  mlfib17_5        | u32    | +          | +     |          |           | 0.38
- mt19937          | u32    | +          | -     | -        |           |
+ mt19937          | u32    | +          | -     | -        |           | 1.38
  mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.45
  mwc64x           | u32    | +          | +     | +        | >=8TiB    | 0.57
  mwc128x          | u64    | +          | +     |          |           | 
  philox           | u64    | +          | +     |          |           |
  randu            | u32    | -          | -     | -        | 1 KiB     | 
- ranluxpp         | u64    | +          | +     |          |           |
- rc4              | u32    | +          |       |          |           |
- rrmxmx           | u64    | +          | +     |          |           |
+ ranluxpp         | u64    | +          | +     |          |           | 3.82
+ rc4              | u32    | +          |       |          |           | 7.41
+ rrmxmx           | u64    | +          | +     |          |           | 0.21
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB   | 3.50
  sqxor            | u64    | +          |       |          |           |
  sqxor32          | u32    | +          |       |          | 16 GiB    |
  threefry         | u64    | +          | +     |          |           | 1.14
  wyrand           | u64    | +          | +     |          |           | ~0.1
- xoroshiro128stst | u64    | +          |       |          |           |
- xorwow           | u32    | +          | -     | -        | 128 KiB   |
+ xoroshiro128stst | u64    | +          |       |          |           | 0.28
+ xorwow           | u32    | +          | -     | -        | 128 KiB   | 0.73
 
 
 

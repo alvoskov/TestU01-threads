@@ -43,8 +43,10 @@ find_library(M_LIB m)
 
 # Source files names
 add_library(testu01threads  testu01_mt.h testu01_mt_cintf.h entropy.h
+    dummy_module.h
     batteries.h bigcrush.h crush.h smallcrush.h pdiehard.h generators.h
     testu01_mt.cpp testu01_mt_cintf.cpp entropy.cpp
+    dummy_module.c
     bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp generators.cpp)
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE})
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
@@ -60,7 +62,7 @@ add_library(splitmix_shared SHARED splitmix_shared.c
     splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_mod alfib coveyou64 dummy isaac64 kiss64 kiss93 kiss99
+foreach(prng_name alfib_mod alfib coveyou64 isaac64 kiss64 kiss93 kiss99
     lcg64 lcg128 lcg69069 lfib_ranmar minstd mwc32x mwc64x mwc128x mlfib17_5
     philox randu rc4 rrmxmx seed64 sezgin63 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
@@ -74,6 +76,11 @@ set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
 add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c
     generators/chacha_avx_shared.h testu01_mt_cintf.h)
 set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
+
+# Module for dummy PRNG
+add_library(dummy_shared SHARED generators/dummy_shared.c dummy_module.c testu01_mt_cintf.h)
+set_target_properties(dummy_shared PROPERTIES LINK_FLAGS "-nostdlib")
+
 
 # Module for RANLUX++ PRNG
 add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c

@@ -1,3 +1,7 @@
+/**
+ * @file mt19937_shared.cpp
+ * @brief Mersenne Twister from C++ standard library.
+ */
 #include <random>
 
 #include "testu01_mt_cintf.h"
@@ -5,13 +9,24 @@
 PRNG_CMODULE_PROLOG
 
 
-static long unsigned int get_bits32(void *param, void *state)
+static unsigned long get_bits32(void *param, void *state)
 {
     std::mt19937 *obj = (std::mt19937 *) state;
     (void) param;
     return (*obj)();
 }
 
+
+static uint32_t get_sum32(void *param, void *state, size_t len)
+{
+    std::mt19937 *obj = (std::mt19937 *) state;
+    uint32_t sum = 0;
+    (void) param;
+    for (size_t i = 0; i < len; i++) {
+        sum += (*obj)();
+    }
+    return sum;
+}
 
 static double get_u01(void *param, void *state)
 {
@@ -45,5 +60,6 @@ int EXPORT gen_getinfo(GenInfoC *gi)
     gi->delete_state = delete_state;
     gi->get_u01 = get_u01;
     gi->get_bits32 = get_bits32;
+    gi->get_sum32 = get_sum32;
     return 1;
 }
