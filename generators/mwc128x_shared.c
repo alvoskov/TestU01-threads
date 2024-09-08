@@ -30,11 +30,7 @@ PRNG_CMODULE_PROLOG
 typedef struct {
     uint64_t x;
     uint64_t c;
-    union {
-        uint64_t u64val; ///< To be splitted to two 32-bit values.
-        uint32_t u32val[2]; ///< 32-bit values.
-    } buf32; ///< Internal buffer for 32-bit outputs.
-    int pos32; ///< Output position for 32-bit output.
+    Interleaved32Buffer i32buf;
 } MWC128State;
 
 /**
@@ -54,67 +50,13 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return obj->x ^ obj->c;
 }
 
-static uint64_t get_bits64(void *param, void *state)
-{
-    return get_bits64_raw(param, state);
-}
-
-/**
- * @brief Decomposes each 64-bit value into a pair of 32-bit
- * values. Needed for TestU01: its batteries should have
- * an access to all bits.
- */
-static long unsigned int get_bits32(void *param, void *state)
-{
-    MWC128State *obj = state;
-    if (obj->pos32 == 2) {
-        obj->buf32.u64val = get_bits64_raw(param, state);
-        obj->pos32 = 0;
-    }
-    return obj->buf32.u32val[obj->pos32++];
-}
-
-
-static double get_u01(void *param, void *state)
-{
-    return uint64_to_udouble(get_bits64_raw(param, state));
-}
-
-
 static void *init_state()
 {
     MWC128State *obj = intf.malloc(sizeof(MWC128State));
     obj->x = intf.get_seed64();
     obj->c = 1;
-    obj->pos32 = 2;
+    Interleaved32Buffer_init(&obj->i32buf);
     return (void *) obj;
 }
 
-
-static void get_array64(void *param, void *state, uint64_t *out, size_t len)
-{
-    for (size_t i = 0; i < len; i++) {
-        out[i] = get_bits64_raw(param, state);
-    }
-}
-
-
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "MWC128X";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    gi->get_bits64 = get_bits64;
-    gi->get_array64 = get_array64;
-    return 1;
-}
+MAKE_UINT64_INTERLEAVED32_PRNG("MWC128X", MWC128State, NULL)

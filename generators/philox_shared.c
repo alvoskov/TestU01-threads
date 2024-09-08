@@ -1,4 +1,5 @@
 /**
+ * @file philox_shared.c
  * @brief An implementation of Philox4x64x10 PRNG.
  * @details Philox PRNG is inspired by Threefish cipher but uses 128-bit
  * multiplication instead of cyclic shifts and uses reduced number of rounds.

@@ -1,31 +1,38 @@
 #include "splitmix_gen.h"
 #include <stdlib.h>
 
-static inline uint64_t get_bits64_raw(SplitMixState *obj)
+static inline uint64_t get_bits64_raw(void *param, void *state)
 {
-    const uint64_t gamma = UINT64_C(0x9E3779B97F4A7C15);
+    SplitMixState *obj = state;
+    (void) param;
+    const uint64_t gamma = 0x9E3779B97F4A7C15;
     uint64_t z = (obj->x += gamma);
-    z = (z ^ (z >> 30)) * UINT64_C(0xBF58476D1CE4E5B9);
-    z = (z ^ (z >> 27)) * UINT64_C(0x94D049BB133111EB);
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EB;
     return z ^ (z >> 31);
 }
 
 
-
 static uint64_t get_bits64(void *param, void *state)
 {
-    SplitMixState *obj = (SplitMixState *) state;
-    (void) param;
-    return get_bits64_raw(obj);
+    return get_bits64_raw(param, state);
+}
+
+
+static uint64_t get_sum64(void *param, void *state, size_t len)
+{
+    size_t sum = 0;
+    for (size_t i = 0; i < len; i++) {
+        sum += get_bits64_raw(param, state);
+    }
+    return sum;
 }
 
 
 static void get_array64(void *param, void *state, uint64_t *out, size_t len)
 {
-    SplitMixState *obj = (SplitMixState *) state;
-    (void) param;
     for (size_t i = 0; i < len; i++) {
-        out[i] = get_bits64_raw(obj);
+        out[i] = get_bits64_raw(param, state);
     }
 }
 
@@ -44,7 +51,7 @@ static long unsigned int get_bits32(void *param, void *state)
 
 static void *init_state()
 {
-    SplitMixState *obj = (SplitMixState *) malloc(sizeof(SplitMixState));
+    SplitMixState *obj = malloc(sizeof(SplitMixState));
     obj->x = 0;
     return (void *) obj;
 }
@@ -66,5 +73,6 @@ int splitmix_get_geninfo(GenInfoC *gi)
     gi->get_bits32 = get_bits32;
     gi->get_bits64 = get_bits64;
     gi->get_array64 = get_array64;
+    gi->get_sum64 = get_sum64;
     return 1;
 }

@@ -7,6 +7,20 @@
  * 1. https://www.burtleburtle.net/bob/rand/isaacafa.html
  * 2. R.J. Jenkins Jr. ISAAC // Fast Software Encryption. Third International
  *    Workshop Proceedings. Cambridge, UK, Februrary 21-23, 1996. P.41-49.
+ *
+ * @copyright Based on public domain code by Bob Jenkins (1996).
+ *
+ * Adaptation for C99 and TestU01-threads (data types, interface, internal
+ * self-test, slight modification of seeding procedure):
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
 #include "testu01_mt_cintf.h"
 
@@ -129,7 +143,7 @@ void Isaac64State_init(Isaac64State *obj, uint64_t seed)
 static uint64_t get_bits64(void *param, void *state)
 {
     (void) param;
-    Isaac64State *obj = (Isaac64State *) state;
+    Isaac64State *obj = state;
     if (obj->pos-- == 0) {
         Isaac64State_block(obj);
         obj->pos = RANDSIZ - 1;
@@ -140,9 +154,9 @@ static uint64_t get_bits64(void *param, void *state)
 
 static void get_array64(void *param, void *state, uint64_t *out, size_t len)
 {
-    (void) param;
-    Isaac64State *obj = (Isaac64State *) state;
+    Isaac64State *obj = state;
     size_t pos = 0;
+    (void) param;
     // Returns blocks of 256 uint64s.
     for (size_t i = 0; i < len / RANDSIZ; i++) {
         Isaac64State_block(obj);
@@ -191,7 +205,8 @@ static void delete_state(void *param, void *state)
 
 /**
  * @brief The internal self-test that compares the PRNG output with
- * the values obtained from the reference implementation of ISAAC64.
+ * the values obtained from the reference implementation of ISAAC64
+ * by Bob Jenkins.
  */
 static int run_self_test()
 {
@@ -202,7 +217,7 @@ static int run_self_test()
         0x993e1de72d36d310ull, 0xa2853b80f17f58eeull,
         0x1877b51e57a764d5ull, 0x001f837cc7350524ull};
 
-    Isaac64State *obj = (Isaac64State *) intf.malloc(sizeof(Isaac64State));
+    Isaac64State *obj = intf.malloc(sizeof(Isaac64State));
     Isaac64State_init(obj, 0);
     for (size_t i = 0; i < 2; i++) {
         intf.printf("----- BLOCK RUN %d -----\n", i);

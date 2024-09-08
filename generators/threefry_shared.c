@@ -48,12 +48,7 @@ typedef struct {
     uint64_t p[Nw]; // Counter ("plain text")
     uint64_t v[Nw]; // Output buffer
     size_t pos;
-
-    union {
-        uint32_t u32[2];
-        uint64_t u64;
-    } bits32_buf;
-    size_t bits32_pos;
+    Interleaved32Buffer i32buf;
 } Tf256State;
 
 
@@ -66,6 +61,7 @@ static void Tf256State_init(Tf256State *obj, const uint64_t *k)
         obj->p[i] = 0;
         obj->k[Nw] ^= obj->k[i];
     }
+    Interleaved32Buffer_init(&obj->i32buf);
 }
 
 
@@ -262,4 +258,4 @@ static void *init_state()
 }
 
 
-MAKE_UINT64_UPTO32_PRNG("Threefry4x64x20", run_self_test)
+MAKE_UINT64_INTERLEAVED32_PRNG("Threefry4x64x20", Tf256State, run_self_test)

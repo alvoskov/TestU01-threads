@@ -1,6 +1,29 @@
 /**
  * @file entropy.h
  * @brief Generator of random seeds for other PRNGs.
+ * @details It uses some sources of entropy (timestamp, rdtsc) and hardware PRNG
+ * that built in CPU (RDSEED). They are used for initialization of modified
+ * SplitMix PRNG and XXTEA block cipher. Output of SplitMix is XORed with
+ * RDSEED and encrypted with XXTEA.
+ *
+ * DON'T USE THIS MODULE FOR CRYPTOGRAPHY, E.G. GENERATION OF KEYS FOR ENCRYPTION!
+ * IT IS DESIGNED ONLY FOR STATISTICAL TESTS AND PRNG SEEDING!
+ *
+ * The next references are used:
+ *
+ * 1. https://mostlymangling.blogspot.com/2018/07/on-mixing-functions-in-fast-splittable.html
+ * 2. https://www.movable-type.co.uk/scripts/xxtea.pdf
+ * 3. https://github.com/an0maly/Crypt-XXTEA/blob/master/reference/test-vector.t
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
 #ifndef __ENTROPY_H
 #define __ENTROPY_H
@@ -50,7 +73,7 @@ class Entropy
     uint32_t key[4];
     uint64_t state;
     
-    uint64_t SplitMixHash(uint64_t z) const;
+    uint64_t MixHash(uint64_t z) const;
     uint64_t Xxtea(const uint64_t inp) const;
     uint64_t NextState();
     uint64_t MixRdSeed(const uint64_t x) const;

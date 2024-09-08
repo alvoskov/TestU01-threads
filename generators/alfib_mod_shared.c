@@ -1,11 +1,11 @@
 /**
  * @file alfib_mod_shared.c
  * @brief A shared library that implements the modified additive
- * Lagged Fibbonaci generator \f$ LFib(2^{64}, 55, 24, +) \f$.
+ * Lagged Fibbonaci generator \f$ LFib(2^{64}, 607, 273, +) \f$.
  * @details It uses the next recurrent formula:
  *
  * \f[
- *   Y_{n} = Y_{n - 55} + Y_{n - 24} \mod 2^{64}
+ *   Y_{n} = Y_{n - 607} + Y_{n - 273} \mod 2^{64}
  * \f]
  *
  * \f[
@@ -20,7 +20,18 @@
  * 52 bits (as double). The initial values in the ring buffer are filled
  * by the 64-bit PCG generator.
  *
- * It passes SmallCrush, Crush and BigCrush batteries.
+ * It passes SmallCrush, Crush and BigCrush batteries. But fails PractRand
+ * at >1 TiB of data.
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
 #include "testu01_mt_cintf.h"
 
@@ -30,8 +41,8 @@ PRNG_CMODULE_PROLOG
 #define LFIB_B 273
 
 typedef struct {
-    uint64_t U[LFIB_A + 1]; /**< Ring buffer (only values 1..17 are used) */
-    uint64_t w; /**< "Weyl sequence */
+    uint64_t U[LFIB_A + 1]; ///< Ring buffer (only values 1..17 are used)
+    uint64_t w; ///< Weyl sequence
     int i;
     int j;
 } ALFib_State;
@@ -42,7 +53,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     (void) param;
     uint64_t x = obj->U[obj->i] + obj->U[obj->j];
     obj->U[obj->i] = x;
-    obj->w += 0x9E3779B97F4A7C15;//UINT64_C(0xd1342543de82ef95)*obj->w + 1;
+    obj->w += 0x9E3779B97F4A7C15;
     if(--obj->i == 0) obj->i = LFIB_A;
 	if(--obj->j == 0) obj->j = LFIB_A;
     return x ^ obj->w;

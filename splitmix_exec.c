@@ -5,7 +5,6 @@ int main()
 {
     GenInfoC gi;
     splitmix_get_geninfo(&gi);
-    set_generator(&gi);
-    run_smallcrush();
+    run_smallcrush(&gi);
     return 0;
 }

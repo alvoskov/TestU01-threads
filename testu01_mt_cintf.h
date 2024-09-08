@@ -166,10 +166,9 @@ static inline uint64_t pcg_bits64(uint64_t *state)
 }
 
 
-void set_generator(const GenInfoC *gi);
-int run_smallcrush();
-int run_crush();
-int run_bigcrush();
+int run_smallcrush(const GenInfoC *gi);
+int run_crush(const GenInfoC *gi);
+int run_bigcrush(const GenInfoC *gi);
 
 /*
  * External modules functions prototypes. They are needed for
@@ -198,8 +197,9 @@ int EXPORT gen_closelib() \
 
 
 /**
- * @brief Some default boilerplate code for scalar PRNG that returns
- * unsigned 32-bit numbers. Requires the next functions to be defined:
+ * @brief  Some default boilerplate code for scalar PRNG that returns
+ * unsigned 32-bit numbers.
+ * @details  Requires the next functions to be defined:
  *
  * - `static inline unsigned long get_bits32_raw(void *param, void *state);`
  * - `static void *init_state();`
@@ -242,7 +242,9 @@ int EXPORT gen_getinfo(GenInfoC *gi) { \
 
 /**
  * @brief Some default boilerplate code for scalar PRNG that returns
- * unsigned 64-bit numbers. Requires the next functions to be defined:
+ * unsigned 64-bit numbers (32-bit numbers are just upper halves).
+ *
+ * @details Requires the next functions to be defined:
  *
  * - `static inline unsigned long get_bits64_raw(void *param, void *state);`
  * - `static void *init_state();`
@@ -292,6 +294,89 @@ int EXPORT gen_getinfo(GenInfoC *gi) { \
     gi->run_self_test = selftest_func; \
     return 1; \
 }
+
+
+/**
+ * @brief Buffer for decomposition of each 64-bit value into a pair
+ * of 32-bit values. Needed for TestU01: its batteries should have
+ * an access to all bits. Used by MAKE_UINT64_INTERLEAVED_PRNG macro.
+ */
+typedef struct {
+    union {
+        uint64_t u64; ///< To be splitted to two 32-bit values.
+        uint32_t u32[2]; ///< 32-bit values.
+    } val; ///< Internal buffer for 32-bit outputs.
+    int pos; ///< Output position for 32-bit output.
+} Interleaved32Buffer;
+
+
+static inline void Interleaved32Buffer_init(Interleaved32Buffer *obj)
+{
+    obj->pos = 2;
+}
+
+
+/**
+ * @brief Some default boilerplate code for scalar PRNG that returns
+ * unsigned 64-bit numbers (32-bit numbers are interleaved high/low parts
+ * of 64-bit number).
+ *
+ * @details Requires the next functions to be defined:
+ *
+ * - `static inline unsigned long get_bits64_raw(void *param, void *state);`
+ * - `static void *init_state();`
+ *
+ * It also relies on default prolog (intf static variable, some exports etc.),
+ * see PRNG_CMODULE_PROLOG
+ */
+#define MAKE_UINT64_INTERLEAVED32_PRNG(prng_name, Type, selftest_func) \
+EXPORT uint64_t get_bits64(void *param, void *state) { \
+    return get_bits64_raw(param, state); \
+} \
+EXPORT long unsigned int get_bits32(void *param, void *state) { \
+    Type *obj = state; \
+    if (obj->i32buf.pos == 2) { \
+        obj->i32buf.val.u64 = get_bits64_raw(param, state); \
+        obj->i32buf.pos = 0; \
+    } \
+    return obj->i32buf.val.u32[obj->i32buf.pos++]; \
+} \
+EXPORT double get_u01(void *param, void *state) { \
+    return uint64_to_udouble(get_bits64_raw(param, state)); \
+} \
+EXPORT void get_array64(void *param, void *state, uint64_t *out, size_t len) { \
+    for (size_t i = 0; i < len; i++) \
+        out[i] = get_bits64_raw(param, state); \
+} \
+EXPORT uint32_t get_sum32(void *param, void *state, size_t len) { \
+    uint32_t sum = 0; \
+    for (size_t i = 0; i < len; i++) \
+        sum += get_bits32(param, state); \
+    return sum; \
+} \
+EXPORT uint64_t get_sum64(void *param, void *state, size_t len) { \
+    uint64_t sum = 0; \
+    for (size_t i = 0; i < len; i++) \
+        sum += get_bits64_raw(param, state); \
+    return sum; \
+} \
+static void delete_state(void *param, void *state) {\
+    (void) param; intf.free(state); \
+} \
+int EXPORT gen_getinfo(GenInfoC *gi) { \
+    gi->name = prng_name; \
+    gi->init_state = init_state; \
+    gi->delete_state = delete_state; \
+    gi->get_u01 = get_u01; \
+    gi->get_bits32 = get_bits32; \
+    gi->get_bits64 = get_bits64; \
+    gi->get_array64 = get_array64; \
+    gi->get_sum32 = get_sum32; \
+    gi->get_sum64 = get_sum64; \
+    gi->run_self_test = selftest_func; \
+    return 1; \
+}
+
 
 
 

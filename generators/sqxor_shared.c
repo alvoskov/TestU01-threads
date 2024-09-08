@@ -14,18 +14,14 @@ PRNG_CMODULE_PROLOG
  */
 typedef struct {
     uint64_t w; /**< "Weyl sequence" counter state */
-    union {
-        uint32_t dw_ary[2];
-        uint64_t qw_val;
-    } buf_32b; /**< Needed for conversion of 64-bit output to 32-bit */
-    size_t pos_32b; /**< Position for 32-bit output */
+    Interleaved32Buffer i32buf;
 } SqXorState;
 
 
-static uint64_t get_bits64(void *param, void *state)
+static inline uint64_t get_bits64_raw(void *param, void *state)
 {
-    const uint64_t s = UINT64_C(0x9E3779B97F4A7C15);
-    SqXorState *obj = (SqXorState *) state;
+    const uint64_t s = 0x9E3779B97F4A7C15;
+    SqXorState *obj = state;
     (void) param;
     uint64_t ww = obj->w += s; // "Weyl sequence" variant
     //uint64_t ww = ++obj->w ^ s; // "Counter" variant
@@ -40,52 +36,13 @@ static uint64_t get_bits64(void *param, void *state)
     return x;
 }
 
-static long unsigned int get_bits32(void *param, void *state)
-{
-    SqXorState *obj = (SqXorState *) state;
-    if (obj->pos_32b >= 2) {
-        obj->buf_32b.qw_val = get_bits64(param, state);
-        obj->pos_32b = 0;
-    }
-    return obj->buf_32b.dw_ary[obj->pos_32b++];
-}
-
-static double get_u01(void *param, void *state)
-{
-    return uint64_to_udouble(get_bits64(param, state));
-}
-
-void get_array64(void *param, void *state, uint64_t *out, size_t len)
-{    
-    for (size_t i = 0; i < len; i++) {
-        out[i] = get_bits64(param, state);
-    }
-}
-
 
 static void *init_state()
 {
     SqXorState *obj = intf.malloc(sizeof(SqXorState));
     obj->w = intf.get_seed64();
-    obj->pos_32b = 2;
+    Interleaved32Buffer_init(&obj->i32buf);
     return (void *) obj;
 }
 
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
-
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "SqXor";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    gi->get_bits64 = get_bits64;
-    gi->get_array64 = get_array64;
-    return 1;
-}
+MAKE_UINT64_INTERLEAVED32_PRNG("SqXor", SqXorState, NULL)

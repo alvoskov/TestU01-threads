@@ -1,6 +1,15 @@
 /**
+ * @file kiss93_shared.c
  * @brief KISS93 pseudorandom number generator. It passes SmallCrush
- * but fails the LinearComp (r = 29) test in the Crush battery.
+ * but fails the LinearComp (r = 29) test in the Crush battery (N72).
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * The KISS93 algorithm is developed by George Marsaglia.
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
 #include "testu01_mt_cintf.h"
 
@@ -14,7 +23,7 @@ typedef struct {
 
 static inline unsigned long get_bits32_raw(void *param, void *state)
 {
-    KISS93State *obj = (KISS93State *) state;
+    KISS93State *obj = state;
     (void) param;
     obj->S1 = 69069 * obj->S1 + 23606797;
     uint32_t b = obj->S2 ^ (obj->S2 << 17);
@@ -27,7 +36,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 
 static void *init_state()
 {
-    KISS93State *obj = (KISS93State *) intf.malloc(sizeof(KISS93State));
+    KISS93State *obj = intf.malloc(sizeof(KISS93State));
     obj->S1 = 12345;
     obj->S2 = 6789;
     obj->S3 = 111213;

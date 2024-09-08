@@ -4,7 +4,7 @@
  * Lagged Fibbonaci generator \f$ LFib(2^{64}, 607, 273, +) \f$.
  * @details It uses the next recurrent formula:
  * \f[
- * X_{n} = X_{n - 17} + X_{n - 5}
+ * X_{n} = X_{n - 607} + X_{n - 273}
  * \f]
  * and returns either higher 32 bits (as unsigned integer) or higher
  * 52 bits (as double). The initial values in the ring buffer are filled
@@ -15,6 +15,16 @@
  *
  * - The failed tests in Crush: `Gap, r = 0`; `Gap, r = 22`
  * - The failed tests in BigCrush: `Gap, r = 0`; `Gap, r = 20`
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
 #include "testu01_mt_cintf.h"
 

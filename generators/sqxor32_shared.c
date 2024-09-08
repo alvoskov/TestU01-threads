@@ -39,9 +39,9 @@ typedef struct {
 } SqXor32State;
 
 
-static unsigned long get_bits32(void *param, void *state)
+static unsigned long get_bits32_raw(void *param, void *state)
 {
-    const uint32_t s = UINT64_C(0x9E3779B9);
+    const uint32_t s = 0x9E3779B9;
     SqXor32State *obj = (SqXor32State *) state;
     (void) param;
     uint32_t ww = obj->w += s; // "Weyl sequence" variant
@@ -56,31 +56,13 @@ static unsigned long get_bits32(void *param, void *state)
     return x;
 }
 
-static double get_u01(void *param, void *state)
-{
-    return uint32_to_udouble(get_bits32(param, state));
-}
 
 static void *init_state()
 {
-    SqXor32State *obj = (SqXor32State *) intf.malloc(sizeof(SqXor32State));
+    SqXor32State *obj = intf.malloc(sizeof(SqXor32State));
     obj->w = intf.get_seed64();
     return (void *) obj;
 }
 
-static void delete_state(void *param, void *state)
-{
-    (void) param;
-    intf.free(state);
-}
 
-int EXPORT gen_getinfo(GenInfoC *gi)
-{
-    static const char name[] = "SqXor32";
-    gi->name = name;
-    gi->init_state = init_state;
-    gi->delete_state = delete_state;
-    gi->get_u01 = get_u01;
-    gi->get_bits32 = get_bits32;
-    return 1;
-}
+MAKE_UINT32_PRNG("SqXor32", NULL)

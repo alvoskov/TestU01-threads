@@ -1,5 +1,7 @@
 /**
- * @brief
+ * @file rrmxmx_shared.c
+ * @brief A modified version of SplitMix that is resistant to bad gammas,
+ * i.e. increments in the "discrete Weyl sequence".
  * @details
  * References:
  * 1. https://mostlymangling.blogspot.com/2018/07/on-mixing-functions-in-fast-splittable.html

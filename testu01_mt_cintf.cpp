@@ -6,8 +6,6 @@
 
 using namespace testu01_threads;
 
-static GenInfoC geninfo;
-
 /**
  * @brief Initialize the structure with information about PRNG
  * with empty values (pointers to empty strings and nullptrs)
@@ -29,33 +27,47 @@ void GenInfoC_init(GenInfoC *obj)
 }
 
 
+/*
 void set_generator(const GenInfoC *gi)
 {
     geninfo = *gi;
 }
+*/
 
-int run_smallcrush()
+/**
+ * @brief Runs multithreaded SmallCrush for the given PRNG.
+ * @param gi Pseudorandom number generator for testing.
+ */
+int run_smallcrush(const GenInfoC *gi)
 {
-    SmallCrushBattery bat([] () -> std::shared_ptr<UniformGenerator> {
-        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
+    SmallCrushBattery bat([gi] () -> std::shared_ptr<UniformGenerator> {
+        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(gi));
     });
     bat.Run();
     return 1;
 }
 
-int run_crush()
+/**
+ * @brief Runs multithreaded Crush for the given PRNG.
+ * @param gi Pseudorandom number generator for testing.
+ */
+int run_crush(const GenInfoC *gi)
 {
-    CrushBattery bat([] () -> std::shared_ptr<UniformGenerator> {
-        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
+    CrushBattery bat([gi] () -> std::shared_ptr<UniformGenerator> {
+        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(gi));
     });
     bat.Run();
     return 1;
 }
 
-int run_bigcrush()
+/**
+ * @brief Runs multithreaded BigCrush for the given PRNG.
+ * @param gi Pseudorandom number generator for testing.
+ */
+int run_bigcrush(const GenInfoC *gi)
 {
-    BigCrushBattery bat([] () -> std::shared_ptr<UniformGenerator> {
-        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(&geninfo));
+    BigCrushBattery bat([gi] () -> std::shared_ptr<UniformGenerator> {
+        return std::shared_ptr<UniformGenerator>(new UniformGeneratorC(gi));
     });
     bat.Run();
     return 1;

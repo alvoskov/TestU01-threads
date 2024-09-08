@@ -77,10 +77,12 @@ Supplied PRNGs external modules
  minstd           |
  mlfib17_5        | LFib(x,2^{64},17,5)
  mt19937          | Mersenne twister from C++ standard library.
+ msws             | Middle-Squares Weyl Sequence PRNG by B.Widynski
  mwc32x           | Similar to MWC64X, but x and c are 16-bit
  mwc64x           | MWC64X: 32-bit Multiply-With-Carry with XORing x and c
  mwc128x          | MWC128X: similar to MWC64X but x and c are 64-bit
  philox           | Philox4x64x10 (weakened and altered ThreeFish)
+ philox32         | Philox4x32x10 (weakened and altered ThreeFish)
  randu            | LCG(2^{32},65539,1), returns whole 32 bits
  ranluxpp         | RANLUX++, RANLUX reformulated as LCG
  rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
@@ -111,37 +113,40 @@ The supplied generators can be divided into several groups:
 
 
  Module name      | Type   | SmallCrush | Crush | BigCrush | PractRand | cpb
-------------------|--------|------------|-------|----------|-----------|------
+------------------|--------|------------|-------|----------|-----------|-----------
  alfib            | u32    | +          | -     | -        | 128 GiB   | 0.34
  alfib_mod        | u32    | +          | +     | +        | 1 TiB     | 0.40
  chacha_avx       | u32    | +          |       |          |           | 1.86
  chacha           | u32    | +          | +     |          |           | 2.42
  coveyou64        | u32    | +          | -     | -        | 256 KiB   | 0.46
- isaac64          | u64    | +          |       |          |           | 0.85
+ isaac64          | u64    | +          | +     |          |           | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB     | 0.85
  kiss99           | u32    | +          | +     |          |           | 1.08
  kiss64           | u64    | +          | +     |          |           | 0.41
  lcg64            | u32    | +          | -     | -        | 16 MiB    | 0.41
- lcg128           | u32/64 | +          |       |          |           | 
+ lcg128           | u32/64 | +          | +     |          | ???/????  | 0.53/0.29
  lcg69069         | u32    | -          | -     | -        | 2 KiB     | 0.40
  lfib_ranmar      | double | +          | +     | +        | < 1KiB    | 6.07
  minstd           | u32    | -          | -     | -        | 1 KiB     | 2.71
  mlfib17_5        | u32    | +          | +     |          |           | 0.38
  mt19937          | u32    | +          | -     | -        |           | 1.38
+ msws             | u32    | +          | +     |          |           | 0.53
  mwc32x           | u32    | +          | -     | -        | 256MiB    | 1.45
  mwc64x           | u32    | +          | +     | +        | >=8TiB    | 0.57
- mwc128x          | u64    | +          | +     |          |           | 
- philox           | u64    | +          | +     |          |           |
- randu            | u32    | -          | -     | -        | 1 KiB     | 
+ mwc128x          | u64    | +          | +     |          |           | 0.21
+ philox           | u64    | +          | +     |          |           | 0.95
+ philox32         | u64    | +          | +     |          |           | 1.91
+ randu            | u32    | -          | -     | -        | 1 KiB     | 0.37
  ranluxpp         | u64    | +          | +     |          |           | 3.82
- rc4              | u32    | +          |       |          |           | 7.41
+ rc4              | u32    | +          | +     |          |           | 7.41
  rrmxmx           | u64    | +          | +     |          |           | 0.21
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB   | 3.50
- sqxor            | u64    | +          |       |          |           |
- sqxor32          | u32    | +          |       |          | 16 GiB    |
+ splitmix         | u64    | +          | +     |          |           | 0.19
+ sqxor            | u64    | +          | +     |          |           | 0.14
+ sqxor32          | u32    | +          | -     | -        | 16 GiB    | 0.24
  threefry         | u64    | +          | +     |          |           | 1.14
  wyrand           | u64    | +          | +     |          |           | ~0.1
- xoroshiro128stst | u64    | +          |       |          |           | 0.28
+ xoroshiro128stst | u64    | +          | +     |          |           | 0.28
  xorwow           | u32    | +          | -     | -        | 128 KiB   | 0.73
 
 
@@ -179,11 +184,22 @@ The next fields in GenInfoC structure should be filled by `gen_getinfo`:
 - `get_u01` - returns the double pseudorandom number.
 - `get_bits32` - returns the uint32_t pseudorandom number.
 
+Functions prototypes:
+
+- `double get_u01(void *param, void *state);`
+- `unsigned long get_bits32(void *param, void *state);`
+
+Remember that `unsigned long` may be either 32-bit or 64-bit, it should be 
+taken into account in PRNG implementations. This is made for compatibility
+with TestU01 subroutines and reducing function calls overhead.
+
 The next fields are optional but may be filled:
 
 - `get_bits64` - returns the uint64_t pseudorandom number.
 - `get_array32` - fills the uint32_t array buffer with pseudorandom numbers.
 - `get_array64` - fills the uint64_t array buffer with pseudorandom numbers.
+- `get_sum32` - returns the sum of uint32_t pseudorandom number.
+- `get_sum64` - returns the sum of uint64_t pseudorandom number.
 - `run_self_test` - runs the internal self-test.
 
 The next fields are filled in GenInfoC before `gen_getinfo` is called and used

@@ -4,11 +4,22 @@
 
 using namespace testu01_threads;
 
-uint64_t Entropy::SplitMixHash(uint64_t z) const
+static inline uint64_t ror64(uint64_t x, uint64_t r)
 {
-    z = (z ^ (z >> 30)) * UINT64_C(0xBF58476D1CE4E5B9);
-    z = (z ^ (z >> 27)) * UINT64_C(0x94D049BB133111EB);
-    return z ^ (z >> 31);
+    return (x << r) | (x >> (64 - r));
+}
+
+/**
+ * @brief rrmxmx hash from modified SplitMix PRNG.
+ */
+uint64_t Entropy::MixHash(uint64_t z) const
+{
+    static uint64_t const M = 0x9fb21c651e98df25ULL;    
+    z ^= ror64(z, 49) ^ ror64(z, 24);
+    z *= M;
+    z ^= z >> 28;
+    z *= M;
+    return z ^ z >> 28;
 }
 
 /**
@@ -20,7 +31,6 @@ uint64_t Entropy::SplitMixHash(uint64_t z) const
 /**
  * @brief XXTEA encryption subroutine for 64-bit block. Used for
  * generation of seeds from 64-bit state.
- * @details https://www.movable-type.co.uk/scripts/xxtea.pdf
  */
 uint64_t Entropy::Xxtea(const uint64_t inp) const
 {
@@ -62,17 +72,13 @@ uint64_t Entropy::MixRdSeed(const uint64_t x) const
 uint64_t Entropy::NextState()
 {
     state += 0x9E3779B97F4A7C15;
-    return MixRdSeed(SplitMixHash(state));
+    return MixRdSeed(MixHash(state));
 }
 
 
-
-/*
-# 64-bit block
-00000000000000000000000000000000, 0000000000000000, ab043705808c5d57
-0102040810204080fffefcf8f0e0c080, fffefcf8f0e0c080, 8c3707c01c7fccc4
-https://github.com/an0maly/Crypt-XXTEA/blob/master/reference/test-vector.t
-*/
+/**
+ * @brief Tests 64-bit XXTEA implementation correctness
+ */
 bool Entropy::XxteaTest()
 {
     constexpr uint64_t OUT0 = 0x575d8c80053704ab;
@@ -95,9 +101,9 @@ bool Entropy::XxteaTest()
 
 Entropy::Entropy()
 {
-    uint64_t seed0 = MixRdSeed(SplitMixHash(time(NULL)));
-    uint64_t seed1 = MixRdSeed(SplitMixHash(~seed0));
-    seed1 ^= MixRdSeed(SplitMixHash(__rdtsc()));
+    uint64_t seed0 = MixRdSeed(MixHash(time(NULL)));
+    uint64_t seed1 = MixRdSeed(MixHash(~seed0));
+    seed1 ^= MixRdSeed(MixHash(CpuClock()));
     key[0] = seed0; key[1] = seed0 >> 32;
     key[2] = seed1; key[3] = seed1 >> 32;
     state = time(NULL);
@@ -112,7 +118,9 @@ uint64_t Entropy::Seed64()
 {
     std::lock_guard<std::mutex> guard(mut);
     uint64_t seed = Xxtea(NextState());
-    seeds_log.push_back(seed);
+    if (seeds_log.size() < 1048576) {
+        seeds_log.push_back(seed);
+    }
     return seed;
 }
 
