@@ -129,7 +129,7 @@ The supplied generators can be divided into several groups:
  lfib_ranmar      | double | +          | +     | +        | < 1KiB       | 6.07
  minstd           | u32    | -          | -     | -        | 1 KiB        | 2.71
  mlfib17_5        | u32    | +          | +     | +        |              | 0.38
- mt19937          | u32    | +          | -     | -        |              | 1.38
+ mt19937          | u32    | +          | -     | -        | 128 GiB      | 1.38
  msws             | u32    | +          | +     | +        |              | 0.53
  mwc32x           | u32    | +          | -     | -        | 256MiB       | 1.45
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
@@ -142,7 +142,7 @@ The supplied generators can be divided into several groups:
  rrmxmx           | u64    | +          | +     |          |              | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
  splitmix         | u64    | +          | +     |          |              | 0.19
- sqxor            | u64    | +          | +     |          |              | 0.14
+ sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
  threefry         | u64    | +          | +     |          |              | 1.14
  wyrand           | u64    | +          | +     |          |              | ~0.1
