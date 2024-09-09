@@ -49,7 +49,7 @@ typedef struct {
 
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
-    ALFib_State *obj = (ALFib_State *) state;
+    ALFib_State *obj = state;
     (void) param;
     uint64_t x = obj->U[obj->i] + obj->U[obj->j];
     obj->U[obj->i] = x;
@@ -61,7 +61,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 
 static void *init_state()
 {
-    ALFib_State *obj = (ALFib_State *) intf.malloc(sizeof(ALFib_State));
+    ALFib_State *obj = intf.malloc(sizeof(ALFib_State));
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf.get_seed64();
     for (size_t k = 1; k <= LFIB_A; k++) {    

@@ -39,7 +39,8 @@ static double get_u01(void *param, void *state)
 
 static void *init_state()
 {
-    std::mt19937 *obj = new std::mt19937();
+    std::seed_seq sd {intf.get_seed64(), intf.get_seed64()};
+    std::mt19937 *obj = new std::mt19937(sd);
     return (void *) obj;
 }
 
