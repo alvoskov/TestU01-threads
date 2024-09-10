@@ -45,7 +45,7 @@ static double get_u01(void *param, void *state)
 
 static long unsigned int get_bits32(void *param, void *state)
 {
-    uint64_t x = get_bits64(param, state);
+    uint64_t x = get_bits64_raw(param, state);
     return x >> 32;
 }
 

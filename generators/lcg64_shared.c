@@ -1,4 +1,5 @@
 /**
+ * @file lcg64_shared.c
  * @brief Just 64-bit LCG.
  * @details
  *
