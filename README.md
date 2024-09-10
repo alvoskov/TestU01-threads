@@ -121,7 +121,7 @@ The supplied generators can be divided into several groups:
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
  isaac64          | u64    | +          | +     |          |              | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB        | 0.85
- kiss99           | u32    | +          | +     |          |              | 1.08
+ kiss99           | u32    | +          | +     | +        |              | 1.08
  kiss64           | u64    | +          | +     | +        |              | 0.41
  lcg64            | u32    | +          | -     | -        | 16 MiB       | 0.41
  lcg128           | u32/64 | +          | +     | +        | >=2TiB/64GiB | 0.53/0.29
@@ -137,7 +137,7 @@ The supplied generators can be divided into several groups:
  philox           | u64    | +          | +     | +        |              | 0.95
  philox32         | u64    | +          | +     | +        |              | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
- ranluxpp         | u64    | +          | +     |          |              | 3.82
+ ranluxpp         | u64    | +          | +     | +        |              | 3.82
  rc4              | u32    | +          | +     |          |              | 7.41
  rrmxmx           | u64    | +          | +     |          |              | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
