@@ -62,9 +62,9 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
     splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_mod alfib coveyou64 isaac64 kiss64 kiss93 kiss99
+foreach(prng_name alfib_mod alfib coveyou64 cmwc4096 isaac64 kiss64 kiss93 kiss99
     lcg64 lcg128 lcg69069 lfib_ranmar minstd msws mwc32x mwc64x mwc128x mlfib17_5
-    philox philox32 randu rc4 rrmxmx seed64 sezgin63 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
+    pcg32 pcg64 philox philox32 randu rc4 rrmxmx seed64 sezgin63 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
 endforeach()

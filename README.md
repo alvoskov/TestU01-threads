@@ -119,6 +119,7 @@ The supplied generators can be divided into several groups:
  chacha_avx       | u32    | +          | +     |          |              | 1.86
  chacha           | u32    | +          | +     |          |              | 2.42
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
+ cmwc4096         | u32    | +          | +     | +        |              | 0.36
  isaac64          | u64    | +          | +     |          |              | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB        | 0.85
  kiss99           | u32    | +          | +     | +        |              | 1.08
@@ -134,6 +135,8 @@ The supplied generators can be divided into several groups:
  mwc32x           | u32    | +          | -     | -        | 256MiB       | 1.45
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
  mwc128x          | u64    | +          | +     | +        |              | 0.21
+ pcg32            | u32    | +          | +     |          |              | 0.42
+ pcg64            | u64    | +          | +     |          |              | 0.27
  philox           | u64    | +          | +     | +        |              | 0.95
  philox32         | u64    | +          | +     | +        |              | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37

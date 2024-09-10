@@ -70,8 +70,8 @@ enum EntropyMethod
 class Entropy
 {
     std::mutex mut;
-    uint32_t key[4];
-    uint64_t state;
+    uint32_t key[4]; ///< XXTEA key
+    uint64_t state; ///< Internal PRNG state
     
     uint64_t MixHash(uint64_t z) const;
     uint64_t Xxtea(const uint64_t inp) const;

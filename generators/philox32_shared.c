@@ -15,7 +15,11 @@
  * 2. Random123: a Library of Counter-Based Random Number Generators
  *    https://github.com/girving/random123/blob/main/tests/kat_vectors
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright Philox algorithm is proposed by J. K. Salmon, M. A. Moraes,
+ * R. O. Dror and D. E. Shaw.
+ *
+ * Implementation for TestU01-threads:
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.

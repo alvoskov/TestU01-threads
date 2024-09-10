@@ -21,10 +21,10 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief MWC32X state. Cannot be initialized to 0 or 2^32 - 1.
+ * @brief MWC32X state. Cannot be initialized to (
  */
 typedef struct {
-    uint32_t data;
+    uint32_t data; ///< (c,x)
 } MWC32XState;
 
 /**
@@ -57,9 +57,10 @@ static inline uint32_t get_bits32_raw(void *param, void *state)
 static void *init_state()
 {
     MWC32XState *obj = intf.malloc(sizeof(MWC32XState));
+    // Seeding: prevent (0,0) and (?,0xFFFF)
     do {
-        obj->data = intf.get_seed64();
-    } while (obj->data == 0 || obj->data == 0xFFFFFFFF);
+        obj->data = intf.get_seed64() << 1;
+    } while (obj->data == 0);
     return (void *) obj;
 }
 

@@ -20,9 +20,9 @@ typedef struct {
 
 uint64_t get_bits64_raw(void *param, void *state)
 {
-    (void) param;
     const uint64_t c = 0xe7037ed1a0b428db;
-    WyRandState *obj = (WyRandState *) state;
+    (void) param;
+    WyRandState *obj = state;
     obj->x += 0xa0761d6478bd642f;
     __uint128_t t = (__uint128_t) obj->x * (obj->x ^ c);
     return (t >> 64) ^ t;

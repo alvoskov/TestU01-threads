@@ -45,9 +45,10 @@ static inline uint32_t get_bits32_raw(void *param, void *state)
 static void *init_state()
 {
     MWC64XState *obj = intf.malloc(sizeof(MWC64XState));
+    // Seeding: prevent (0,0) and (?,0xFFFF)
     do {
-        obj->data = intf.get_seed64();
-    } while (obj->data == 0 || obj->data == 0xFFFFFFFFFFFFFFFF);
+        obj->data = intf.get_seed64() << 1;
+    } while (obj->data == 0);
     return (void *) obj;
 }
 

@@ -15,7 +15,11 @@
  * 2. Random123: a Library of Counter-Based Random Number Generators
  *    https://github.com/girving/random123/blob/main/tests/kat_vectors
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright Philox algorithm is proposed by J. K. Salmon, M. A. Moraes,
+ * R. O. Dror and D. E. Shaw.
+ *
+ * Implementation for TestU01-threads:
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -67,10 +71,8 @@ static inline void philox_bumpkey(uint64_t *key)
 
 static inline void philox_round(uint64_t *out, const uint64_t *key)
 {
-    static const uint64_t PHILOX_M4x64_0 = 0xD2E7470EE14C6C93ull;
-    static const uint64_t PHILOX_M4x64_1 = 0xCA5A826395121157ull;
-    __int128 mul0 = ((__int128) out[0]) * PHILOX_M4x64_0;
-    __int128 mul1 = ((__int128) out[2]) * PHILOX_M4x64_1;
+    __int128 mul0 = ((__int128) out[0]) * 0xD2E7470EE14C6C93ull;
+    __int128 mul1 = ((__int128) out[2]) * 0xCA5A826395121157ull;
     uint64_t hi0 = mul0 >> 64, lo0 = mul0;
     uint64_t hi1 = mul1 >> 64, lo1 = mul1;
     out[0] = hi1 ^ out[1] ^ key[0]; out[1] = lo1;
