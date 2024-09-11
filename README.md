@@ -47,7 +47,6 @@ TestU01 library but just replaces single-threaded batteries implementation from
 are reentrant. Such modification also requires new API for pseudorandom number
 generators: threads should be able to create its own examples of generators.
 
-
 There is another program with similar approach: TestU01-parallel. However, it was
 forked from an older non-free version of TestU01. It also almost not documented
 and uses Python scripts for running different processes with slightly modified TestU01.
@@ -97,8 +96,9 @@ Supplied PRNGs external modules
  randu            | LCG(2^{32},65539,1), returns whole 32 bits
  ranluxpp         | RANLUX++, RANLUX reformulated as LCG
  rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
- rrmxmx           |
+ rrmxmx           | Modified SplitMix PRNG with improved output function
  seigzin63        | LCG(2^{63}-25,a,0)
+ squares64        |
  sqxor            | sqxor
  sqxor32          | sqxor32
  threefry         | Threefry4x64x20 (ThreeFish with reduced number of rounds) 
@@ -153,14 +153,15 @@ The supplied generators can be divided into several groups:
  philox32         | u64    | +          | +     | +        |              | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
  ranluxpp         | u64    | +          | +     | +        |              | 3.82
- rc4              | u32    | +          | +     |          |              | 7.41
- rrmxmx           | u64    | +          | +     |          |              | 0.18
+ rc4              | u32    | +          | +     | +        |              | 7.41
+ rrmxmx           | u64    | +          | +     | +        | 512 GiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
  splitmix         | u64    | +          | +     |          |              | 0.19
  sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
+ squares64        | u64    | +          | +     |          | >=1 TiB      | 0.42
  threefry         | u64    | +          | +     |          |              | 1.14
- wyrand           | u64    | +          | +     |          |              | ~0.1
+ wyrand           | u64    | +          | +     | +        |              | ~0.1
  xoroshiro128stst | u64    | +          | +     |          |              | 0.28
  xorwow           | u32    | +          | -     | -        | 128 KiB      | 0.73
 

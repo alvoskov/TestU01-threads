@@ -48,7 +48,16 @@ extern "C" {
 #define MILLION (THOUSAND * THOUSAND)
 #define BILLION (THOUSAND * MILLION)
 
+
+/**
+ * @brief Block size (in elements) for vectorized PRNG calls.
+ */
+constexpr size_t ELEMENTS_PER_BLOCK = 1024;
+
+
 #include "testu01_mt_cintf.h"
+#include "dummy_module.h"
+#include "entropy.h"
 #include <string>
 #include <functional>
 #include <memory>
