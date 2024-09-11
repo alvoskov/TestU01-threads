@@ -44,7 +44,15 @@ TestU01-threads uses an entirely different approach: it doesn't modify the origi
 TestU01 library but just replaces single-threaded batteries implementation from
 `bbattery.c` (sequental call of statistical tests) to its own multithreaded version
 (parallel call of statistical tests from different threads). These statistical tests
-are reentrant.
+are reentrant. Such modification also requires new API for pseudorandom number
+generators: threads should be able to create its own examples of generators.
+
+
+There is another program with similar approach: TestU01-parallel. However, it was
+forked from an older non-free version of TestU01. It also almost not documented
+and uses Python scripts for running different processes with slightly modified TestU01.
+
+- https://github.com/rski/testu01-parallel
 
 Executables
 ===========
@@ -66,6 +74,7 @@ Supplied PRNGs external modules
  chacha_avx       | ChaCha12 CSPRNG: AVX2 implementation
  chacha           | ChaCha12 CSPRNG: Cross-platform implementation 
  coveyou64        |
+ cmwc4096         |
  isaac64          | ISAAC64 CSPRNG
  kiss93           | KISS93 (doesn't pass Crush and BigCrush)
  kiss99           | KISS99
@@ -81,11 +90,14 @@ Supplied PRNGs external modules
  mwc32x           | Similar to MWC64X, but x and c are 16-bit
  mwc64x           | MWC64X: 32-bit Multiply-With-Carry with XORing x and c
  mwc128x          | MWC128X: similar to MWC64X but x and c are 64-bit
+ pcg32            | Permuted Congruental Generator (32-bit version, 64-bit state)
+ pcg64            | Permuted Congruental Generator (32-bit version, 64-bit state)
  philox           | Philox4x64x10 (weakened and altered ThreeFish)
  philox32         | Philox4x32x10 (weakened and altered ThreeFish)
  randu            | LCG(2^{32},65539,1), returns whole 32 bits
  ranluxpp         | RANLUX++, RANLUX reformulated as LCG
  rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
+ rrmxmx           |
  seigzin63        | LCG(2^{63}-25,a,0)
  sqxor            | sqxor
  sqxor32          | sqxor32
@@ -100,7 +112,7 @@ The supplied generators can be divided into several groups:
 1. Cryptographically secure pseudorandom numbers generators (CSPRNG):
    ChaCha12, ISAAC64
 2. Simplified generators based on CSPRNG: Philox, Threefry.
-3. High-quality PRNGs that pass BigCrush: KISS99, KISS64, LCG128,
+3. High-quality PRNGs that pass BigCrush: CMWC, KISS99, KISS64, LCG128,
    multiplicative lagged Fibonacci, MWC64X, MWC128X, RANLUX++,
    sqxor, wyrand, xoroshiro128**.
 4. RC4: passes BigCrush but fails PractRand (obsolete and slow CSPRNG).
@@ -108,7 +120,7 @@ The supplied generators can be divided into several groups:
 6. PRNGs that pass SmallCrush but fail more complex tests: Coveyou64, KISS93,
    LCG64, Mersenne Twister, MWC32X, sqxor32, xorwow.
 7. Low-quality PRNGs: lcg69069, minstd
-8. RANDU
+8. RANDU: low-quality LCG that fails almost all statistical tests.
    
 
 
@@ -134,7 +146,7 @@ The supplied generators can be divided into several groups:
  msws             | u32    | +          | +     | +        |              | 0.53
  mwc32x           | u32    | +          | -     | -        | 256MiB       | 1.45
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
- mwc128x          | u64    | +          | +     | +        |              | 0.21
+ mwc128x          | u64    | +          | +     | +        | >=1TiB       | 0.21
  pcg32            | u32    | +          | +     | +        |              | 0.47
  pcg64            | u64    | +          | +     | +        |              | 0.30
  philox           | u64    | +          | +     | +        |              | 0.95
@@ -172,7 +184,7 @@ C modules should be compiled as freestanding, i.e. don't use any functions from
 standard library and other libraries. However, CallerAPI structure contains
 pointer to some functions useful for PRNG construction:
 
-- `get_seed64` - get random 64-bit seed using RDSEED and/or XXTEA CSPRNG.
+- `get_seed64` - get random 64-bit seed using hardware random numbers generator.
 - `malloc` - pointer to malloc function from C standard library.
 - `free` - pointer to free function from C standard library.
 - `printf` - pointer to printf function.
