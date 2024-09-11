@@ -7,7 +7,7 @@
  * - 26  SimpPoker, d = 64
  */
 
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

@@ -1,4 +1,4 @@
-#include "dummy_module.h"
+#include "testu01th/dummy_module.h"
 #include <stdlib.h>
 
 static int dummy_initlib(CallerAPI *intf)

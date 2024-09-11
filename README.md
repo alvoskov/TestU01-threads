@@ -67,9 +67,9 @@ Supplied PRNGs external modules
 ===============================
 
  Module name      | Generator
-------------------|------------------------------------------------------------
- alfib            | LFib(+,2^{64},607,203)
- alfib_mod        | LFib(+,2^{64},52,24) XORed by "Weyl sequence"
+------------------|---------------------------------------------------------------------------
+ alfib            | \f$ LFib(+,2^{64},607,203) \f$
+ alfib_mod        | \f$ LFib(+,2^{64},607,203) \f$ XORed by "Weyl sequence"
  chacha_avx       | ChaCha12 CSPRNG: AVX2 implementation
  chacha           | ChaCha12 CSPRNG: Cross-platform implementation 
  coveyou64        |
@@ -78,12 +78,12 @@ Supplied PRNGs external modules
  kiss93           | KISS93 (doesn't pass Crush and BigCrush)
  kiss99           | KISS99
  kiss64           | 64-bit version of KISS
- lcg64            | LCG(2^{64},6906969069,1) that returns upper 32 bits
- lcg128           | LCG(2^{128},18000690696906969069,1), returns upper 32 bits
- lcg69069         | LCG(2^{32},69069,1), returns whole 32 bits
+ lcg64            | \f$ LCG(2^{64},6906969069,1) \f$ that returns upper 32 bits
+ lcg128           | \f$ LCG(2^{128},18000690696906969069,1) \f$, returns upper 32/64 bits
+ lcg69069         | \f$ LCG(2^{32},69069,1)\f$, returns whole 32 bits
  lfib_ranmar      | RANMAR: subtractive lagged Fibonacci + "Weyl sequence"
- minstd           |
- mlfib17_5        | LFib(x,2^{64},17,5)
+ minstd           | \f$ LCG(2^{31} - 1, 16807, 0)\f$ "minimial standard" obsolete generator.
+ mlfib17_5        | \f$ LFib(x,2^{64},17,5) \f$
  mt19937          | Mersenne twister from C++ standard library.
  msws             | Middle-Squares Weyl Sequence PRNG by B.Widynski
  mwc32x           | Similar to MWC64X, but x and c are 16-bit
@@ -93,12 +93,13 @@ Supplied PRNGs external modules
  pcg64            | Permuted Congruental Generator (32-bit version, 64-bit state)
  philox           | Philox4x64x10 (weakened and altered ThreeFish)
  philox32         | Philox4x32x10 (weakened and altered ThreeFish)
- randu            | LCG(2^{32},65539,1), returns whole 32 bits
+ randu            | \f$ LCG(2^{32},65539,1) \f$, returns whole 32 bits
  ranluxpp         | RANLUX++, RANLUX reformulated as LCG
  rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
  rrmxmx           | Modified SplitMix PRNG with improved output function
- seigzin63        | LCG(2^{63}-25,a,0)
- squares64        |
+ seigzin63        | \f$ LCG(2^{63}-25,a,0) \f$
+ sfc64            | "Small Fast Chaotic 64-bit" PRNG by 
+ squares64        | Counter-based 64-bit PRNG by B.Widynski
  sqxor            | sqxor
  sqxor32          | sqxor32
  threefry         | Threefry4x64x20 (ThreeFish with reduced number of rounds) 
@@ -132,7 +133,7 @@ The supplied generators can be divided into several groups:
  chacha           | u32    | +          | +     |          |              | 2.04
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
  cmwc4096         | u32    | +          | +     | +        |              | 0.36
- isaac64          | u64    | +          | +     |          |              | 0.85
+ isaac64          | u64    | +          | +     | +        |              | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB        | 0.85
  kiss99           | u32    | +          | +     | +        | >=1 TiB      | 1.08
  kiss64           | u64    | +          | +     | +        |              | 0.41
@@ -141,7 +142,7 @@ The supplied generators can be divided into several groups:
  lcg69069         | u32    | -          | -     | -        | 2 KiB        | 0.40
  lfib_ranmar      | double | +          | +     | +        | < 1KiB       | 6.07
  minstd           | u32    | -          | -     | -        | 1 KiB        | 2.71
- mlfib17_5        | u32    | +          | +     | +        |              | 0.38
+ mlfib17_5        | u32    | +          | +     | +        | >=1TiB       | 0.38
  mt19937          | u32    | +          | -     | -        | 128 GiB      | 1.38
  msws             | u32    | +          | +     | +        |              | 0.53
  mwc32x           | u32    | +          | -     | -        | 256MiB       | 1.45
@@ -156,6 +157,7 @@ The supplied generators can be divided into several groups:
  rc4              | u32    | +          | +     | +        |              | 7.41
  rrmxmx           | u64    | +          | +     | +        | 512 GiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
+ sfc64            | u32    | +          | +     |          |              | 0.12
  splitmix         | u64    | +          | +     |          |              | 0.19
  sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24

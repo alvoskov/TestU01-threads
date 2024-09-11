@@ -17,8 +17,15 @@
  * 2. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
  *    CD-ROM) https://www.grc.com/otg/Marsaglia_MWC_Generators.pdf
  * 3. Sebastiano Vigna. MWC128. https://prng.di.unimi.it/MWC128.c
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

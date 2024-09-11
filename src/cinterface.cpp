@@ -1,8 +1,8 @@
-#include "testu01_mt_cintf.h"
-#include "testu01_mt.h"
-#include "smallcrush.h"
-#include "crush.h"
-#include "bigcrush.h"
+#include "testu01th/cinterface.h"
+#include "testu01th/testu01_mt.h"
+#include "testu01th/smallcrush.h"
+#include "testu01th/crush.h"
+#include "testu01th/bigcrush.h"
 
 using namespace testu01_threads;
 
@@ -25,14 +25,6 @@ void GenInfoC_init(GenInfoC *obj)
     obj->get_sum64 = nullptr;
     obj->run_self_test = nullptr;
 }
-
-
-/*
-void set_generator(const GenInfoC *gi)
-{
-    geninfo = *gi;
-}
-*/
 
 /**
  * @brief Runs multithreaded SmallCrush for the given PRNG.

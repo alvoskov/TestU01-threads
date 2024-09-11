@@ -15,13 +15,7 @@
  * In scientific publications which used this software, a reference to it
  * would be appreciated.
  */
-
-#include "testu01_mt.h"
-#include "batteries.h"
-#include "entropy.h"
-#include "generators.h"
-#include "dummy_module.h"
-#include "speedtest.h"
+#include "testu01_threads.h"
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
 /**
- * @file testu01th_lib.h
+ * @file cinterface.h
  * @brief Simple C-style interface that enables an interaction between
  * TestU01-threads library and C programs.
  *
@@ -30,8 +30,8 @@
  * would be appreciated.
  */
 
-#ifndef __TESTU01_MT_CINTF
-#define __TESTU01_MT_CINTF
+#ifndef __TESTU01_CINTERFACE
+#define __TESTU01_CINTERFACE
 #include <stdint.h>
 #include <time.h>
 

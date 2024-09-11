@@ -1,4 +1,4 @@
-#include "splitmix_gen.h"
+#include "testu01th/splitmix_gen.h"
 #include <stdlib.h>
 
 static inline uint64_t get_bits64_raw(void *param, void *state)

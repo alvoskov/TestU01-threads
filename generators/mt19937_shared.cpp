@@ -3,8 +3,7 @@
  * @brief Mersenne Twister from C++ standard library.
  */
 #include <random>
-
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

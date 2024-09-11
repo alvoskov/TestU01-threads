@@ -10,10 +10,16 @@
  * 52 bits (as double). The initial values in the ring buffer are filled
  * by the 64-bit PCG generator.
  *
- * It should pass SmallCrush, Crush, BigCrush and
- * pseudoDIEHARD test batteries.
+ * Passes SmallCrush, Crush, BigCrush and pseudoDIEHARD test batteries.
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 #define LFIB_A 17
 #define LFIB_B 5

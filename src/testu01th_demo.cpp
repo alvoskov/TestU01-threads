@@ -2,10 +2,18 @@
  * @file testu01th_demo.cpp
  * @brief Runs TestU01 batteries for some pre-defined pseudorandom
  * number generators. Cannot load tests from DLLs.
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
-#include "testu01_mt.h"
-#include "batteries.h"
-#include "generators.h"
+#include "testu01_threads.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -47,9 +55,10 @@ int main(int argc, char *argv[])
     };
 
     if (argc != 3) {
-        printf("Usage: testu01th_demo battery generator\n");
-        printf("battery: battery name (SmallCrush, Crush, BigCrush, pseudoDIEHARD)\n");
-        printf("generator: PRNG name. The supported generators are:\n");
+        std::cout << "Usage: testu01th_demo battery generator" << std::endl;
+        std::cout << "battery: battery name; possible variants are:" << std::endl;
+        std::cout << "  SmallCrush, Crush, BigCrush, pseudoDIEHARD, stdout32, stdout64" << std::endl;
+        std::cout << "generator: PRNG name. The supported generators are:" << std::endl;
         std::vector<std::string> gnames;
         for (auto &kv : gen_map) {
             gnames.push_back(kv.first);
@@ -72,18 +81,20 @@ int main(int argc, char *argv[])
     auto create_gen = gen_map.at(generator);    
     if (battery == "SmallCrush") {
         SmallCrushBattery bat(create_gen);
-        bat.Run();
+        std::cout << bat.Run().report << std::endl;
     } else if (battery == "Crush") {
         CrushBattery bat(create_gen);
-        bat.Run();
+        std::cout << bat.Run().report << std::endl;
     } else if (battery == "BigCrush") {
         BigCrushBattery bat(create_gen);
-        bat.Run();
+        std::cout << bat.Run().report << std::endl;
     } else if (battery == "pseudoDIEHARD") {
         PseudoDiehardBattery bat(create_gen);
-        bat.Run();
-    } else if (battery == "practrand32") {
+        std::cout << bat.Run().report << std::endl;
+    } else if (battery == "stdout32") {
         prng_bits32_to_file(create_gen());
+    } else if (battery == "stdout64") {
+        prng_bits64_to_file(create_gen());
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
     }

@@ -10,8 +10,18 @@
  * - https://groups.google.com/g/comp.lang.fortran/c/qFv18ql_WlU
  * - https://www.thecodingforums.com/threads/64-bit-kiss-rngs.673657/
  * - https://ssau.ru/pagefiles/sbornik_pit_2021.pdf
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

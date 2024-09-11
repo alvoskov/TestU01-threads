@@ -1,4 +1,4 @@
-#include "smallcrush.h"
+#include "testu01th/smallcrush.h"
 
 using namespace testu01_threads;
 

@@ -31,8 +31,8 @@ endif()
 
 # Some CMake settings
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Check if math library is required to link
@@ -43,57 +43,66 @@ find_library(M_LIB m)
 
 # Source files names
 add_library(testu01threads
-    batteries.h
-    bigcrush.h crush.h smallcrush.h pdiehard.h
-    bigcrush.cpp crush.cpp smallcrush.cpp pdiehard.cpp 
-    dummy_module.h dummy_module.c
-    entropy.h entropy.cpp
-    generators.h generators.cpp 
-    speedtest.h speedtest.cpp
-    testu01_mt.h testu01_mt.cpp
-    testu01_mt_cintf.h testu01_mt_cintf.cpp)
-target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE})
+    include/testu01th/batteries.h
+    include/testu01th/bigcrush.h      src/bigcrush.cpp
+    include/testu01th/crush.h         src/crush.cpp
+    include/testu01th/dummy_module.h  src/dummy_module.c
+    include/testu01th/entropy.h       src/entropy.cpp
+    include/testu01th/generators.h    src/generators.cpp 
+    include/testu01th/smallcrush.h    src/smallcrush.cpp
+    include/testu01th/speedtest.h     src/speedtest.cpp
+    include/testu01th/pdiehard.h      src/pdiehard.cpp 
+    include/testu01th/testu01_mt.h    src/testu01_mt.cpp
+    include/testu01th/cinterface.h    src/cinterface.cpp)
+target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 
 # Executables that call TestU01-threads library
-add_executable(testu01th_run testu01th_run.cpp)
-add_executable(testu01th_demo testu01th_demo.cpp)
+add_executable(testu01th_run src/testu01th_run.cpp)
+target_include_directories(testu01th_run PRIVATE include)
+add_executable(testu01th_demo src/testu01th_demo.cpp)
+target_include_directories(testu01th_demo PRIVATE include)
 
 # SplitMix generator in two variants: that calls TestU01-threads
 # and that is called by TestU01-threads as an external module
-add_executable(splitmix_exec splitmix_exec.c splitmix_gen.c splitmix_gen.h)
+add_executable(splitmix_exec
+    src/splitmix_exec.c src/splitmix_gen.c include/testu01th/splitmix_gen.h)
+target_include_directories(splitmix_exec PRIVATE include)
 add_library(splitmix_shared SHARED generators/splitmix_shared.c
-    splitmix_gen.c splitmix_gen.h testu01_mt_cintf.h)
+    src/splitmix_gen.c include/testu01th/splitmix_gen.h include/testu01th/cinterface.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_mod alfib coveyou64 cmwc4096 isaac64 kiss64 kiss93 kiss99
+foreach(prng_name alfib_mod alfib chacha chacha_avx coveyou64 cmwc4096 isaac64 kiss64 kiss93 kiss99
     lcg64 lcg128 lcg69069 lfib_ranmar minstd msws mwc32x mwc64x mwc128x mlfib17_5
     pcg32 pcg64 philox philox32 randu rc4 rrmxmx
-    seed64 sezgin63 squares64 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
-    add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c testu01_mt_cintf.h)
+    seed64 sezgin63 sfc64 squares64 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
+    add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
+    set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    target_include_directories(${prng_name}_shared PRIVATE include)
 endforeach()
 
-# Modules (with internal self-tests) for ChaCha CSPRNG
-add_library(chacha_shared SHARED generators/chacha_shared.c
-    generators/chacha_shared.h testu01_mt_cintf.h)
-set_target_properties(chacha_shared PROPERTIES LINK_FLAGS "-nostdlib")
-add_library(chacha_avx_shared SHARED generators/chacha_avx_shared.c
-    generators/chacha_avx_shared.h testu01_mt_cintf.h)
-set_target_properties(chacha_avx_shared PROPERTIES LINK_FLAGS "-nostdlib")
-
 # Module for dummy PRNG
-add_library(dummy_shared SHARED generators/dummy_shared.c dummy_module.c testu01_mt_cintf.h)
+add_library(dummy_shared SHARED generators/dummy_shared.c src/dummy_module.c include/testu01th/cinterface.h)
 set_target_properties(dummy_shared PROPERTIES LINK_FLAGS "-nostdlib")
-
 
 # Module for RANLUX++ PRNG
 add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c
-    generators/ranluxpp_mulmod.h generators/ranluxpp_helpers.h testu01_mt_cintf.h)
+    generators/ranluxpp_mulmod.h generators/ranluxpp_helpers.h include/testu01th/cinterface.h)
 set_target_properties(ranluxpp_shared PROPERTIES LINK_FLAGS "-nostdlib")
 
 # Module and test for MT19937
-add_library(mt19937_shared SHARED generators/mt19937_shared.cpp testu01_mt_cintf.h)
+add_library(mt19937_shared SHARED generators/mt19937_shared.cpp include/testu01th/cinterface.h)
+
+
+foreach(prng_name chacha chacha_avx dummy ranluxpp mt19937 splitmix)
+    set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    target_include_directories(${prng_name}_shared PRIVATE include)
+endforeach()
+
+
 
 # Link executables
 foreach (program testu01th_demo testu01th_run splitmix_exec)

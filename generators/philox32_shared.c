@@ -29,8 +29,7 @@
  * In scientific publications which used this software, a reference to it
  * would be appreciated.
  */
-
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 #define Nw 4
 

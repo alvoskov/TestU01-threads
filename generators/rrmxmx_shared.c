@@ -5,8 +5,15 @@
  * @details
  * References:
  * 1. https://mostlymangling.blogspot.com/2018/07/on-mixing-functions-in-fast-splittable.html
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

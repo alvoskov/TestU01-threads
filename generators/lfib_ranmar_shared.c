@@ -17,8 +17,17 @@
  * 1. George Marsaglia, Wai Wan Tsang. The 64-bit universal RNG //
  *    // Statistics & Probability Letters. 2004. V. 66. N 2. P.183-187.
  *    https://doi.org/10.1016/j.spl.2003.11.001.
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * The KISS99 algorithm is developed by George Marsaglia.
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 #include <limits.h>
 
 #define LFIB_A 98

@@ -2,7 +2,7 @@
 // Licensed under Apache License 2.0 (NO WARRANTY, etc. see website)
 
 
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

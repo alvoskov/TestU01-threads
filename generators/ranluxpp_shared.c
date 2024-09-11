@@ -54,7 +54,7 @@
  * See ranluxpp_LICENSE.txt next to this file for the text of the LGPL version 2.1.
  * For questions regarding the ROOT license, please contact rootdev@cern.ch.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 #include "ranluxpp_mulmod.h"
 
 PRNG_CMODULE_PROLOG

@@ -24,10 +24,27 @@
  * In scientific publications which used this software, a reference to it
  * would be appreciated.
  */
-#include "chacha_shared.h"
+#include "testu01th/cinterface.h"
 
 static CallerAPI intf;
 static int gen_nrounds = 12;
+
+/**
+ * @brief Contains the ChaCha state.
+ * @details The next memory layout in 1D array is used:
+ * 
+ *     | 0   1  2  3 |
+ *     | 4   5  6  7 |
+ *     | 8   9 10 11 |
+ *     | 12 13 14 15 |
+ */
+typedef struct {
+    uint32_t x[16]; ///< Working state
+    uint32_t out[16]; ///< Output state
+    size_t ncycles; ///< Number of rounds / 2
+    size_t pos;
+} ChaChaState;
+
 
 /////////////////////////////////////////////////
 ///// Entry point for -nostdlib compilation /////

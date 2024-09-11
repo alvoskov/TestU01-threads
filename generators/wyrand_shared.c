@@ -8,8 +8,14 @@
  * - testingRNG, wyrand.h file by D. Lemire (Apache 2.0 license)
  *   https://github.com/lemire/testingRNG/blob/master/source/wyrand.h
  *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 

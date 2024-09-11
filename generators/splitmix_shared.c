@@ -1,5 +1,5 @@
-#include "testu01_mt_cintf.h"
-#include "splitmix_gen.h"
+#include "testu01th/cinterface.h"
+#include "testu01th/splitmix_gen.h"
 #include <stdio.h>
 
 static GenInfoC gi;

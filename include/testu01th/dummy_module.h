@@ -5,7 +5,7 @@
  */
 #ifndef __DUMMY_MODULE_H
 #define __DUMMY_MODULE_H
-#include "testu01_mt_cintf.h"
+#include "testu01th/cinterface.h"
 
 #ifdef __cplusplus
 extern "C" {

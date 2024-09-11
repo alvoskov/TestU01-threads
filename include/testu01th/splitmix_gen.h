@@ -1,7 +1,7 @@
 #ifndef __SPLITMIX_GEN_H
 #define __SPLITMIX_GEN_H
 
-#include "testu01_mt_cintf.h"
+#include "cinterface.h"
 
 typedef struct {
     uint64_t x;

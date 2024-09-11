@@ -1,4 +1,4 @@
-#include "pdiehard.h"
+#include "testu01th/pdiehard.h"
 
 using namespace testu01_threads;
 

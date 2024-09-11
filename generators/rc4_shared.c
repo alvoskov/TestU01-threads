@@ -13,9 +13,15 @@
  * 3. Khovayko O., Schelkunov D. RC4OK. An improvement of the RC4 stream
  *    cipher // Cryptology ePrint Archive, Paper 2023/1486.
  *    https://eprint.iacr.org/2023/1486
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
-#include "testu01_mt_cintf.h"
-
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
