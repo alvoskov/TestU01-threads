@@ -73,7 +73,7 @@ Supplied PRNGs external modules
  chacha_avx       | ChaCha12 CSPRNG: AVX2 implementation
  chacha           | ChaCha12 CSPRNG: Cross-platform implementation 
  coveyou64        |
- cmwc4096         |
+ cmwc4096         | CMWC4096 "Mother-of-all" PRNG by G.Marsaglia
  isaac64          | ISAAC64 CSPRNG
  kiss93           | KISS93 (doesn't pass Crush and BigCrush)
  kiss99           | KISS99
@@ -154,10 +154,10 @@ The supplied generators can be divided into several groups:
  philox32         | u64    | +          | +     | +        |              | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
  ranluxpp         | u64    | +          | +     | +        |              | 3.82
- rc4              | u32    | +          | +     | +        |              | 7.41
- rrmxmx           | u64    | +          | +     | +        | 512 GiB      | 0.18
+ rc4              | u32    | +          | +     | +        | 512 GiB      | 7.41
+ rrmxmx           | u64    | +          | +     | +        |              | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
- sfc64            | u32    | +          | +     |          |              | 0.12
+ sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
  splitmix         | u64    | +          | +     |          |              | 0.19
  sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
