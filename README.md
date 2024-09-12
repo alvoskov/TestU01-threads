@@ -164,6 +164,7 @@ The supplied generators can be divided into several groups:
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
  splitmix         | u64    | +          | +     |          |              | 0.19
+ shr3             | u32    | -          | -     | -        | 32 KiB       | 0.73?
  sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
  squares64        | u64    | +          | +     |          | >=1 TiB      | 0.42
@@ -171,6 +172,7 @@ The supplied generators can be divided into several groups:
  wyrand           | u64    | +          | +     | +        |              | ~0.1
  xoroshiro128stst | u64    | +          | +     |          |              | 0.28
  xorwow           | u32    | +          | -     | -        | 128 KiB      | 0.73
+ xsh              | u64    | -          | -     | -        | 32 KiB       | 0.37?
 
 
 
