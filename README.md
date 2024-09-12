@@ -167,7 +167,7 @@ The supplied generators can be divided into several groups:
  sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
  squares64        | u64    | +          | +     |          | >=1 TiB      | 0.42
- threefry         | u64    | +          | +     |          |              | 1.14
+ threefry         | u64    | +          | +     | +        |              | 1.14
  wyrand           | u64    | +          | +     | +        |              | ~0.1
  xoroshiro128stst | u64    | +          | +     |          |              | 0.28
  xorwow           | u32    | +          | -     | -        | 128 KiB      | 0.73
