@@ -23,6 +23,9 @@ PRNG_CMODULE_PROLOG
 
 /**
  * @brief 128-bit LCG state.
+ * @details It has two versions: for compilers with 128-bit integers (GCC,Clang)
+ * and for MSVC that has no such integers but has some compiler intrinsics
+ * for 128-bit multiplication.
  */
 typedef struct {
 #ifdef UINT128_ENABLED
@@ -33,7 +36,9 @@ typedef struct {
 #endif
 } Lcg128State;
 
-
+/**
+ * @brief A cross-compiler implementation of 128-bit LCG.
+ */
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
     Lcg128State *obj = state;
@@ -43,16 +48,11 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     obj->x = a * obj->x  + 1; 
     return (uint64_t) (obj->x >> 64);
 #else
-    uint64_t mul0_low, mul0_high, mul1_low;
-    mul0_low = unsigned_mul128(a, obj->x_low, &mul0_high);
-    mul1_low = a * obj->x_high;
-    mul1_low += mul0_high;
-    mul1_low += _addcarry_u64(0, mul0_low, 1ull, &mul0_low);
-
-    obj->x_low = mul0_low;
-    obj->x_high = mul1_low;
-
-    return obj->x_low;
+    uint64_t mul0_high;
+    obj->x_low = unsigned_mul128(a, obj->x_low, &mul0_high);
+    obj->x_high = a * obj->x_high + mul0_high;
+    obj->x_high += _addcarry_u64(0, obj->x_low, 1ull, &obj->x_low);
+    return obj->x_high;
 #endif
 }
 

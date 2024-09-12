@@ -45,7 +45,7 @@ SHARED_ENTRYPOINT_CODE
 
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#include <xopintrin.h>
+//#include <xopintrin.h>
 
 static inline __m256i mm256_roti_epi32_def(__m256i in, int r)
 {
@@ -202,8 +202,8 @@ void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *
 
 static long unsigned int get_bits32(void *param, void *state)
 {
+    ChaChaAVXState *obj = state;
     (void) param;
-    ChaChaAVXState *obj = (ChaChaAVXState *) state;
     if (obj->pos >= 32) {
         ChaChaAVX_inc_counter(obj);
         ChaChaAVX_block(obj);
@@ -218,9 +218,9 @@ static double get_u01(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
-    ChaChaAVXState *obj = (ChaChaAVXState *) intf.malloc(sizeof(ChaChaAVXState));
+    ChaChaAVXState *obj = intf.malloc(sizeof(ChaChaAVXState));
     uint32_t seeds[8];
     for (size_t i = 0; i < 4; i++) {
         uint64_t s = intf.get_seed64();
@@ -257,7 +257,7 @@ static void print_matx(uint32_t *x, size_t ncols, size_t nelem)
 /**
  * @brief Internal self-test. Based on reference values from RFC 7359.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     uint32_t x_init[] = { // Input values
         0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
@@ -310,7 +310,7 @@ int EXPORT gen_initlib(CallerAPI *intf_)
     return 1;
 }
 
-int EXPORT gen_closelib()
+int EXPORT gen_closelib(void)
 {
     return 1;
 }
