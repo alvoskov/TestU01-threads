@@ -66,7 +66,7 @@ static void *init_state(void)
     MWC32XState *obj = intf.malloc(sizeof(MWC32XState));
     // Seeding: prevent (0,0) and (?,0xFFFF)
     do {
-        obj->data = intf.get_seed64() << 1;
+        obj->data = ((uint32_t) intf.get_seed64()) << 1;
     } while (obj->data == 0);
     return (void *) obj;
 }

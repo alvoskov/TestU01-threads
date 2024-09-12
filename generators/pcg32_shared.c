@@ -32,7 +32,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     Pcg32State *obj = state;
     (void) param;
-    uint32_t xorshifted = ((obj->x >> 18u) ^ obj->x) >> 27u;
+    uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18u) ^ obj->x) >> 27u );
     uint32_t rot = obj->x >> 59u;
     obj->x = obj->x * 6364136223846793005ULL + 12345;
     return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));

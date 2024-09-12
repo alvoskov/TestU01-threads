@@ -39,7 +39,8 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
     (void) param;
     obj->x *= obj->x;
     obj->x += (obj->w += s);
-    return obj->x = (obj->x >> 32) | (obj->x << 32);
+    obj->x = (obj->x >> 32) | (obj->x << 32);
+    return (uint32_t) obj->x;
 }
 
 

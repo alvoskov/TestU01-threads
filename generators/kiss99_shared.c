@@ -31,11 +31,13 @@ PRNG_CMODULE_PROLOG
 /**
  * @brief KISS99 PRNG state.
  * @details Contains states of 3 PRNG: LCG, SHR3, MWC.
- * z, w and jsr musn't be initialized with zeros.
+ * There are three rules:
+ * - z and w are initialized as MWC generators
+ * - jsr mustn't be initialized to 0
  */
 typedef struct {
-    uint32_t z;     ///< MWC state 1
-    uint32_t w;     ///< MWC state 2
+    uint32_t z;     ///< MWC state 1: c - upper half, x - lower half
+    uint32_t w;     ///< MWC state 2: c - upper half, x - lower half
     uint32_t jsr;   ///< SHR3 state
     uint32_t jcong; ///< LCG state
 } KISS99State;
@@ -47,7 +49,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
     (void) param;
     // LCG generator
     obj->jcong = 69069 * obj->jcong + 1234567;
-    // MWC generator
+    // MWC generators
     obj->z = 36969 * (obj->z & 0xFFFF) + (obj->z >> 16);
     obj->w = 18000 * (obj->w & 0xFFFF) + (obj->w >> 16);
     uint32_t mwc = (obj->z << 16) + obj->w;
@@ -65,10 +67,12 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 static void *init_state(void)
 {
     KISS99State *obj = intf.malloc(sizeof(KISS99State));
-    do { obj->z = intf.get_seed64(); } while (obj->z == 0 || obj->z == 0xFFFFFFFF);
-    do { obj->w = intf.get_seed64(); } while (obj->w == 0 || obj->z == 0xFFFFFFFF);
-    do { obj->jsr = intf.get_seed64(); } while (obj->jsr == 0);
-    obj->jcong = intf.get_seed64();
+    uint64_t seed0 = intf.get_seed64(); // For MWC
+    uint64_t seed1 = intf.get_seed64(); // For SHR3 and LCG
+    obj->z = (seed0 & 0xFFFF) | 0x10000; // MWC generator 1: prevent bad seeds
+    obj->w = ((seed0 >> 16) & 0xFFFF) | 0x10000; // MWC generator 2: prevent bad seeds
+    obj->jsr = (seed1 >> 32) | 0x1; // SHR3 mustn't be init with 0
+    obj->jcong = (uint32_t) seed1; // LCG accepts any seed
     return (void *) obj;
 }
 
@@ -83,7 +87,7 @@ static int run_self_test(void)
     KISS99State obj;
     obj.z   = 12345; obj.w     = 65435;
     obj.jsr = 34221; obj.jcong = 12345; 
-    for (size_t i = 1; i < 1000001 + 256; i++) {
+    for (long i = 1; i < 1000001 + 256; i++) {
         val = get_bits32_raw(NULL, &obj);
     }
     intf.printf("Reference value: %u\n", refval);

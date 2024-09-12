@@ -54,10 +54,10 @@ static unsigned long get_bits32_raw(void *param, void *state)
     //uint32_t ww = ++obj->w ^ s; // "Counter" variant
     // Round 1
     uint64_t sq = ((uint64_t) ww) * ww; // |16bit|16bit||16bit|16bit||
-    uint32_t x = (sq >> 32) ^ sq; // Middle squares (32 bits) + XORing
+    uint32_t x = (uint32_t) ((sq >> 32) ^ sq); // Middle squares (32 bits) + XORing
     // Round 2
     sq = (uint64_t) x * ww;
-    x = (sq >> 32) ^ sq; // Middle squares (64 bits) + XORing
+    x = (uint32_t) ((sq >> 32) ^ sq); // Middle squares (64 bits) + XORing
     // Return the result
     return x;
 }
@@ -66,7 +66,7 @@ static unsigned long get_bits32_raw(void *param, void *state)
 static void *init_state(void)
 {
     SqXor32State *obj = intf.malloc(sizeof(SqXor32State));
-    obj->w = intf.get_seed64();
+    obj->w = (uint32_t) intf.get_seed64();
     return (void *) obj;
 }
 

@@ -66,8 +66,8 @@ static inline void philox_round(uint32_t *out, const uint32_t *key)
 {
     uint64_t mul0 = out[0] * 0xD2511F53ull;
     uint64_t mul1 = out[2] * 0xCD9E8D57ull;
-    uint32_t hi0 = mul0 >> 32, lo0 = mul0;
-    uint32_t hi1 = mul1 >> 32, lo1 = mul1;
+    uint32_t hi0 = mul0 >> 32, lo0 = (uint32_t) mul0;
+    uint32_t hi1 = mul1 >> 32, lo1 = (uint32_t) mul1;
     out[0] = hi1 ^ out[1] ^ key[0]; out[1] = lo1;
     out[2] = hi0 ^ out[3] ^ key[1]; out[3] = lo0;
 }

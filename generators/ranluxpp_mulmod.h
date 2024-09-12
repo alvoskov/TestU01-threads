@@ -94,7 +94,7 @@ static void multiply9x9(const uint64_t *in1, const uint64_t *in2, uint64_t *out)
          // When adding the two products, the maximum value for middle is
          // 2 * 2 ** 64 - 4 * 2 ** 32 + 2, which exceeds a uint64_t.
          unsigned overflow;
-         uint64_t middle = add_overflow(middle1, middle2, overflow);
+         uint64_t middle = add_overflow(middle1, middle2, &overflow);
          // Handling the overflow by a multiplication with 0 or 1 is cheaper
          // than branching with an if statement, which the compiler does not
          // optimize to this equivalent code. Note that we could do entirely
@@ -115,7 +115,7 @@ static void multiply9x9(const uint64_t *in1, const uint64_t *in2, uint64_t *out)
          uint64_t middle_upper = middle >> 32;
          uint64_t middle_lower = middle << 32;
 
-         lower = add_overflow(lower, middle_lower, overflow);
+         lower = add_overflow(lower, middle_lower, &overflow);
          upper += overflow;
 
          // This still can't overflow since the maximum of middle_upper is

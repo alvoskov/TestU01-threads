@@ -34,7 +34,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     KISS93State *obj = intf.malloc(sizeof(KISS93State));
     obj->S1 = 12345;

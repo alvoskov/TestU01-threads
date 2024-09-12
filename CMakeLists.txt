@@ -5,6 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Compiler settings
 if (NOT MSVC)
     set(PROF_FLAGS "")
+    set(CMODULE_LINK_FLAGS "-nostdlib")
     set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
@@ -14,6 +15,8 @@ if (NOT MSVC)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS}")
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding ${C_CXX_FLAGS}")
     endif()
+else()
+    set(CMODULE_LINK_FLAGS " ")
 endif()
 
 if (WIN32)
@@ -77,7 +80,7 @@ foreach(prng_name alfib_mod alfib chacha chacha_avx coveyou64 cmwc4096 isaac64 k
     pcg32 pcg64 philox philox32 randu rc4 rrmxmx
     seed64 sezgin63 sfc64 squares64 sqxor sqxor32 threefry wyrand xoroshiro128stst xorwow)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
-    set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS "-nostdlib")
+    set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     target_include_directories(${prng_name}_shared PRIVATE include)
@@ -85,18 +88,18 @@ endforeach()
 
 # Module for dummy PRNG
 add_library(dummy_shared SHARED generators/dummy_shared.c src/dummy_module.c include/testu01th/cinterface.h)
-set_target_properties(dummy_shared PROPERTIES LINK_FLAGS "-nostdlib")
+set_target_properties(dummy_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
 
 # Module for RANLUX++ PRNG
 add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c
     generators/ranluxpp_mulmod.h generators/ranluxpp_helpers.h include/testu01th/cinterface.h)
-set_target_properties(ranluxpp_shared PROPERTIES LINK_FLAGS "-nostdlib")
+set_target_properties(ranluxpp_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
 
 # Module and test for MT19937
 add_library(mt19937_shared SHARED generators/mt19937_shared.cpp include/testu01th/cinterface.h)
 
 
-foreach(prng_name chacha chacha_avx dummy ranluxpp mt19937 splitmix)
+foreach(prng_name dummy ranluxpp mt19937 splitmix)
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     target_include_directories(${prng_name}_shared PRIVATE include)
