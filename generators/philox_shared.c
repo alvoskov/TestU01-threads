@@ -74,7 +74,7 @@ static inline void philox_round(uint64_t *out, const uint64_t *key)
 {
     uint64_t hi0, lo0, hi1, lo1;
     lo0 = unsigned_mul128(out[0], 0xD2E7470EE14C6C93ull, &hi0);
-    lo1 = unsigned_mul128(out[1], 0xCA5A826395121157ull, &hi1);
+    lo1 = unsigned_mul128(out[2], 0xCA5A826395121157ull, &hi1);
     out[0] = hi1 ^ out[1] ^ key[0]; out[1] = lo1;
     out[2] = hi0 ^ out[3] ^ key[1]; out[3] = lo0;
 }

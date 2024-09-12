@@ -26,12 +26,12 @@ typedef struct {
 
 uint64_t get_bits64_raw(void *param, void *state)
 {
-    const uint64_t c = 0xe7037ed1a0b428db;
-    (void) param;
+    uint64_t hi, lo;
     WyRandState *obj = state;
+    (void) param;
     obj->x += 0xa0761d6478bd642f;
-    __uint128_t t = (__uint128_t) obj->x * (obj->x ^ c);
-    return (t >> 64) ^ t;
+    lo = unsigned_mul128(obj->x, obj->x ^ 0xe7037ed1a0b428db, &hi);
+    return lo ^ hi;
 }
 
 static void *init_state(void)

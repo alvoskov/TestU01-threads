@@ -39,7 +39,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 	return result;
 }
 
-static void *init_state(voi)
+static void *init_state(void)
 {
     const uint64_t phi = 0x9E3779B97F4A7C15ull; // Golden ratio
     PrngState *obj = intf.malloc(sizeof(PrngState));

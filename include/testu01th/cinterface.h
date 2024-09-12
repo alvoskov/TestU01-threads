@@ -45,7 +45,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 #else
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
-    __uint128 mul = ((__uint128) a) * b;
+    __uint128_t mul = ((__uint128_t) a) * b;
     *high = mul >> 64;
     return (uint64_t) mul;
 }

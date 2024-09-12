@@ -57,6 +57,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return obj->x ^ obj->c;
 }
 
+
 static void *init_state(void)
 {
     MWC128State *obj = intf.malloc(sizeof(MWC128State));
@@ -66,4 +67,17 @@ static void *init_state(void)
     return (void *) obj;
 }
 
-MAKE_UINT64_INTERLEAVED32_PRNG("MWC128X", MWC128State, NULL)
+
+int run_self_test(void)
+{
+    MWC128State obj = {.x = 12345, .c = 67890};
+    uint64_t u, u_ref = 0xDE4919065DBF6449;
+    for (size_t i = 0; i < 1000000; i++) {
+        u = get_bits64_raw(NULL, &obj);
+    }
+    intf.printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    return u == u_ref;
+}
+
+
+MAKE_UINT64_INTERLEAVED32_PRNG("MWC128X", MWC128State, run_self_test)

@@ -26,6 +26,10 @@
  */
 #include "testu01th/cinterface.h"
 
+#ifdef  __AVX__
+#define CHACHA_VECTOR_INTR
+#endif
+
 static CallerAPI intf;
 static int gen_nrounds = 12;
 
@@ -328,8 +332,6 @@ static int run_self_test()
     intf.printf("Success.\n");
     return 1;
 }
-
-
 
 
 /////////////////////////////////////////////////
