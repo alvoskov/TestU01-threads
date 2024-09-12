@@ -49,7 +49,7 @@ static inline uint32_t get_bits32_raw(void *param, void *state)
     return x ^ c; // XORing masks issue with BirthdaySpacing (t=3, Crush N12)
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     MWC64XState *obj = intf.malloc(sizeof(MWC64XState));
     // Seeding: prevent (0,0) and (?,0xFFFF)

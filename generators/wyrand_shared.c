@@ -34,7 +34,7 @@ uint64_t get_bits64_raw(void *param, void *state)
     return (t >> 64) ^ t;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     WyRandState *obj = intf.malloc(sizeof(WyRandState));
     obj->x = intf.get_seed64();

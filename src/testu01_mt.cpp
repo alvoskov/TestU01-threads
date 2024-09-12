@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstring>
 #include <random>
+#include <io.h>
 #include <fcntl.h>
 #include <stdarg.h>
 

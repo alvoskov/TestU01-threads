@@ -44,7 +44,7 @@ static double get_u01(void *param, void *state)
     return uint64_to_udouble(get_bits64(param, state));
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Seed64State *obj = intf.malloc(sizeof(Seed64State));
     obj->pos32 = 2;

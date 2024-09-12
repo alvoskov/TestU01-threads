@@ -129,7 +129,7 @@ static int self_test_compare(const uint32_t *out, const uint32_t *ref)
  * @brief An internal self-test. Test vectors are taken
  * from Random123 library.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     Philox32State obj;
     const uint32_t k0_m1[4] = {-1, -1, -1, -1};
@@ -175,7 +175,7 @@ static inline uint32_t get_bits32_raw(void *param, void *state)
     return obj->out[obj->pos++];
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     uint32_t k[Nw];
     Philox32State *obj = intf.malloc(sizeof(Philox32State));

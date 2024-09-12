@@ -47,7 +47,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
     return obj->Q[obj->i] = 0xfffffffe - x;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Cmwc4096State *obj = intf.malloc(sizeof(Cmwc4096State));
     uint32_t state = intf.get_seed64();

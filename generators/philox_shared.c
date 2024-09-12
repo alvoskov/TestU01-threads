@@ -68,12 +68,13 @@ static inline void philox_bumpkey(uint64_t *key)
     key[1] += 0xBB67AE8584CAA73Bull; // sqrt(3) - 1
 }
 
+
+
 static inline void philox_round(uint64_t *out, const uint64_t *key)
 {
-    __int128 mul0 = ((__int128) out[0]) * 0xD2E7470EE14C6C93ull;
-    __int128 mul1 = ((__int128) out[2]) * 0xCA5A826395121157ull;
-    uint64_t hi0 = mul0 >> 64, lo0 = mul0;
-    uint64_t hi1 = mul1 >> 64, lo1 = mul1;
+    uint64_t hi0, lo0, hi1, lo1;
+    lo0 = unsigned_mul128(out[0], 0xD2E7470EE14C6C93ull, &hi0);
+    lo1 = unsigned_mul128(out[1], 0xCA5A826395121157ull, &hi1);
     out[0] = hi1 ^ out[1] ^ key[0]; out[1] = lo1;
     out[2] = hi0 ^ out[3] ^ key[1]; out[3] = lo0;
 }
@@ -134,7 +135,7 @@ static int self_test_compare(const uint64_t *out, const uint64_t *ref)
  * @brief An internal self-test. Test vectors are taken
  * from Random123 library.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     PhiloxState obj;
     static const uint64_t k0_m1[4] = {-1, -1, -1, -1};
@@ -229,7 +230,7 @@ static double get_u01(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     uint64_t k[Nw];
     PhiloxState *obj = intf.malloc(sizeof(PhiloxState));

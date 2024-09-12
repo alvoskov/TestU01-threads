@@ -49,7 +49,7 @@ static long unsigned int get_bits32(void *param, void *state)
     return x >> 32;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     SplitMixState *obj = malloc(sizeof(SplitMixState));
     obj->x = 0;

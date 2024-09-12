@@ -43,7 +43,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     MswsState *obj = intf.malloc(sizeof(MswsState));
     obj->x = intf.get_seed64();

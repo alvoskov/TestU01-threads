@@ -39,7 +39,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return t ^ ((x*x + y) >> 32); // Round 5
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Squares64State *obj = intf.malloc(sizeof(Squares64State));
     obj->ctr = intf.get_seed64();

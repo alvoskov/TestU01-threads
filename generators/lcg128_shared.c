@@ -38,7 +38,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     Lcg128State *obj = intf.malloc(sizeof(Lcg128State));
     obj->x = intf.get_seed64() | 0x1;
