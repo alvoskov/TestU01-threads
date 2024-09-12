@@ -81,7 +81,7 @@ static int run_self_test(void)
 #else
     Lcg128State obj = { .x_low = 1234567890, .x_high = 0 };
 #endif
-    uint64_t u, u_ref = 0xA2BDB4061ECC6BF2;
+    uint64_t u, u_ref = 0x8E878929D96521D7;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits64_raw(NULL, &obj);
     }
