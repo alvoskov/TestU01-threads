@@ -650,6 +650,14 @@ void set_bin_stdout()
 }
 
 
+void set_bin_stdin()
+{
+#ifdef USE_LOADLIBRARY
+    _setmode( _fileno(stdin), _O_BINARY); // needed to allow binary stdin on windows
+#endif
+}
+
+
 /**
  * @brief Dump an output of a 32-bit PRNG to the stdout in the format suitable
  * for PractRand.

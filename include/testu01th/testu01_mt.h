@@ -327,6 +327,7 @@ public:
 
 
 void set_bin_stdout();
+void set_bin_stdin();
 void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr);
 void prng_array32_to_file(std::shared_ptr<UniformGenerator> genptr);
 void prng_bits64_to_file(std::shared_ptr<UniformGenerator> genptr);

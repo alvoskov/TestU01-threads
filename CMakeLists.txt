@@ -65,6 +65,8 @@ add_executable(testu01th_run src/testu01th_run.cpp)
 target_include_directories(testu01th_run PRIVATE include)
 add_executable(testu01th_demo src/testu01th_demo.cpp)
 target_include_directories(testu01th_demo PRIVATE include)
+add_executable(testu01th_pipes src/testu01th_pipes.cpp)
+target_include_directories(testu01th_pipes PRIVATE include)
 
 # SplitMix generator in two variants: that calls TestU01-threads
 # and that is called by TestU01-threads as an external module
@@ -108,7 +110,7 @@ endforeach()
 
 
 # Link executables
-foreach (program testu01th_demo testu01th_run splitmix_exec)
+foreach (program testu01th_demo testu01th_run testu01th_pipes splitmix_exec)
     if(M_LIB)
         target_link_libraries (${program})
     endif()
