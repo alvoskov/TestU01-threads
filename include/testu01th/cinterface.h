@@ -43,6 +43,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
     return _umul128(a, b, high);
 }
 #else
+#define UINT128_ENABLED
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     __uint128_t mul = ((__uint128_t) a) * b;

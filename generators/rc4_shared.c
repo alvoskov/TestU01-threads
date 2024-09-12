@@ -59,7 +59,7 @@ static void *init_state(void)
     RC4State *obj = intf.malloc(sizeof(RC4State));
     uint64_t v = 0x9E3779B97F4A7C15 ^ intf.get_seed64();
     for (size_t i = 0; i < 256; i++) {
-        obj->s[i] = i;
+        obj->s[i] = (uint8_t) i;
     }
     for (size_t i = 0, j = 0; i < 256; i++) {
         uint8_t ss = obj->s[i];

@@ -39,7 +39,7 @@ static void *init_state()
     KISS93State *obj = intf.malloc(sizeof(KISS93State));
     obj->S1 = 12345;
     obj->S2 = 6789;
-    obj->S3 = intf.get_seed64();// Default is 111213;
+    obj->S3 = (uint32_t) intf.get_seed64();// Default is 111213;
     return (void *) obj;
 }
 

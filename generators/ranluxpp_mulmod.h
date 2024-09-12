@@ -105,7 +105,7 @@ static void multiply9x9(const uint64_t *in1, const uint64_t *in2, uint64_t *out)
          // why a) the code gives the same results without b) overflowing due
          // to the mixture of 32 bit arithmetic. Moreover, my tests show that
          // the scheme implemented here is actually slightly more performant.
-         uint64_t overflow_add = overflow * (uint64_t(1) << 32);
+         uint64_t overflow_add = overflow * (1ull << 32);
          // This addition can never overflow because the maximum value of upper
          // is 2 ** 64 - 2 * 2 ** 32 + 1 (see above). When now adding another
          // 2 ** 32, the result is 2 ** 64 - 2 ** 32 + 1 and still smaller than

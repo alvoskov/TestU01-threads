@@ -60,10 +60,10 @@ static uint64_t get_bits64_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     const uint64_t mask58 = 0x3FFFFFFFFFFFFFFULL;
-    KISS64State *obj = (KISS64State *) intf.malloc(sizeof(KISS64State));
+    KISS64State *obj = intf.malloc(sizeof(KISS64State));
     do { obj->x = intf.get_seed64(); } while (obj->x == 0);
     do { obj->c = intf.get_seed64() & mask58; } while (obj->c == 0);
     do { obj->y = intf.get_seed64(); } while (obj->y == 0);
@@ -75,7 +75,7 @@ static void *init_state()
 /**
  * @brief An internal self-test, taken from Marsaglia post.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     const uint64_t refval = 1666297717051644203ULL;
     KISS64State obj;

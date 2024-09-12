@@ -46,13 +46,13 @@ static inline int64_t get_bits63_raw(void *param, void *state)
 
 static inline unsigned long get_bits32(void *param, void *state)
 {
-    return get_bits63_raw(param, state) >> 31;
+    return (uint32_t) (get_bits63_raw(param, state) >> 31);
 }
 
 static void get_array32(void *param, void *state, uint32_t *out, size_t len)
 {
     for (size_t i = 0; i < len; i++) {
-        out[i] = get_bits63_raw(param, state) >> 31;
+        out[i] = (uint32_t) (get_bits63_raw(param, state) >> 31);
     }
 }
 

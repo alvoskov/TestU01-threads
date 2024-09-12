@@ -40,6 +40,7 @@ typedef struct {
     Interleaved32Buffer i32buf;
 } MWC128State;
 
+
 /**
  * @brief MWC128X PRNG implementation.
  * @details A slight modification of PRNG by S.Vigna: output function
@@ -50,10 +51,17 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 {
     static const uint64_t MWC_A1 = 0xffebb71d94fcdaf9;
     MWC128State *obj = state;
-    const __uint128_t t = MWC_A1 * (__uint128_t) obj->x + obj->c;
     (void) param;
+
+#ifdef UINT128_ENABLED
+    const __uint128_t t = MWC_A1 * (__uint128_t)obj->x + obj->c;
     obj->x = t;
     obj->c = t >> 64;
+#else
+    uint64_t c_old = obj->c;
+    obj->x = unsigned_mul128(MWC_A1, obj->x, &obj->c);
+    obj->c += _addcarry_u64(0, obj->x, c_old, &obj->x);
+#endif
     return obj->x ^ obj->c;
 }
 

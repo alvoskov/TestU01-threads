@@ -264,7 +264,7 @@ static double get_u01(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     ChaChaState *obj = (ChaChaState *) intf.malloc(sizeof(ChaChaState));
     uint32_t seeds[8];
@@ -301,7 +301,7 @@ static void print_mat16(uint32_t *x)
 /**
  * @brief Internal self-test. Based on reference values from RFC 7359.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     uint32_t x_init[] = { // Input values
         0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,

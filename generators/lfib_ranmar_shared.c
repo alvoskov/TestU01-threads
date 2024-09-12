@@ -82,7 +82,7 @@ static long unsigned int get_bits32(void *param, void *state)
     return (uint32_t) (get_u01(param, state) * m_2_pow_32);
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     LFibFloat *obj = intf.malloc(sizeof(LFibFloat));
     uint64_t seed = intf.get_seed64();

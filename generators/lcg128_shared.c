@@ -34,7 +34,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     Lcg128State *obj = state;
     (void) param;
     obj->x = obj->x * 0xfc0072fa0b15f4fd + 1; 
-    return obj->x >> 64;
+    return (uint64_t) (obj->x >> 64);
 }
 
 

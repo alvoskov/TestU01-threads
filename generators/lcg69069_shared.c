@@ -32,7 +32,7 @@ static long unsigned int get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     Lcg32State *obj = intf.malloc(sizeof(Lcg32State));
     obj->x = intf.get_seed64() >> 32;

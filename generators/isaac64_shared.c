@@ -190,9 +190,9 @@ static long unsigned int get_bits32(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
-    Isaac64State *obj = (Isaac64State *) intf.malloc(sizeof(Isaac64State));
+    Isaac64State *obj = intf.malloc(sizeof(Isaac64State));
     Isaac64State_init(obj, intf.get_seed64());
     return (void *) obj;
 }
@@ -208,7 +208,7 @@ static void delete_state(void *param, void *state)
  * the values obtained from the reference implementation of ISAAC64
  * by Bob Jenkins.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     // Elements 248-255
     int is_ok = 1;

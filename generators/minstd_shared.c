@@ -45,7 +45,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     MinstdState *obj = intf.malloc(sizeof(MinstdState));
     obj->x = intf.get_seed64() >> 33;
@@ -53,7 +53,7 @@ static void *init_state()
 }
 
 
-int run_self_test()
+int run_self_test(void)
 {
     const uint32_t x_ref = 1043618065;
     MinstdState obj;

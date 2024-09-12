@@ -23,7 +23,7 @@ static inline uint32_t get_bits32_raw(void *param, void *state)
     return obj->x >> 32;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Coveyou64State *obj = intf.malloc(sizeof(Coveyou64State));
     obj->x = intf.get_seed64();

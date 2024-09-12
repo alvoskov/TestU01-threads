@@ -181,7 +181,7 @@ static void *init_state(void)
     Philox32State *obj = intf.malloc(sizeof(Philox32State));
     for (size_t i = 0; i < Nw; i += 2) {
         uint64_t seed = intf.get_seed64();
-        k[i] = seed;
+        k[i] = (uint32_t) (seed);
         k[i + 1] = seed >> 32;
     }
     Philox32State_init(obj, k);

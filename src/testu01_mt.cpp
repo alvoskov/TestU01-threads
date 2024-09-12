@@ -38,7 +38,7 @@ std::string double_tostring(double x, int I, int J, int K)
     if (x == 0.0) {
         EntierSign = 1;
     } else {
-        EntierSign = PosEntier = floor(log10(fabs(x)) + 1);
+        EntierSign = PosEntier = (int) floor(log10(fabs(x)) + 1);
         if (x < 0.0)
             Neg = 1;
     }
@@ -603,7 +603,7 @@ namespace testu01_threads {
  * @brief Get the p-values in a swalk_RandomWalk1 test
  * @details It is a rewrite of the `GetPVal_Walk` function from `bbattery.c`.
  */
-static void GetPValue_Walk(BatteryIO &io, long N, swalk_Res *res, size_t id, const std::string &mess)
+static void GetPValue_Walk(BatteryIO &io, long N, swalk_Res *res, int id, const std::string &mess)
 {
    if (N == 1) {
         io.Add(id, "RandomWalk1 H" + mess, res->H[0]->pVal2[gofw_Mean]);
@@ -624,7 +624,7 @@ static void GetPValue_Walk(BatteryIO &io, long N, swalk_Res *res, size_t id, con
  * @brief Get the p-values in a snpair_ClosePairs test
  * @param flag Former snpair_mNP2S_Flag global variable (made local for thread safety).
  */
-static void GetPValue_CPairs(BatteryIO &io, long N, snpair_Res *res, size_t id, const std::string &mess, bool flag)
+static void GetPValue_CPairs(BatteryIO &io, long N, snpair_Res *res, int id, const std::string &mess, bool flag)
 {
     if (N == 1) {
         io.Add(id, "ClosePairs NP" + mess, res->pVal[snpair_NP]);

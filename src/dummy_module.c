@@ -86,7 +86,7 @@ static uint64_t dummy_get_sum64(void *param, void *state, size_t len)
     return sum;
 }
 
-static void *dummy_init_state()
+static void *dummy_init_state(void)
 {
     return NULL;
 }

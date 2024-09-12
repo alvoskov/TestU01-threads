@@ -62,7 +62,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     KISS99State *obj = intf.malloc(sizeof(KISS99State));
     do { obj->z = intf.get_seed64(); } while (obj->z == 0 || obj->z == 0xFFFFFFFF);
@@ -76,7 +76,7 @@ static void *init_state()
 /**
  * @brief An internal self-test, taken from Marsaglia post.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     const uint32_t refval = 1372460312U;
     uint32_t val = 0;

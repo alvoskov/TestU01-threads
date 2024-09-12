@@ -179,7 +179,7 @@ static int self_test_compare(const uint64_t *out, const uint64_t *ref)
  * @brief An internal self-test. Test vectors are taken
  * from Random123 library.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     Tf256State obj;
     static const uint64_t k0_m1[4] = {-1, -1, -1, -1};
