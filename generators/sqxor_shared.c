@@ -30,16 +30,33 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     SqXorState *obj = state;
     (void) param;
     uint64_t ww = obj->w += s; // "Weyl sequence" variant
+    uint64_t sq_hi;
     //uint64_t ww = ++obj->w ^ s; // "Counter" variant
     // Round 1
-    __int128 sq = ((__int128) ww) * ww; // |32bit|32bit||32bit|32bit||
-    uint64_t x = (sq >> 64) ^ sq; // Middle squares (64 bits) + XORing
+    uint64_t x = unsigned_mul128(ww, ww, &sq_hi); // |32bit|32bit||32bit|32bit||
+    x ^= sq_hi; // Middle squares (64 bits) + XORing
     // Round 2
     //sq = ((__int128) x) * ww; // Slower but a little more reliable
-    sq = ((__int128) x) * x;
-    x = (sq >> 64) ^ sq; // Middle squares (64 bits) + XORing
+    x = unsigned_mul128(x, x, &sq_hi);
+    x ^= sq_hi; // Middle squares (64 bits) + XORing
     // Return the result
     return x;
+}
+
+/**
+ * @brief Self-test to prevent problems during re-implementation
+ * in MSVC and other plaforms that don't support int128. It also
+ * doesn't initialize i32buf: we don't need them anyway.
+ */
+static int run_self_test(void)
+{
+    SqXorState obj = {.w = 1234567890};
+    uint64_t u, u_ref = 0xB74C88775DF514;
+    for (size_t i = 0; i < 1000000; i++) {
+        u = get_bits64_raw(NULL, &obj);
+    }
+    intf.printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    return u == u_ref;
 }
 
 
@@ -51,4 +68,5 @@ static void *init_state(void)
     return (void *) obj;
 }
 
-MAKE_UINT64_INTERLEAVED32_PRNG("SqXor", SqXorState, NULL)
+
+MAKE_UINT64_INTERLEAVED32_PRNG("SqXor", SqXorState, run_self_test)

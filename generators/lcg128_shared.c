@@ -32,8 +32,9 @@ typedef struct {
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
     Lcg128State *obj = state;
+    const uint64_t a = 1800690696906969069ull;
     (void) param;
-    obj->x = obj->x * 0xfc0072fa0b15f4fd + 1; 
+    obj->x = a * obj->x  + 1; 
     return (uint64_t) (obj->x >> 64);
 }
 
@@ -46,4 +47,21 @@ static void *init_state(void)
 }
 
 
-MAKE_UINT64_UPTO32_PRNG("Lcg128", NULL)
+/**
+ * @brief Self-test to prevent problems during re-implementation
+ * in MSVC and other plaforms that don't support int128. It also
+ * doesn't initialize i32buf: we don't need them anyway.
+ */
+static int run_self_test(void)
+{
+    Lcg128State obj = {.x = 1234567890};
+    uint64_t u, u_ref = 0xA2BDB4061ECC6BF2;
+    for (size_t i = 0; i < 1000000; i++) {
+        u = get_bits64_raw(NULL, &obj);
+    }
+    intf.printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    return u == u_ref;
+}
+
+
+MAKE_UINT64_UPTO32_PRNG("Lcg128", run_self_test)
