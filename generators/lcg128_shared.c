@@ -25,24 +25,46 @@ PRNG_CMODULE_PROLOG
  * @brief 128-bit LCG state.
  */
 typedef struct {
+#ifdef UINT128_ENABLED
     unsigned __int128 x;
+#else
+    uint64_t x_low;
+    uint64_t x_high;
+#endif
 } Lcg128State;
 
 
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
     Lcg128State *obj = state;
-    const uint64_t a = 1800690696906969069ull;
+    const uint64_t a = 18000690696906969069ull;
     (void) param;
+#ifdef UINT128_ENABLED
     obj->x = a * obj->x  + 1; 
     return (uint64_t) (obj->x >> 64);
+#else
+    uint64_t mul0_low, mul0_high, mul1_low;
+    mul0_low = unsigned_mul128(a, obj->x_low, &mul0_high);
+    mul1_low = a * obj->x_high;
+    mul1_low += mul0_high;
+    mul1_low += _addcarry_u64(0, mul0_low, 1ull, &mul0_low);
+
+    obj->x_low = mul0_low;
+    obj->x_high = mul1_low;
+
+    return obj->x_low;
+#endif
 }
 
 
 static void *init_state(void)
 {
     Lcg128State *obj = intf.malloc(sizeof(Lcg128State));
+#ifdef UINT128_ENABLED
     obj->x = intf.get_seed64() | 0x1;
+#else
+    obj->x_low = intf.get_seed64() | 0x1;
+#endif
     return (void *) obj;
 }
 
@@ -54,7 +76,11 @@ static void *init_state(void)
  */
 static int run_self_test(void)
 {
+#ifdef UINT128_ENABLED
     Lcg128State obj = {.x = 1234567890};
+#else
+    Lcg128State obj = { .x_low = 1234567890, .x_high = 0 };
+#endif
     uint64_t u, u_ref = 0xA2BDB4061ECC6BF2;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits64_raw(NULL, &obj);
