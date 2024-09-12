@@ -6,7 +6,10 @@
  * - Bernard Widynski. Squares: A Fast Counter-Based RNG
  *   arXiv:2004.06278
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright "Squares" PRNG is developed by B.Widynski.
+ *
+ * Implementation for TestU01-threads:
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -27,16 +30,16 @@ typedef struct {
 
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {    
-    const uint64_t key = 0x9E3779B97F4A7C15;
+    const uint64_t key = 0x9E3779B97F4A7C15; // Golden ratio frac.part
     uint64_t t, x, y, z;
     Squares64State *obj = state;
     (void) param;
     y = x = obj->ctr++ * key; z = y + key;
-    x = ROR32(x*x + y); // Round 1
-    x = ROR32(x*x + z); // Round 2
-    x = ROR32(x*x + y); // Round 3
-    t = x = x*x + z; x = ROR32(x); // Round 4
-    return t ^ ((x*x + y) >> 32); // Round 5
+    x = ROR32(x * x + y); // Round 1
+    x = ROR32(x * x + z); // Round 2
+    x = ROR32(x * x + y); // Round 3
+    t = x = x * x + z; x = ROR32(x); // Round 4
+    return t ^ ((x * x + y) >> 32); // Round 5
 }
 
 static void *init_state(void)

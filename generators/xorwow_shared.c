@@ -11,7 +11,10 @@
  * 2. cuRAND library programming guide.
  *    https://docs.nvidia.com/cuda/curand/testing.html
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright xorwow algorithm is developed by G. Marsaglia.
+ *
+ * Implementation for TestU01-threads:
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -38,7 +41,7 @@ typedef struct {
 static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     const uint32_t d_inc = 362437;
-    XorWowState *obj = (XorWowState *) state;
+    XorWowState *obj = state;
     (void) param;
     uint32_t t = (obj->x ^ (obj->x >> 2));
     obj->x = obj->y;

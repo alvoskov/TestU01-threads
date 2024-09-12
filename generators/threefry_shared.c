@@ -22,7 +22,11 @@
  * 3. https://www.schneier.com/academic/skein/threefish/
  * 4. https://pdebuyl.be/blog/2016/threefry-rng.html
 
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright Philox algorithm is proposed by J. K. Salmon, M. A. Moraes,
+ * R. O. Dror and D. E. Shaw.
+ *
+ * Implementation for TestU01-threads:
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.

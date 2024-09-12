@@ -172,7 +172,7 @@ static inline double uint32_to_udouble(uint32_t val)
 
 /**
  * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
- * for initialization for other PRNGs such as lagged Fibbonaci.
+ * for initialization for other PRNGs such as lagged Fibonacci.
  */
 static inline uint64_t pcg_bits64(uint64_t *state)
 {
@@ -311,6 +311,7 @@ int EXPORT gen_getinfo(GenInfoC *gi) { \
     gi->run_self_test = selftest_func; \
     return 1; \
 }
+// end of MAKE_UINT64_UPTO32_PRNG macros
 
 
 /**
@@ -393,10 +394,7 @@ int EXPORT gen_getinfo(GenInfoC *gi) { \
     gi->run_self_test = selftest_func; \
     return 1; \
 }
-
-
-
-
+// end of MAKE_UINT64_INTERLEAVED32_PRNG macros
 
 #ifdef __cplusplus
 }

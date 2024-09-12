@@ -1,3 +1,6 @@
+Introduction
+============
+
 TestU01-threads is an extension of TestU01 library that allows to run
 SmallCrush, Crush, BigCrush and pseudoDIEHARD test batteries in
 a multi-threaded mode. TestU01-threads doesn't modify the original
@@ -245,16 +248,68 @@ to transfer information to the PRNG initialization
 - `options` - string with generator options
 
 
+Predefined macroses and inline functions for C modules
+=================================
+
+C interface is rather simple but may require to write a lot of boilerplate
+code. Some macroses are predefined in `testu01th/cinterface.h` to reduce
+its amount in the most common situations.
+
+
+- `UINT128_ENABLED` - defined only if 128-bit integers such as `__uint128_t`
+  are available.
+- `PRNG_CMODULE_PROLOG` - implements the default code for entry point and
+  default versions of `gen_initlib` and `gen_closelib` functions. It also
+  defines the `static CallerAPI intf;` variable with pointers to API functions
+  for caller such as printf, malloc etc.
+- `MAKE_UINT32_PRNG(prng_name, selftest_func)` - implements default versions
+  of all exported functions except `init_state` for 32-bit PRNG. The PRNG code
+  should be inside the
+  `static inline uint32_t get_bits32_raw(void *param, void *state)` function.
+- `MAKE_UINT64_UPTO32_PRNG(prng_name, selftest_func)` - implements default
+  versions of all exported functions except `init_state` for 64-bit PRNG.
+  32-bit integers are formed from the upper 32-bits, one 64-bit integer
+  is converted to one double. The PRNG code should be inside the next function:
+  `static inline uint64_t get_bits64_raw(void *param, void *state)`
+- `MAKE_UINT64_INTERLEAVED32_PRNG(prng_name, Type, selftest_func)` - 
+  implements default versions of all exported functions except `init_state`
+  for 64-bit PRNG. For 32-bit integers interleaved output of higher and lower
+  halves of 64-bit integers are implemented. But one 64-bit integer
+  is converted to one double. The PRNG code should be inside the next function:
+  `static inline uint64_t get_bits64_raw(void *param, void *state)`
+
+If interleaved 32-bit output is desired then the structure with PRNG state
+must include the i32buf field that has `Interleaved32Buffer` data type.
+This field must me initialized by the next inline function:
+
+- `void Interleaved32Buffer_init(Interleaved32Buffer *obj)`
+
+The next inline functions are predefined in `testu01th/cinterface`:
+
+- `double uint64_to_udouble(uint64_t val)` - converts unsigned 64-bit number
+  to double precision float in the 0 <= u < 1 interval. The 52 bits are written
+  into mantissa. Then 1.0 is subtracted from the float in the 0 <= u < 1
+  interval.
+- `double uint32_to_udouble(uint32_t val)` - converts unsigned 32-bit integer
+  to double precision float in the 0 <= u < 1 interval by multiplying
+  by constant.
+- `uint64_t pcg_bits64(uint64_t *state)` - pcg_rxs_m_xs64 generator for
+  initialization for other PRNGs such as lagged Fibonacci.
+- `uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)` -
+  cross-compiler implementation of 128-bit multiplication, useful for such
+  generators as Philox. Allows to work with MSVC.
+
+
 Compilation
 ===========
 
-The program can be compiled for Linux or MS Windows using GCC compiler
-and CMake building system. For some Linux distributions it is possible
-to install TestU01-1.2.3 from repositories. E.g. for Ubuntu the next
+The program can be compiled for GNU/Linux or MS Windows using GCC or MSVC
+compilers and CMake building system. For some Linux distributions it is
+possible to install TestU01-1.2.3 from repositories. E.g. for Ubuntu the next
 packages should be installed:
 
-- libtestu01-0:amd64 (contains the compiled TestU01 library)
-- libtestu01-0-dev-common (contains the TestU01 header files)
+- `libtestu01-0:amd64` (contains the compiled TestU01 library)
+- `libtestu01-0-dev-common` (contains the TestU01 header files)
 
 For MS Windows the TestU01 library should be compiled from its source code.
 The original TestU01-2009 uses GNU Autoconf for building, and it may be
