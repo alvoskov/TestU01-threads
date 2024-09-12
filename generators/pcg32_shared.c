@@ -38,7 +38,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
     return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Pcg32State *obj = intf.malloc(sizeof(Pcg32State));
     obj->x = intf.get_seed64();

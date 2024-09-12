@@ -63,7 +63,7 @@ static double get_u01(void *param, void *state)
     return uint64_to_udouble(x << 1);
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Lcg63State *obj = intf.malloc(sizeof(Lcg63State));
     obj->x = intf.get_seed64();

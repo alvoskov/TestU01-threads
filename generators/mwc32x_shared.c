@@ -61,7 +61,7 @@ static inline uint32_t get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     MWC32XState *obj = intf.malloc(sizeof(MWC32XState));
     // Seeding: prevent (0,0) and (?,0xFFFF)

@@ -245,7 +245,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     uint64_t k[Nw];
     Tf256State *obj = intf.malloc(sizeof(Tf256State));

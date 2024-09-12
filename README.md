@@ -31,25 +31,27 @@ tests using parallel programming, e.g. OpenMP. However, they were not completed
 and don't include full SmallCrush, Crush, BigCrush and pseudoDIEHARD batteries.
 
 - A. Suciu, R. A. Toma and K. Marton, "Parallel implementation of the TestU01
-  statistical test suite," 2012 IEEE 8th International Conference on Intelligent
-  Computer Communication and Processing, Cluj-Napoca, Romania, 2012, pp. 317-322
-  doi: 10.1109/ICCP.2012.6356206.
+  statistical test suite," 2012 IEEE 8th International Conference on
+  Intelligent Computer Communication and Processing, Cluj-Napoca, Romania,
+  2012, pp. 317-322  doi: 10.1109/ICCP.2012.6356206.
 - A. Suciu, R. A. Toma and K. Marton, "Parallel object-oriented implementation
-  of the TestU01 statistical test suites," 2014 IEEE 10th International Conference
-  on Intelligent Computer Communication and Processing (ICCP), Cluj-Napoca, Cluj,
-  Romania, 2014, pp. 311-315, doi: 10.1109/ICCP.2014.6937014.
+  of the TestU01 statistical test suites," 2014 IEEE 10th International
+  Conference on Intelligent Computer Communication and Processing (ICCP),
+  Cluj-Napoca, Cluj, Romania, 2014, pp. 311-315, doi: 10.1109/ICCP.2014.6937014.
 - https://github.com/adamsolomou/TestU01
 
-TestU01-threads uses an entirely different approach: it doesn't modify the original
-TestU01 library but just replaces single-threaded batteries implementation from
-`bbattery.c` (sequental call of statistical tests) to its own multithreaded version
-(parallel call of statistical tests from different threads). These statistical tests
-are reentrant. Such modification also requires new API for pseudorandom number
-generators: threads should be able to create its own examples of generators.
+TestU01-threads uses an entirely different approach: it doesn't modify the
+original TestU01 library but just replaces single-threaded batteries
+implementation from `bbattery.c` (sequental call of statistical tests) to its
+own multithreaded version (parallel call of statistical tests from different
+threads). These statistical tests are reentrant. Such modification also
+requires new API for pseudorandom number generators: threads should be able to
+create its own examples of generators.
 
-There is another program with similar approach: TestU01-parallel. However, it was
-forked from an older non-free version of TestU01. It also almost not documented
-and uses Python scripts for running different processes with slightly modified TestU01.
+There is another program with similar approach: TestU01-parallel. However, it
+was forked from an older non-free version of TestU01. It also almost not
+documented and uses Python scripts for running different processes with
+slightly modified TestU01.
 
 - https://github.com/rski/testu01-parallel
 
@@ -130,7 +132,7 @@ The supplied generators can be divided into several groups:
  alfib            | u32    | +          | -     | -        | 128 GiB      | 0.34
  alfib_mod        | u32    | +          | +     | +        | 1 TiB        | 0.40
  chacha_avx       | u32    | +          | +     |          |              | 0.91
- chacha           | u32    | +          | +     |          |              | 2.04
+ chacha           | u32    | +          | +     | +        |              | 2.04
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
  cmwc4096         | u32    | +          | +     | +        |              | 0.36
  isaac64          | u64    | +          | +     | +        |              | 0.85
@@ -176,8 +178,9 @@ A module with PRNG implementation that supports C API should export the next
 three functions:
 
 - `int gen_initlib(CallerAPI *intf)` - initializes the library and gets
-   a pointer to the structure with pointers to some functions of TestU01-threads
-   library, e.g. for obtaining seeds, controlling dynamic memory.
+   a pointer to the structure with pointers to some functions of
+   TestU01-threads library, e.g. for obtaining seeds, controlling
+   dynamic memory.
 - `int gen_closelib(void)` - called before closing the library.
 - `int gen_getinfo(GenInfoC *gi)` - should fill the `GenInfoC` structure
    with information about generator (mainly with pointer to its callback
@@ -193,6 +196,9 @@ pointer to some functions useful for PRNG construction:
 - `printf` - pointer to printf function.
 - `strcmp` - pointer to strcmp function from C standard library.
 
+Function prototype for `get_seed64`:
+
+- `uint64_t get_seed64(void);`
 
 The next fields in GenInfoC structure should be filled by `gen_getinfo`:
 
@@ -204,12 +210,16 @@ The next fields in GenInfoC structure should be filled by `gen_getinfo`:
 
 Functions prototypes:
 
+- `void *init_state(void);`
+- `void delete_state(void *param, void *state);`
 - `double get_u01(void *param, void *state);`
 - `unsigned long get_bits32(void *param, void *state);`
 
 Remember that `unsigned long` may be either 32-bit or 64-bit, it should be 
 taken into account in PRNG implementations. This is made for compatibility
-with TestU01 subroutines and reducing function calls overhead.
+with TestU01 subroutines and reducing function calls overhead. The first
+argument `param` is not used by TestU01-threads and left mainly for
+compatibility with TestU01 and for future use.
 
 The next fields are optional but may be filled:
 
@@ -219,6 +229,15 @@ The next fields are optional but may be filled:
 - `get_sum32` - returns the sum of uint32_t pseudorandom number.
 - `get_sum64` - returns the sum of uint64_t pseudorandom number.
 - `run_self_test` - runs the internal self-test.
+
+Functions prototypes:
+
+- `uint64_t get_bits64(void *param, void *state);`
+- `void get_array32(void *param, void *state, uint32_t *out, size_t len);`
+- `void get_array64(void *param, void *state, uint64_t *out, size_t len);`
+- `uint32_t get_sum32(void *param, void *state, size_t len);`
+- `uint64_t get_sum64(void *param, void *state, size_t len);`
+- `int run_self_test(void);`
 
 The next fields are filled in GenInfoC before `gen_getinfo` is called and used
 to transfer information to the PRNG initialization

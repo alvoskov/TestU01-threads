@@ -43,7 +43,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     SqXorState *obj = intf.malloc(sizeof(SqXorState));
     obj->w = intf.get_seed64();

@@ -63,7 +63,7 @@ static unsigned long get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     SqXor32State *obj = intf.malloc(sizeof(SqXor32State));
     obj->w = intf.get_seed64();

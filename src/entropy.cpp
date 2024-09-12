@@ -1,6 +1,12 @@
 #include "testu01th/entropy.h"
 #include <time.h>
+
+#if (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
+#include <intrin.h>
+#pragma intrinsic(__rdtsc)
+#else
 #include <x86intrin.h>
+#endif
 
 using namespace testu01_threads;
 
@@ -104,8 +110,8 @@ Entropy::Entropy()
     uint64_t seed0 = MixRdSeed(MixHash(time(NULL)));
     uint64_t seed1 = MixRdSeed(MixHash(~seed0));
     seed1 ^= MixRdSeed(MixHash(CpuClock()));
-    key[0] = seed0; key[1] = seed0 >> 32;
-    key[2] = seed1; key[3] = seed1 >> 32;
+    key[0] = (uint32_t) seed0; key[1] = seed0 >> 32;
+    key[2] = (uint32_t) seed1; key[3] = seed1 >> 32;
     state = time(NULL);
 //    printf("%X %X %X %X\n", key[0], key[1], key[2], key[3]);
 }

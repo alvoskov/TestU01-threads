@@ -180,7 +180,7 @@ static double get_u01_from32(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     RanluxppState *obj = intf.malloc(sizeof(RanluxppState));
     RanluxppState_init(obj, intf.get_seed64(), DEFAULT_P);
@@ -199,7 +199,7 @@ static void delete_state(void *param, void *state)
  * the `ranluxpp_p_2048_seed_1.output` file from the ranluxpp-portable
  * library.
  */
-static int run_self_test()
+static int run_self_test(void)
 {
     static const uint64_t x_ref[] = {
         0x9F1C67142C84C502, 0x024D94E3C4B490E8, 0xE9D460859F0659B6,

@@ -49,7 +49,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
     return (obj->d += d_inc) + obj->v;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     XorWowState *obj = intf.malloc(sizeof(XorWowState));
     uint64_t s1 = intf.get_seed64();

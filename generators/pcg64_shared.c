@@ -23,7 +23,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return (word >> 43) ^ word;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Pcg64State *obj = intf.malloc(sizeof(Pcg64State));
     obj->x = intf.get_seed64();

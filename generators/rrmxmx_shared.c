@@ -44,7 +44,7 @@ static uint64_t get_bits64_raw(void *param, void *state)
     return v ^ v >> 28;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     RrmxmxState *obj = intf.malloc(sizeof(RrmxmxState));
     obj->x = intf.get_seed64();

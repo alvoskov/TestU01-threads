@@ -57,7 +57,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return obj->x ^ obj->c;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     MWC128State *obj = intf.malloc(sizeof(MWC128State));
     obj->x = intf.get_seed64();

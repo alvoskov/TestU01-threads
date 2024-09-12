@@ -35,6 +35,22 @@
 #include <stdint.h>
 #include <time.h>
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#pragma intrinsic(_umul128)
+static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
+{
+    return _umul128(a, b, high);
+}
+#else
+static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
+{
+    __uint128 mul = ((__uint128) a) * b;
+    *high = mul >> 64;
+    return (uint64_t) mul;
+}
+#endif
+
 typedef double (*GetU01CallbackC)(void *param, void *state);
 typedef long unsigned int (*GetBits32CallbackC)(void *param, void *state);
 typedef uint64_t (*GetBits64CallbackC)(void *param, void *state);
@@ -174,9 +190,9 @@ int run_bigcrush(const GenInfoC *gi);
  * External modules functions prototypes. They are needed for
  * protection from function types mismatchin
  */
-int gen_initlib(CallerAPI *intf);
-int gen_closelib(void);
-int gen_getinfo(GenInfoC *gi);
+int EXPORT gen_initlib(CallerAPI *intf);
+int EXPORT gen_closelib(void);
+int EXPORT gen_getinfo(GenInfoC *gi);
 
 
 /**

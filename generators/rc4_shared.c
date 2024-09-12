@@ -54,7 +54,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 }
 
 
-static void *init_state()
+static void *init_state(void)
 {
     RC4State *obj = intf.malloc(sizeof(RC4State));
     uint64_t v = 0x9E3779B97F4A7C15 ^ intf.get_seed64();

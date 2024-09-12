@@ -50,7 +50,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return tmp;
 }
 
-static void *init_state()
+static void *init_state(void)
 {
     Sfc64State *obj = intf.malloc(sizeof(Sfc64State));
     obj->a = obj->b = obj->c = intf.get_seed64();
