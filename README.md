@@ -141,7 +141,7 @@ The supplied generators can be divided into several groups:
  isaac64          | u64    | +          | +     | +        |              | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB        | 0.85
  kiss99           | u32    | +          | +     | +        | >=1 TiB      | 1.08
- kiss64           | u64    | +          | +     | +        |              | 0.41
+ kiss64           | u64    | +          | +     | +        | >=1 TiB      | 0.41
  lcg64            | u32    | +          | -     | -        | 16 MiB       | 0.41
  lcg128           | u32/64 | +          | +     | +        | >=2TiB/64GiB | 0.53/0.29
  lcg69069         | u32    | -          | -     | -        | 2 KiB        | 0.40
@@ -152,13 +152,13 @@ The supplied generators can be divided into several groups:
  msws             | u32    | +          | +     | +        |              | 0.53
  mwc32x           | u32    | +          | -     | -        | 256MiB       | 1.45
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
- mwc128x          | u64    | +          | +     | +        | >=1TiB       | 0.21
+ mwc128x          | u64    | +          | +     | +        | >=8TiB       | 0.21
  pcg32            | u32    | +          | +     | +        |              | 0.47
  pcg64            | u64    | +          | +     | +        |              | 0.30
  philox           | u64    | +          | +     | +        |              | 0.95
  philox32         | u64    | +          | +     | +        |              | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
- ranluxpp         | u64    | +          | +     | +        |              | 3.82
+ ranluxpp         | u64    | +          | +     | +        | >= 1TiB      | 3.82
  rc4              | u32    | +          | +     | +        | 512 GiB      | 7.41
  rrmxmx           | u64    | +          | +     | +        |              | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
@@ -168,9 +168,9 @@ The supplied generators can be divided into several groups:
  sqxor            | u64    | +          | +     | +        |              | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
  squares64        | u64    | +          | +     | +        | >=1 TiB      | 0.42
- threefry         | u64    | +          | +     | +        |              | 1.14
+ threefry         | u64    | +          | +     | +        | >=1 TiB      | 1.14
  wyrand           | u64    | +          | +     | +        |              | ~0.1
- xoroshiro128stst | u64    | +          | +     |          |              | 0.28
+ xoroshiro128stst | u64    | +          | +     | +        |              | 0.28
  xorwow           | u32    | +          | -     | -        | 128 KiB      | 0.73
  xsh              | u64    | -          | -     | -        | 32 KiB       | 0.42
 
