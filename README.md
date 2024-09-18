@@ -150,8 +150,10 @@ The supplied generators can be divided into several groups:
  mlfib17_5        | u32    | +          | +     | +        | >=1TiB       | 0.38
  mt19937          | u32    | +          | -     | -        | 128 GiB      | 1.38
  msws             | u32    | +          | +     | +        |              | 0.53
- mwc32x           | u32    | +          | -     | -        | 256MiB       | 1.45
+ mwc32x           | u32    | +          | -     | -        | 256 MiB      | 1.45
+ mwc64            | u32    | +          | -     | -        | 1 TiB        | 0.34?
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
+ mwc128           | u64    | +          | +     | +        |              | 0.20?
  mwc128x          | u64    | +          | +     | +        | >=8TiB       | 0.21
  pcg32            | u32    | +          | +     | +        |              | 0.47
  pcg64            | u64    | +          | +     | +        |              | 0.30
@@ -161,7 +163,7 @@ The supplied generators can be divided into several groups:
  ranluxpp         | u64    | +          | +     | +        | >= 1TiB      | 3.82
  rc4              | u32    | +          | +     | +        | 512 GiB      | 7.41
  rrmxmx           | u64    | +          | +     | +        |              | 0.18
- seigzin63        | u32    | +          | +     | -+       | >= 2TiB      | 3.50
+ seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
  splitmix         | u64    | +          | +     |          |              | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
