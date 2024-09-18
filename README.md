@@ -162,10 +162,10 @@ The supplied generators can be divided into several groups:
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
  ranluxpp         | u64    | +          | +     | +        | >= 1TiB      | 3.82
  rc4              | u32    | +          | +     | +        | 512 GiB      | 7.41
- rrmxmx           | u64    | +          | +     | +        |              | 0.18
+ rrmxmx           | u64    | +          | +     | +        | >= 2TiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
- splitmix         | u64    | +          | +     |          |              | 0.19
+ splitmix         | u64    | +          | +     | +        |              | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
  sqxor            | u64    | +          | +     | +        | >= 2TiB      | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
