@@ -161,7 +161,7 @@ The supplied generators can be divided into several groups:
  ranluxpp         | u64    | +          | +     | +        | >= 1TiB      | 3.82
  rc4              | u32    | +          | +     | +        | 512 GiB      | 7.41
  rrmxmx           | u64    | +          | +     | +        | >= 2TiB      | 0.18
- seigzin63        | u32    | +          | +     | -+       | >= 8TiB      | 3.50
+ seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
  splitmix         | u64    | +          | +     | +        |              | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
