@@ -153,11 +153,11 @@ The supplied generators can be divided into several groups:
  mwc32x           | u32    | +          | -     | -        | 256 MiB      | 1.45
  mwc64            | u32    | +          | -     | -        | 1 TiB        | 0.34?
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
- mwc128           | u64    | +          | +     | +        |              | 0.20?
+ mwc128           | u64    | +          | +     | +        | >=2TiB       | 0.20?
  mwc128x          | u64    | +          | +     | +        | >=8TiB       | 0.21
  pcg32            | u32    | +          | +     | +        |              | 0.47
  pcg64            | u64    | +          | +     | +        |              | 0.30
- philox           | u64    | +          | +     | +        |              | 0.95
+ philox           | u64    | +          | +     | +        | >=2TiB       | 0.95
  philox32         | u64    | +          | +     | +        | >=2TiB       | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
  ranluxpp         | u64    | +          | +     | +        | >= 1TiB      | 3.82
@@ -172,7 +172,7 @@ The supplied generators can be divided into several groups:
  squares64        | u64    | +          | +     | +        | >=1 TiB      | 0.42
  threefry         | u64    | +          | +     | +        | >=1 TiB      | 1.14
  wyrand           | u64    | +          | +     | +        | >=1 TiB      | ~0.1
- xoroshiro128stst | u64    | +          | +     | +        |              | 0.28
+ xoroshiro128stst | u64    | +          | +     | +        | >=2 TiB      | 0.28
  xorwow           | u32    | +          | -     | -        | 128 KiB      | 0.73
  xsh              | u64    | -          | -     | -        | 32 KiB       | 0.42
 
