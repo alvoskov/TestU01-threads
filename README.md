@@ -134,7 +134,7 @@ The supplied generators can be divided into several groups:
 ------------------|--------|------------|-------|----------|--------------|-----------
  alfib            | u32    | +          | -     | -        | 128 GiB      | 0.34
  alfib_mod        | u32    | +          | +     | +        | 1 TiB        | 0.40
- chacha_avx       | u32    | +          | +     |          |              | 0.91
+ chacha_avx       | u32    | +          | +     | +        |              | 0.91
  chacha           | u32    | +          | +     | +        |              | 2.04
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
  cmwc4096         | u32    | +          | +     | +        | >= 1 TiB     | 0.36
