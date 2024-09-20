@@ -138,7 +138,7 @@ The supplied generators can be divided into several groups:
  chacha           | u32    | +          | +     | +        |              | 2.04
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
  cmwc4096         | u32    | +          | +     | +        | >= 1 TiB     | 0.36
- isaac64          | u64    | +          | +     | +        |              | 0.85
+ isaac64          | u64    | +          | +     | +        | >= 1 TiB     | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB        | 0.85
  kiss99           | u32    | +          | +     | +        | >=1 TiB      | 1.08
  kiss64           | u64    | +          | +     | +        | >=1 TiB      | 0.41
@@ -156,7 +156,7 @@ The supplied generators can be divided into several groups:
  mwc128           | u64    | +          | +     | +        | >=2TiB       | 0.22
  mwc128x          | u64    | +          | +     | +        | >=8TiB       | 0.21
  pcg32            | u32    | +          | +     | +        |              | 0.47
- pcg64            | u64    | +          | +     | +        |              | 0.30
+ pcg64            | u64    | +          | +     | +        | >=2TiB       | 0.30
  philox           | u64    | +          | +     | +        | >=2TiB       | 0.95
  philox32         | u64    | +          | +     | +        | >=2TiB       | 1.91
  randu            | u32    | -          | -     | -        | 1 KiB        | 0.37
@@ -165,7 +165,7 @@ The supplied generators can be divided into several groups:
  rrmxmx           | u64    | +          | +     | +        | >= 2TiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
- splitmix         | u64    | +          | +     | +        |              | 0.19
+ splitmix         | u64    | +          | +     | +        | >= 2TiB      | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
  sqxor            | u64    | +          | +     | +        | >= 2TiB      | 0.14
  sqxor32          | u32    | +          | -     | -        | 16 GiB       | 0.24
