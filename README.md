@@ -134,14 +134,14 @@ The supplied generators can be divided into several groups:
 ------------------|--------|------------|-------|----------|--------------|-----------
  alfib            | u32    | +          | -     | -        | 128 GiB      | 0.34
  alfib_mod        | u32    | +          | +     | +        | 1 TiB        | 0.40
- chacha_avx       | u32    | +          | +     | +        |              | 0.91
+ chacha_avx       | u32    | +          | +     | +        | >= 2 TiB     | 0.91
  chacha           | u32    | +          | +     | +        |              | 2.04
  coveyou64        | u32    | +          | -     | -        | 256 KiB      | 0.46
- cmwc4096         | u32    | +          | +     | +        | >= 1 TiB     | 0.36
+ cmwc4096         | u32    | +          | +     | +        | >= 32 TiB    | 0.36
  isaac64          | u64    | +          | +     | +        | >= 1 TiB     | 0.85
  kiss93           | u32    | +          | -     | -        | 1 MiB        | 0.85
- kiss99           | u32    | +          | +     | +        | >=1 TiB      | 1.08
- kiss64           | u64    | +          | +     | +        | >=1 TiB      | 0.41
+ kiss99           | u32    | +          | +     | +        | >=8 TiB      | 1.08
+ kiss64           | u64    | +          | +     | +        | >=16 TiB(?)  | 0.41
  lcg64            | u32    | +          | -     | -        | 16 MiB       | 0.41
  lcg128           | u32/64 | +          | +     | +        | >=2TiB/64GiB | 0.53/0.29
  lcg69069         | u32    | -          | -     | -        | 2 KiB        | 0.40
@@ -155,7 +155,7 @@ The supplied generators can be divided into several groups:
  mwc64x           | u32    | +          | +     | +        | >=8TiB       | 0.57
  mwc128           | u64    | +          | +     | +        | >=2TiB       | 0.22
  mwc128x          | u64    | +          | +     | +        | >=8TiB       | 0.21
- pcg32            | u32    | +          | +     | +        |              | 0.47
+ pcg32            | u32    | +          | +     | +        | >=2TiB       | 0.47
  pcg64            | u64    | +          | +     | +        | >=2TiB       | 0.30
  philox           | u64    | +          | +     | +        | >=2TiB       | 0.95
  philox32         | u64    | +          | +     | +        | >=2TiB       | 1.91
