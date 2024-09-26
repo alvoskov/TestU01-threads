@@ -117,7 +117,6 @@ int run_self_test(void)
     intf.printf("Reference: 0x%16llX 0x%16llX\n", out[0], out[1]);
     intf.free(obj);
     return obj->out[0] == out[0] && obj->out[1] == out[1];
-    return 1;
 }
 
 

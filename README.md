@@ -103,6 +103,8 @@ Supplied PRNGs external modules
  rc4              | RC4 obsolete CSPRNG (doesn't pass PractRand)
  rrmxmx           | Modified SplitMix PRNG with improved output function
  seigzin63        | \f$ LCG(2^{63}-25,a,0) \f$
+ speck128_avx     | AVX2 version of Speck128/128 CSPRNG
+ speck128         | Scalar version of Speck128/128 CSPRNG
  sfc64            | "Small Fast Chaotic 64-bit" PRNG by 
  squares64        | Counter-based 64-bit PRNG by B.Widynski
  sqxor            | sqxor
@@ -116,7 +118,7 @@ Supplied PRNGs external modules
 The supplied generators can be divided into several groups:
 
 1. Cryptographically secure pseudorandom numbers generators (CSPRNG):
-   ChaCha12, ISAAC64
+   ChaCha12, ISAAC64, Speck128/128.
 2. Simplified generators based on CSPRNG: Philox, Threefry.
 3. High-quality PRNGs that pass BigCrush: CMWC, KISS99, KISS64, LCG128,
    multiplicative lagged Fibonacci, MWC64X, MWC128X, RANLUX++,
@@ -165,6 +167,8 @@ The supplied generators can be divided into several groups:
  rrmxmx           | u64    | +          | +     | +        | >= 2TiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
+ speck128_avx     | u64    | +          | +     |          |              | 0.78
+ speck128         | u64    | +          | +     |          |              | 3.36
  splitmix         | u64    | +          | +     | +        | >= 2TiB      | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
  sqxor            | u64    | +          | +     | +        | >= 2TiB      | 0.14
