@@ -1,10 +1,13 @@
 /**
  * @file speck128_avx_shared.c
  * @brief Speck128/128 CSPRNG vectorized implementation for AVX2
- * instruction set for modern x86-64 processors. Allows to achieve
- * performance better than 1 cpb.
+ * instruction set for modern x86-64 processors. Its period is \f$ 2^{129} \f$.
+ * Allows to achieve performance better than 1 cpb (about 0.74 cpb) on
+ * Intel(R) Core(TM) i5-11400H 2.70GHz. It is slightly faster than ChaCha12
+ * and ISAAC64 CSPRNG.
  *
  * References:
+ *
  * 1. Ray Beaulieu, Douglas Shors et al. The SIMON and SPECK Families
  *    of Lightweight Block Ciphers // Cryptology ePrint Archive. 2013.
  *    Paper 2013/404. https://ia.cr/2013/404
@@ -26,6 +29,8 @@
 
 PRNG_CMODULE_PROLOG
 
+#define NROUNDS 32
+
 static inline uint64_t rotl(uint64_t x, uint64_t r)
 {
     return (x << r) | (x >> (64 - r));
@@ -37,62 +42,43 @@ static inline uint64_t rotr(uint64_t x, uint64_t l)
 }
 
 /**
- * @brief Speck128 state.
- * @details
- * - ctr has the next layout: [c0_lo, c1_lo, c2_lo, c3_lo; c0_hi, c1_hi, c2_hi, c3_hi;
- *   c4_lo, c5_lo, c6_lo, c7_lo; c4_hi, c5_hi, c6_hi, c7_hi]
+ * @brief Vectorized "rotate left" instruction for vector of 64-bit values.
  */
-typedef struct {
-    uint64_t ctr[16]; ///< Counters
-    uint64_t out[16]; ///< Output buffer
-    uint64_t keys[32]; ///< Round keys
-    unsigned int pos;
-    Interleaved32Buffer i32buf;
-} Speck128State;
-
-#define R(x,y,k) (x=rotr(x,8), x+=y, x^=k, y=rotl(y,3), y^=x)
-
-
-static void Speck128State_init(Speck128State *obj, const uint64_t *key)
-{
-    obj->ctr[0] = 0; obj->ctr[4] = 0;
-    obj->ctr[1] = 1; obj->ctr[5] = 0;
-    obj->ctr[2] = 2; obj->ctr[6] = 0;
-    obj->ctr[3] = 3; obj->ctr[7] = 0;
-
-    obj->ctr[8] = 4; obj->ctr[12] = 0;
-    obj->ctr[9] = 5; obj->ctr[13] = 0;
-    obj->ctr[10] = 6; obj->ctr[14] = 0;
-    obj->ctr[11] = 7; obj->ctr[15] = 0;
-
-    if (key == NULL) {
-        obj->keys[0] = intf.get_seed64();
-        obj->keys[1] = intf.get_seed64();
-    } else {
-        obj->keys[0] = key[0];
-        obj->keys[1] = key[1];
-    }
-    uint64_t a = obj->keys[0], b = obj->keys[1];
-    for (size_t i = 0; i < 31; i++) {
-        //intf.printf("%llX\n", obj->keys[i]);
-        R(b, a, i);
-        obj->keys[i + 1] = a;
-    }    
-    obj->pos = 16;
-    Interleaved32Buffer_init(&obj->i32buf);
-}
-
 static inline __m256i mm256_rotl_epi64_def(__m256i in, int r)
 {
     return _mm256_or_si256(_mm256_slli_epi64(in, r), _mm256_srli_epi64(in, 64 - r));
 }
 
+/**
+ * @brief Vectorized "rotate right" instruction for vector of 64-bit values.
+ */
 static inline __m256i mm256_rotr_epi64_def(__m256i in, int r)
 {
     return _mm256_or_si256(_mm256_slli_epi64(in, 64 - r), _mm256_srli_epi64(in, r));
 }
 
+/**
+ * @brief Speck128/128 state, vectorized version.
+ * @details Counters vector (ctr) has the next layout:
+ *
+ *     [c0_lo, c1_lo, c2_lo, c3_lo; c0_hi, c1_hi, c2_hi, c3_hi;
+ *      c4_lo, c5_lo, c6_lo, c7_lo; c4_hi, c5_hi, c6_hi, c7_hi]
+ *
+ * Output has the similar layout. It means that output of AVX version
+ * is different from output of cross-platform 64-bit version
+ */
+typedef struct {
+    uint64_t ctr[16]; ///< Counters
+    uint64_t out[16]; ///< Output buffer
+    uint64_t keys[NROUNDS]; ///< Round keys
+    unsigned int pos; ///< Current position in the output buffer
+    Interleaved32Buffer i32buf; ///< Buffer for interleaved 32-bit output
+} Speck128VecState;
 
+/**
+ * @brief Vectorized round function for encryption procedure. Processes
+ * 4 copies of Speck128/128 simultaneously.
+ */
 static inline void round_avx(__m256i *x, __m256i *y, __m256i *kv)
 {
     *x = mm256_rotr_epi64_def(*x, 8);
@@ -102,14 +88,66 @@ static inline void round_avx(__m256i *x, __m256i *y, __m256i *kv)
     *y = _mm256_xor_si256(*y, *x);
 }
 
+/**
+ * @brief Round function for key schedule generation (scalar version).
+ */
+static inline void round_scalar(uint64_t *x, uint64_t *y, uint64_t k)
+{
+    *x = rotr(*x, 8);
+    *x += *y;
+    *x ^= k;
+    *y = rotl(*y, 3);
+    *y ^= *x;
+}
 
-static inline void Speck128State_block(Speck128State *obj)
+/**
+ * @brief Initialize counters, buffers and key schedule.
+ * @param obj Pointer to the object to be initialized.
+ * @param key Pointer to 128-bit key. If it is NULL then random key will be
+ * automatically generated.
+ */
+static void Speck128VecState_init(Speck128VecState *obj, const uint64_t *key)
+{
+    // Initialize counters
+    // a) Generators 0..3
+    obj->ctr[0] = 0; obj->ctr[4] = 0;
+    obj->ctr[1] = 1; obj->ctr[5] = 0;
+    obj->ctr[2] = 2; obj->ctr[6] = 0;
+    obj->ctr[3] = 3; obj->ctr[7] = 0;
+    // b) Generators 4..7
+    obj->ctr[8] = 4; obj->ctr[12] = 0;
+    obj->ctr[9] = 5; obj->ctr[13] = 0;
+    obj->ctr[10] = 6; obj->ctr[14] = 0;
+    obj->ctr[11] = 7; obj->ctr[15] = 0;
+    // Initialize key schedule
+    if (key == NULL) {
+        obj->keys[0] = intf.get_seed64();
+        obj->keys[1] = intf.get_seed64();
+    } else {
+        obj->keys[0] = key[0];
+        obj->keys[1] = key[1];
+    }
+    uint64_t a = obj->keys[0], b = obj->keys[1];
+    for (size_t i = 0; i < NROUNDS - 1; i++) {
+        round_scalar(&b, &a, i);
+        obj->keys[i + 1] = a;
+    }
+    // Initialize output buffers
+    obj->pos = 16;
+    Interleaved32Buffer_init(&obj->i32buf);
+}
+
+
+/**
+ * @brief Generate block of 1024 pseudorandom bits.
+ */
+static inline void Speck128VecState_block(Speck128VecState *obj)
 {
     __m256i a = _mm256_loadu_si256((__m256i *) obj->ctr);
     __m256i b = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
     __m256i c = _mm256_loadu_si256((__m256i *) (obj->ctr + 8));
     __m256i d = _mm256_loadu_si256((__m256i *) (obj->ctr + 12));
-    for (size_t i = 0; i < 32; i++) {
+    for (size_t i = 0; i < NROUNDS; i++) {
         __m256i kv = _mm256_set1_epi64x(obj->keys[i]);
         round_avx(&b, &a, &kv);
         round_avx(&d, &c, &kv);
@@ -120,7 +158,10 @@ static inline void Speck128State_block(Speck128State *obj)
     _mm256_storeu_si256((__m256i *) (obj->out + 12), d);
 }
 
-static inline void Speck128State_inc_counter(Speck128State *obj)
+/**
+ * @brief Increase counters of all 8 copies of CSPRNG.
+ */
+static inline void Speck128VecState_inc_counter(Speck128VecState *obj)
 {
     if ((obj->ctr[0] += 8) == 0) obj->ctr[4] += 8;
     if ((obj->ctr[1] += 8) == 0) obj->ctr[5] += 8;
@@ -135,23 +176,22 @@ static inline void Speck128State_inc_counter(Speck128State *obj)
 
 static void *init_state(void)
 {
-    Speck128State *obj = intf.malloc(sizeof(Speck128State));
-    Speck128State_init(obj, NULL);
+    Speck128VecState *obj = intf.malloc(sizeof(Speck128VecState));
+    Speck128VecState_init(obj, NULL);
     return (void *) obj;
 }
 
 
-
 /**
- * @brief Speck128/128 implementation.
+ * @brief Get 64-bit value from Speck128/128.
  */
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
-    Speck128State *obj = state;
+    Speck128VecState *obj = state;
     (void) param;
     if (obj->pos == 16) {
-        Speck128State_block(obj);
-        Speck128State_inc_counter(obj);
+        Speck128VecState_block(obj);
+        Speck128VecState_inc_counter(obj);
         obj->pos = 0;
     }
     return obj->out[obj->pos++];
@@ -166,13 +206,13 @@ int run_self_test(void)
     const uint64_t ctr[] = {0x7469206564616d20, 0x6c61766975716520};
     const uint64_t out[] = {0x7860fedf5c570d18, 0xa65d985179783265};
     int is_ok = 1;
-    Speck128State *obj = intf.malloc(sizeof(Speck128State));
-    Speck128State_init(obj, key);
+    Speck128VecState *obj = intf.malloc(sizeof(Speck128VecState));
+    Speck128VecState_init(obj, key);
     for (size_t i = 0; i < 4; i++) {
         obj->ctr[i] = ctr[0]; obj->ctr[i + 8] = ctr[0];
         obj->ctr[i + 4] = ctr[1]; obj->ctr[i + 12] = ctr[1];
     }
-    Speck128State_block(obj);
+    Speck128VecState_block(obj);
     intf.printf("%16s %16s\n", "Output", "Reference");
     for (size_t i = 0; i < 16; i++) {
         size_t ind = i / 4;
@@ -187,4 +227,4 @@ int run_self_test(void)
 }
 
 
-MAKE_UINT64_INTERLEAVED32_PRNG("Speck128", Speck128State, run_self_test)
+MAKE_UINT64_INTERLEAVED32_PRNG("Speck128AVX", Speck128VecState, run_self_test)

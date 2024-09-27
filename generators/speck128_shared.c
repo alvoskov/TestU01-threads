@@ -1,13 +1,22 @@
 /**
  * @file speck128_shared.c
- * @brief 
+ * @brief Speck128/128 CSPRNG cross-platform implementation for 64-bit
+ * processors. Its period is \f$ 2^{129} \f$. Performance is about
+ * 3.1 cpb on Intel(R) Core(TM) i5-11400H 2.70GHz.
  *
  * References:
- * 1. https://ia.cr/2013/404
- * 2. https://nsacyber.github.io/simon-speck/implementations/ImplementationGuide1.1.pdf
- * 3. https://mcnp.lanl.gov/pdf_files/TechReport_2023_LANL_LA-UR-23-25111Rev.1_Josey.pdf
+ *
+ * 1. Ray Beaulieu, Douglas Shors et al. The SIMON and SPECK Families
+ *    of Lightweight Block Ciphers // Cryptology ePrint Archive. 2013.
+ *    Paper 2013/404. https://ia.cr/2013/404
+ * 2. Ray Beaulieu, Douglas Shors et al. SIMON and SPECK implementation guide
+ *    https://nsacyber.github.io/simon-speck/implementations/ImplementationGuide1.1.pdf
+ * 3. Colin Josey. Reassessing the MCNP Random Number Generator. Technical
+ *    Report LA-UR-23-25111. 2023. Los Alamos National Laboratory (LANL),
+ *    Los Alamos, NM (United States) https://doi.org/10.2172/1998091
  *
  * Rounds:
+ *
  * - 8 rounds: passes SmallCrush, fails PractRand at 8 GiB
  * - 9 rounds: passes Crush, fails PractRand at ???
  *
@@ -22,7 +31,7 @@
 
 PRNG_CMODULE_PROLOG
 
-
+#define NROUNDS 32
 
 static inline uint64_t rotl(uint64_t x, uint64_t r)
 {
@@ -40,7 +49,7 @@ static inline uint64_t rotr(uint64_t x, uint64_t l)
 typedef struct {
     uint64_t ctr[2]; ///< Counter
     uint64_t out[2]; ///< Output buffer
-    uint64_t keys[32]; ///< Round keys
+    uint64_t keys[NROUNDS]; ///< Round keys
     unsigned int pos;
     Interleaved32Buffer i32buf;
 } Speck128State;
@@ -60,7 +69,7 @@ static void Speck128State_init(Speck128State *obj, const uint64_t *key)
         obj->keys[1] = key[1];
     }
     uint64_t a = obj->keys[0], b = obj->keys[1];
-    for (size_t i = 0; i < 31; i++) {
+    for (size_t i = 0; i < NROUNDS - 1; i++) {
         //intf.printf("%llX\n", obj->keys[i]);
         R(b, a, i);
         obj->keys[i + 1] = a;
@@ -73,7 +82,7 @@ static inline void Speck128State_block(Speck128State *obj)
 {
     obj->out[0] = obj->ctr[0];
     obj->out[1] = obj->ctr[1];
-    for (size_t i = 0; i < 32; i++) {
+    for (size_t i = 0; i < NROUNDS; i++) {
         R(obj->out[1], obj->out[0], obj->keys[i]);
     }
 }
@@ -101,9 +110,9 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     return obj->out[obj->pos++];
 }
 
-
-
-
+/**
+ * @brief Internal self-test based on test vectors.
+ */
 int run_self_test(void)
 {
     const uint64_t key[] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
