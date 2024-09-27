@@ -5,7 +5,12 @@
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * The KISS93 algorithm is developed by George Marsaglia.
+ * @copyright The KISS93 algorithm is developed by George Marsaglia.
+ *
+ * Implementation for TestU01-threads:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
  *
  * All rights reserved.
  *
@@ -15,6 +20,9 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief KISS93 PRNG state.
+ */
 typedef struct {
     uint32_t S1;
     uint32_t S2;

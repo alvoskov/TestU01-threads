@@ -67,21 +67,22 @@ typedef int (*SelfTestCallbackC)(void);
 /**
  * @brief Keeps the information for initialization and destruction
  * of PRNG objects. Can be considered as UniformGenerator class equivalent
- * for pure C.
+ * for pure C. "Callbacks" are functions that are similar to virtual methods
+ * in C++.
  */
 typedef struct {
-    const char *name; /**< Generator name */
-    const char *options; /**< Generator options */
-    InitStateCallbackC init_state; /**< Function that initializes the PRNG state */
-    DeleteStateCallbackC delete_state; /**< Function that deletes the PRNG state */
-    GetU01CallbackC get_u01; /**< Function returns the double pseudorandom number */
-    GetBits32CallbackC get_bits32; /**< Function returns the uint32_t pseudorandom number */
-    GetBits64CallbackC get_bits64; /**< Function returns the uint64_t pseudorandom number */
-    GetArray32CallbackC get_array32; /**< Functions fills the uint32_t array buffer with pseudorandom numbers */
-    GetArray64CallbackC get_array64; /**< Functions fills the uint64_t array buffer with pseudorandom numbers */
-    GetSum32CallbackC get_sum32; /**< Function that returns the sum of 32-bit pseudorandom numbers */
-    GetSum64CallbackC get_sum64; /**< Function that returns the sum of 64-bit pseudorandom numbers */
-    SelfTestCallbackC run_self_test; /**< Functions that runs the internal self-test */
+    const char *name; ///< Generator name
+    const char *options; ///< Generator options
+    InitStateCallbackC init_state; ///< Initialize the PRNG state
+    DeleteStateCallbackC delete_state; ///< Delete the PRNG state
+    GetU01CallbackC get_u01; /// Return the double pseudorandom number
+    GetBits32CallbackC get_bits32; ///< Return the uint32_t pseudorandom number
+    GetBits64CallbackC get_bits64; ///< Return the uint64_t pseudorandom number
+    GetArray32CallbackC get_array32; ///< Fill the uint32_t array buffer with pseudorandom numbers
+    GetArray64CallbackC get_array64; ///< Fill the uint64_t array buffer with pseudorandom numbers
+    GetSum32CallbackC get_sum32; ///< Return the sum of 32-bit pseudorandom numbers
+    GetSum64CallbackC get_sum64; ///< Return the sum of 64-bit pseudorandom numbers
+    SelfTestCallbackC run_self_test; ///< Run the internal self-test
 } GenInfoC;
 
 /**
@@ -90,11 +91,11 @@ typedef struct {
  * allow writing freestanding modules.
  */
 typedef struct {
-    GetSeed64CallbackC get_seed64; /**< Get random 64-bit seed */
-    void *(*malloc)(size_t len); /**< Pointer to malloc function */
-    void (*free)(void *); /**< Pointer to free function */
-    int (*printf)(const char *format, ... ); /**< Pointer to printf function */
-    int (*strcmp)(const char *lhs, const char *rhs); /**< Pointer to strcmp function */
+    GetSeed64CallbackC get_seed64; ///< Get random 64-bit seed
+    void *(*malloc)(size_t len); ///< Pointer to malloc function
+    void (*free)(void *); ///< Pointer to free function
+    int (*printf)(const char *format, ... ); ///< Pointer to printf function
+    int (*strcmp)(const char *lhs, const char *rhs); ///< Pointer to strcmp function
 } CallerAPI;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)

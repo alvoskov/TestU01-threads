@@ -22,6 +22,7 @@ static std::string printf_tos(const char *format, ...)
 /**
  * @brief C++ version of num_writeD function. It writes to string, not
  * to stdout.
+ * @param x  Input value to be printed
  * @param I  Minimal width in characters
  * @param J  Number of digits after . (%f format, without exponent)
  * @param K  Number of significant digits in scientific notation
@@ -320,7 +321,7 @@ static std::string ms_to_hms(size_t ms_total)
  * @param bat_name  Battery name.
  * @param gen_name  Generator name.
  * @param timer     TestU01 timer that calculated CPU time for all cores.
- * @param ms_time   Elapsed time, milliseconds.
+ * @param ms_total  Elapsed time, milliseconds.
  * @return Battery run report (ASCII string).
  */
 std::string BatteryIO::WriteReport(const char *bat_name, const char *gen_name,

@@ -35,9 +35,9 @@
  *    Physics (CHEP 2021). V. 251. https://doi.org/10.1051/epjconf/202125103008
  *
  * @copyright (c) 2020-2021 Jonas Hahfeld, Jirka Hladky (original library);
- * (c) 2024 Alexey L. Voskov (modifications for TestU01-threads and MinGW)
+ * (c) 2024 Alexey L. Voskov (modifications for TestU01-threads, MinGW and MSVC)
  *
- * @license This library is free software; you can redistribute it and/or
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.

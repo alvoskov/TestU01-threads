@@ -1,5 +1,5 @@
 /**
- * @file kiss99_shared
+ * @file kiss99_shared.c
  * @brief KISS99 pseudorandom number generator by George Marsaglia.
  * It passes SmallCrush, Crush and BigCrush batteries, has period about 2^123
  * and doesn't require 64-bit arithmetics.
@@ -15,10 +15,14 @@
  * - https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
  * - http://www0.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright The KISS99 algorithm is developed by George Marsaglia.
+ *
+ * Implementation for TestU01-threads:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * The KISS99 algorithm is developed by George Marsaglia.
+ * 
  *
  * All rights reserved.
  *

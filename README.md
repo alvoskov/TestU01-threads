@@ -120,7 +120,7 @@ The supplied generators can be divided into several groups:
 1. Cryptographically secure pseudorandom numbers generators (CSPRNG):
    ChaCha12, ISAAC64, Speck128/128.
 2. Simplified generators based on CSPRNG: Philox, Threefry.
-3. High-quality PRNGs that pass BigCrush: CMWC, KISS99, KISS64, LCG128,
+3. High-quality PRNGs that pass BigCrush: CMWC4096, KISS99, KISS64, LCG128,
    multiplicative lagged Fibonacci, MWC64X, MWC128X, RANLUX++,
    sqxor, wyrand, xoroshiro128**.
 4. RC4: passes BigCrush but fails PractRand (obsolete and slow CSPRNG).
@@ -167,8 +167,8 @@ The supplied generators can be divided into several groups:
  rrmxmx           | u64    | +          | +     | +        | >= 2TiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
- speck128_avx     | u64    | +          | +     |          |              | 0.78
- speck128         | u64    | +          | +     |          |              | 3.36
+ speck128_avx     | u64    | +          | +     | +        |              | 0.78
+ speck128         | u64    | +          | +     | +        |              | 3.36
  splitmix         | u64    | +          | +     | +        | >= 2TiB      | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
  sqxor            | u64    | +          | +     | +        | >= 2TiB      | 0.14

@@ -1,5 +1,5 @@
 /**
- * @file squares_shared.c
+ * @file squares64_shared.c
  * @brief "Squares" counter-based PRNG by B.Widynski
  * @details Reference:
  *

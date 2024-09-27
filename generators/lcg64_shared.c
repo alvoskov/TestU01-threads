@@ -1,23 +1,23 @@
 /**
  * @file lcg64_shared.c
- * @brief Just 64-bit LCG.
- * @details
+ * @brief Just 64-bit LCG that returns the upper 32 bits.
+ * The easy to remember multiplier is suggested by George Marsaglia.
+ * Slightly better multipliers are present in https://doi.org/10.1002/spe.303.
+ * @details It passes SmallCrush but fails Crush:
  *
- *       Test                          p-value
- * ----------------------------------------------
- *  8  CollisionOver, t = 8          9.3e-151
- * 10  CollisionOver, t = 20          5.6e-10
- * 13  BirthdaySpacings, t = 4         1.4e-5
- * 15  BirthdaySpacings, t = 7       7.4e-289
- * 16  BirthdaySpacings, t = 8          eps
- * 17  BirthdaySpacings, t = 8          eps
- * ----------------------------------------------
- * All other tests were passed
+ *           Test                          p-value
+ *     ----------------------------------------------
+ *      8  CollisionOver, t = 8          9.3e-151
+ *     10  CollisionOver, t = 20          5.6e-10
+ *     13  BirthdaySpacings, t = 4         1.4e-5
+ *     15  BirthdaySpacings, t = 7       7.4e-289
+ *     16  BirthdaySpacings, t = 8          eps
+ *     17  BirthdaySpacings, t = 8          eps
+ *     ----------------------------------------------
+ *     All other tests were passed
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
- *
- * The KISS99 algorithm is developed by George Marsaglia.
  *
  * All rights reserved.
  *

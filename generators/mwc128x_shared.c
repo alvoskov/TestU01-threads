@@ -38,7 +38,7 @@ typedef struct {
     uint64_t x;
     uint64_t c;
     Interleaved32Buffer i32buf;
-} MWC128State;
+} MWC128XState;
 
 
 /**
@@ -50,7 +50,7 @@ typedef struct {
 static inline uint64_t get_bits64_raw(void *param, void *state)
 {
     static const uint64_t MWC_A1 = 0xffebb71d94fcdaf9;
-    MWC128State *obj = state;
+    MWC128XState *obj = state;
     (void) param;
 
 #ifdef UINT128_ENABLED
@@ -68,7 +68,7 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
 
 static void *init_state(void)
 {
-    MWC128State *obj = intf.malloc(sizeof(MWC128State));
+    MWC128XState *obj = intf.malloc(sizeof(MWC128XState));
     obj->x = intf.get_seed64();
     obj->c = 1;
     Interleaved32Buffer_init(&obj->i32buf);
@@ -78,7 +78,7 @@ static void *init_state(void)
 
 int run_self_test(void)
 {
-    MWC128State obj = {.x = 12345, .c = 67890};
+    MWC128XState obj = {.x = 12345, .c = 67890};
     uint64_t u, u_ref = 0xDE4919065DBF6449;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits64_raw(NULL, &obj);
@@ -88,4 +88,4 @@ int run_self_test(void)
 }
 
 
-MAKE_UINT64_INTERLEAVED32_PRNG("MWC128X", MWC128State, run_self_test)
+MAKE_UINT64_INTERLEAVED32_PRNG("MWC128X", MWC128XState, run_self_test)

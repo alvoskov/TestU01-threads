@@ -3,8 +3,19 @@
  * @brief Coveyou64 PRNG.
  * @details Passes SmallCrush but fails the next two tests
  * from Crush:
+ *
  * - 17  BirthdaySpacings, t = 8
  * - 26  SimpPoker, d = 64
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
  */
 
 #include "testu01th/cinterface.h"
