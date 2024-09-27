@@ -167,7 +167,7 @@ The supplied generators can be divided into several groups:
  rrmxmx           | u64    | +          | +     | +        | >= 2TiB      | 0.18
  seigzin63        | u32    | +          | +     | -+       | >= 16TiB     | 3.50
  sfc64            | u32    | +          | +     | +        | >= 1TiB      | 0.12
- speck128_avx     | u64    | +          | +     | +        |              | 0.78
+ speck128_avx     | u64    | +          | +     | +        | >= 2TiB      | 0.78
  speck128         | u64    | +          | +     | +        |              | 3.36
  splitmix         | u64    | +          | +     | +        | >= 2TiB      | 0.19
  shr3             | u32    | -          | -     | -        | 32 KiB       | 0.82
