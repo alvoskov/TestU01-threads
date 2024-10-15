@@ -1,14 +1,15 @@
 /**
  * @file lcg64prime_shared.c
- * @brief Just 128-bit LCG with \f$ m = 2^{128}\f$ and easy to memorize
- * multiplier 18000 69069 69069 69069 (suggested by A.L. Voskov)
- * @details It passes SmallCrush, Crush and BigCrush. However, its higher
- * 64 bits fail PractRand 0.94 at 128GiB sample. Usage of slightly better
- * (but hard to memorize) multiplier 0xfc0072fa0b15f4fd from 
- * https://doi.org/10.1002/spe.3030 doesn't improve PractRand 0.94 results.
+ * @brief 64-bit LCG with prime modulus \f$ m = 2^{64} - 59 \f$.
+ * @details It passes SmallCrush, Crush and BigCrush.
  *
- * 1. http://dx.doi.org/10.1090/S0025-5718-99-00996-5
- * 2. https://doi.org/10.1002/spe.2689
+ * References:
+ *
+ * 1. P. L'Ecuyer. Tables of linear congruential generators of different
+ *    sizes and good lattice structure // Mathematics of Computation. 1999.
+ *    V. 68. N. 225. P. 249-260
+ *    http://dx.doi.org/10.1090/S0025-5718-99-00996-5
+ * 2. https://en.wikipedia.org/wiki/Linear_congruential_generator
  *
  * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -39,8 +40,19 @@ static inline uint64_t get_bits64_raw(void *param, void *state)
     Lcg64State *obj = state;
     const uint64_t a = 13891176665706064842ull;
     const uint64_t m = 18446744073709551557ull;  // 2^64 - 59
+    const uint64_t d = 59;
     (void) param;
-    obj->x = ((__uint128_t) a * obj->x + 12345) % m;
+    __uint128_t prod = (__uint128_t) a * obj->x;
+    uint64_t hi = prod >> 64, lo = prod;
+    __uint128_t r = lo + d * (__uint128_t) hi;
+    int k = (int) (r >> 64) - 1;
+    if (k > 0) {
+        r -= (((__uint128_t) k) << 64) - k * d;
+    }
+    if (r > m) {
+        r -= m;
+    }
+    obj->x = r;
     return obj->x;
 }
 
@@ -59,12 +71,12 @@ static void *init_state(void)
  */
 static int run_self_test(void)
 {
-    Lcg64State obj = {.x = 1234567890};
-    uint64_t u, u_ref = 0x8E878929D96521D7;
-    for (size_t i = 0; i < 1000000; i++) {
+    Lcg64State obj = {.x = 1};
+    uint64_t u, u_ref = 3072923337735042611ull;
+    for (size_t i = 0; i < 100000; i++) {
         u = get_bits64_raw(NULL, &obj);
     }
-    intf.printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    intf.printf("Result: %llu; reference value: %llu\n", u, u_ref);
     return u == u_ref;
 }
 
