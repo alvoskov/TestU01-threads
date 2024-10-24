@@ -145,7 +145,7 @@ The supplied generators can be divided into several groups:
  kiss99           | u32    | +          | +     | +        | >=8 TiB      | 1.08
  kiss64           | u64    | +          | +     | +        | >=16 TiB(?)  | 0.41
  lcg64            | u32    | +          | -     | -        | 16 MiB       | 0.41
- lcg64prime       | u64    | +          | +     | +        | >= 16 TiB    | 1.57
+ lcg64prime       | u64    | +          | +     | +        | >= 32 TiB    | 1.57
  lcg128           | u32/64 | +          | +     | +        | >=2TiB/64GiB | 0.53/0.29
  lcg69069         | u32    | -          | -     | -        | 2 KiB        | 0.40
  lfib_ranmar      | double | +          | +     | +        | < 1KiB       | 6.07
