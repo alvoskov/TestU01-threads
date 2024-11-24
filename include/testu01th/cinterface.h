@@ -361,7 +361,8 @@ EXPORT long unsigned int get_bits32(void *param, void *state) { \
     return obj->i32buf.val.u32[obj->i32buf.pos++]; \
 } \
 EXPORT double get_u01(void *param, void *state) { \
-    return uint64_to_udouble(get_bits64_raw(param, state)); \
+    return uint32_to_udouble(get_bits32(param, state)); \
+    /*return uint64_to_udouble(get_bits64_raw(param, state));*/ \
 } \
 EXPORT void get_array64(void *param, void *state, uint64_t *out, size_t len) { \
     for (size_t i = 0; i < len; i++) \
