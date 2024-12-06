@@ -30,8 +30,28 @@
 
 PRNG_CMODULE_PROLOG
 
+// Fail SmallCrush
+//#define LFIB_A 55
+//#define LFIB_B 24
+
+//#define LFIB_A 127
+//#define LFIB_B 97
+
+// Passes SmallCrush, fails Crush
+//#define LFIB_A 258
+//#define LFIB_B 83
+
+// Passes SmallCrush, fails Crush
 #define LFIB_A 607
 #define LFIB_B 273
+
+// Passes BigCrush
+//#define LFIB_A 2281
+//#define LFIB_B 1252
+
+// Passes Crush, Fails BigCrush
+//#define LFIB_A 1279
+//#define LFIB_B 418
 
 typedef struct {
     uint64_t U[LFIB_A + 1]; ///< Ring buffer (only values 1..17 are used)
