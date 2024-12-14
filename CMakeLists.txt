@@ -79,8 +79,8 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib_mod alfib chacha chacha_avx coveyou64 cmwc4096 isaac64 kiss64 kiss93 kiss99
     lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar minstd msws mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616x mlfib17_5
-    pcg32 pcg64 philox philox32 randu rc4 rrmxmx
-    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx swbw
+    pcg32 pcg64 philox philox32 randu ranrot32 rc4 rrmxmx
+    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx swblux swbw
     squares64 sqxor sqxor32 tinymt32 threefry wyrand xoroshiro128stst xorwow xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
