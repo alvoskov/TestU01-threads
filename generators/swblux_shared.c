@@ -70,7 +70,7 @@ static inline unsigned long get_bits32_raw(void *param, void *state)
 
 static void *init_state()
 {
-    int luxury = 0;
+    int luxury = 2;
     SwbLuxState *obj = intf.malloc(sizeof(SwbLuxState));
     for (int i = 1; i <= SWB_A; i++) {
         obj->x[i] = intf.get_seed64();
