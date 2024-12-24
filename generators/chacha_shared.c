@@ -116,6 +116,8 @@ static inline void ChaCha_inc_counter(ChaChaState *obj)
 {
     uint64_t *cnt = (uint64_t *) &obj->x[12];
     if (++cnt[0] == 0) ++cnt[1];
+    /* 32-bit counter */
+    //obj->x[12]++;
 }
 
 
