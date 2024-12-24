@@ -83,7 +83,7 @@ foreach(prng_name alfib_mod alfib ara32 chacha chacha_avx coveyou64 cmwc4096 fle
     minstd mrg32k3a msws mulberry32 mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616 mwc1616x mwc4691 mlfib17_5
     pcg32 pcg64 philox philox32 r1279 randu ranrot32 rc4 rrmxmx
     sapparot
-    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32 swblux swbw
+    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32 swblux swbw swblarge
     squares64 sqxor sqxor32 tinymt32 threefry wyrand xoroshiro128stst xorshift128 xorwow xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
