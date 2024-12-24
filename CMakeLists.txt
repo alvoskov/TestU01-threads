@@ -78,7 +78,7 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
 
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib_mod alfib ara32 chacha chacha_avx coveyou64 cmwc4096 flea32x1 isaac64 kiss64 kiss93 kiss99
-    lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar
+    lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258
     minstd mrg32k3a msws mulberry32 mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616 mwc1616x mlfib17_5
     pcg32 pcg64 philox philox32 r1279 randu ranrot32 rc4 rrmxmx
