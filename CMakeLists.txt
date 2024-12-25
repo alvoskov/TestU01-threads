@@ -81,8 +81,8 @@ foreach(prng_name alfib_lux alfib_mod alfib ara32 chacha chacha_avx coveyou64 cm
     hc256 isaac64 kiss64 kiss93 kiss99
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258
-    minstd mrg32k3a msws mulberry32 mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616 mwc1616x mwc4691 mlfib17_5
-    pcg32 pcg64 philox philox32 r1279 randu ranrot32 rc4 rrmxmx
+    minstd mixmax mrg32k3a msws mulberry32 mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616 mwc1616x mwc4691 mlfib17_5
+    pcg32 pcg64 philox philox32 r1279 randu ranrot32 ranval rc4 rrmxmx
     sapparot sapparot2
     seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32
     stormdrop_old
