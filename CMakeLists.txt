@@ -77,14 +77,17 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
     src/splitmix_gen.c include/testu01th/splitmix_gen.h include/testu01th/cinterface.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_lux alfib_mod alfib ara32 chacha chacha_avx coveyou64 cmwc4096 flea32x1 isaac64 kiss64 kiss93 kiss99
+foreach(prng_name alfib_lux alfib_mod alfib ara32 chacha chacha_avx coveyou64 cmwc4096 flea32x1
+    hc256 isaac64 kiss64 kiss93 kiss99
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258
     minstd mixmax mrg32k3a msws mulberry32 mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616 mwc1616x mwc4691 mlfib17_5
     pcg32 pcg64 philox philox32 r1279 randu ranrot32 ranval rc4 rc4ok rrmxmx
     sapparot sapparot2
-    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32 swblux swbw swblarge
-    squares64 sqxor sqxor32 tinymt32 threefry wyrand xoroshiro128stst xorshift128 xorwow xsh)
+    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32
+    stormdrop_old
+    swblux swbw swblarge
+    squares64 sqxor sqxor32 superduper73 tinymt32 threefry wyrand xoroshiro128stst xorshift128 xorwow xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
