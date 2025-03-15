@@ -35,6 +35,41 @@
 #include <stdint.h>
 #include <time.h>
 
+///////////////////////////
+///// Circular shifts /////
+///////////////////////////
+
+
+static inline uint32_t rotl32(uint32_t x, unsigned int r)
+{
+#ifdef __WATCOMC__
+    return _lrotl(x, r);
+#else
+    return (x << r) | (x >> ((-r) & 31));
+#endif
+}
+
+static inline uint32_t rotr32(uint32_t x, unsigned int r)
+{
+#ifdef __WATCOMC__
+    return _lrotr(x, r);
+#else
+    return (x << ((-r) & 31)) | (x >> r);
+#endif
+}
+
+static inline uint64_t rotl64(uint64_t x, unsigned int r)
+{
+    return (x << r) | (x >> ((-r) & 63));
+}
+
+static inline uint64_t rotr64(uint64_t x, unsigned int r)
+{
+    return (x << ((-r) & 63)) | (x >> r);
+}
+
+
+
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
 #pragma intrinsic(_umul128)

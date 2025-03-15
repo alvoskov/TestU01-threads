@@ -25,11 +25,6 @@ typedef struct {
 } RrmxmxState;
 
 
-static inline uint64_t ror64(uint64_t x, uint64_t r)
-{
-    return (x << r) | (x >> (64 - r));
-}
-
 static uint64_t get_bits64_raw(void *param, void *state)
 {
     RrmxmxState *obj = state;
@@ -37,7 +32,7 @@ static uint64_t get_bits64_raw(void *param, void *state)
     static const uint64_t gamma = 0x9E3779B97F4A7C15;
     uint64_t v = obj->x += gamma; // even obj->x++ is enough for BigCrush
     (void) param;
-    v ^= ror64(v, 49) ^ ror64(v, 24);
+    v ^= rotr64(v, 49) ^ rotr64(v, 24);
     v *= M;
     v ^= v >> 28;
     v *= M;

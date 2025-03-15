@@ -50,11 +50,6 @@ typedef struct {
 } RanRot32State;
 
 
-static inline uint32_t rotl32(uint32_t x, unsigned int r)
-{
-    return (x << r) | (x >> (32 - r));
-}
-
 /**
  * @brief An optimized implementation of lagged Fibonacci style PRNG.
  * @details The buffer before refilling looks like:

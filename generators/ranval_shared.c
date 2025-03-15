@@ -35,11 +35,6 @@ typedef struct {
 } RanvalState;
 
 
-static inline uint32_t rotl32(uint32_t x, unsigned int r)
-{
-    return (x << r) | (x >> (32 - r));
-}
-
 static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     RanvalState *obj = state;
