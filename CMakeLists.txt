@@ -77,9 +77,11 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
     src/splitmix_gen.c include/testu01th/splitmix_gen.h include/testu01th/cinterface.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx coveyou64 cmwc4096 flea32x1
+foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288 flea32x1
     hicg64 hc256
-    isaac64 kiss64 kiss93 kiss99
+    isaac64
+    jkiss32
+    kiss64 kiss93 kiss99
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258 lrnd64_255 lrnd64_1023
     melg607 melg19937 melg44497
@@ -88,14 +90,15 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx covey
     mwc64 mwc64x mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616x mwc4691
     mwc8222
     mlfib17_5
-    pcg32 pcg64 philox philox2x32 philox32 r1279 randu ranrot32 ranval rc4 rc4ok rrmxmx
+    pcg32 pcg64 philox philox32 r1279 randu ranrot32 ranval rc4 rc4ok rrmxmx # philox2x32
     sapparot sapparot2
     seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32 splitmix32cbc
-    stormdrop_old
+    stormdrop stormdrop_old
     swblux swbw swblarge
     squares64 sqxor sqxor32 superduper64 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
-    xabc8 xabc16 xabc32
-    xorshift64st xoroshiro128stst xorshift128 xoshiro128p xoshiro128pp xorwow xsh ziff98)
+    xabc8 xabc16 xabc32 xkiss16_awc
+    xoroshiro32pp xoroshiro64pp xoroshiro64st
+    xorshift64st xoroshiro128 xoroshiro128p xoroshiro128stst xoroshiro1024st xorshift128 xorshift128p xoshiro128p xoshiro128pp xorwow xsh ziff98)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)

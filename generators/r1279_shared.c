@@ -22,8 +22,14 @@
 
 PRNG_CMODULE_PROLOG
 
+/*
 #define RGEN_A 1279
 #define RGEN_B 1063
+*/
+
+
+#define RGEN_A 250
+#define RGEN_B 103
 
 
 typedef struct {

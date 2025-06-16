@@ -27,7 +27,7 @@
  *
  * This software is licensed under the MIT license.
  */
-#include "smokerand/cinterface.h"
+#include "testu01th/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
@@ -39,24 +39,25 @@ typedef struct {
 } Xorshift128PlusState;
 
 
-static inline unsigned long get_bits32_raw(void *state)
+static inline unsigned long get_bits32_raw(void *param, void *state)
 {
     Xorshift128PlusState *obj = state;
     uint64_t s1 = obj->s[0];
     const uint64_t s0 = obj->s[1];
     const uint64_t result = s0 + s1;
+    (void) param;
     obj->s[0] = s0;
     s1 ^= s1 << 23; // a
     obj->s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5); // b, c
-    return result & 0xFFFFFFFF;
+    return result >> 32;// & 0xFFFFFFFF;
 }
 
 
-static void *create(const CallerAPI *intf)
+static void *init_state()
 {
-    Xorshift128PlusState *obj = intf->malloc(sizeof(Xorshift128PlusState));
-    obj->s[0] = intf->get_seed64();
-    obj->s[1] = intf->get_seed64();
+    Xorshift128PlusState *obj = intf.malloc(sizeof(Xorshift128PlusState));
+    obj->s[0] = intf.get_seed64();
+    obj->s[1] = intf.get_seed64();
     if (obj->s[0] == 0 && obj->s[1] == 0) {
         obj->s[1] = 0x9E3779B97F4A7C15;
     }

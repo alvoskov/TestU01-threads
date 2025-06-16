@@ -343,9 +343,6 @@ CrushBattery::CrushBattery(GenFactoryFunc genf)
         sstring_AutoCor_cb(10, 30 + BILLION, r, s, 1));
 
     tests.emplace_back(++j2, "AutoCor, d = 1",
-        sstring_AutoCor_cb(10, 30 + BILLION, r, s, 1));
-
-    tests.emplace_back(++j2, "AutoCor, d = 1",
         sstring_AutoCor_cb(5, 1 + BILLION, 20, 10, 1));
 
     tests.emplace_back(++j2, "AutoCor, d = 30",
