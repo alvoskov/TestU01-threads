@@ -80,7 +80,7 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
 foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288 flea32x1
     hicg64 hc256
     isaac64
-    jkiss32
+    jkiss jkiss32
     kiss64 kiss93 kiss99
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258 lrnd64_255 lrnd64_1023
@@ -95,7 +95,7 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx covey
     seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32 splitmix32cbc
     stormdrop stormdrop_old
     swblux swbw swblarge
-    squares64 sqxor sqxor32 superduper64 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
+    squares64 sqxor sqxor32 superduper64 superduper96 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
     xabc8 xabc16 xabc32 xkiss16_awc
     xoroshiro32pp xoroshiro64pp xoroshiro64st
     xorshift64st xoroshiro128 xoroshiro128p xoroshiro128stst xoroshiro1024st xorshift128 xorshift128p xoshiro128p xoshiro128pp xorwow xsh ziff98)
