@@ -96,7 +96,7 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx covey
     stormdrop stormdrop_old
     swblux swbw swblarge
     squares64 sqxor sqxor32 superduper64 superduper96 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
-    xabc8 xabc16 xabc32 xkiss16_awc
+    xabc8 xabc16 xabc32 xkiss8_awc xkiss16_awc
     xoroshiro32pp xoroshiro64pp xoroshiro64st
     xorshift64st xoroshiro128 xoroshiro128p xoroshiro128stst xoroshiro1024st xorshift128 xorshift128p xoshiro128p xoshiro128pp xorwow xsh ziff98)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
