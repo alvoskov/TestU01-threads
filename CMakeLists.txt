@@ -77,16 +77,23 @@ add_library(splitmix_shared SHARED generators/splitmix_shared.c
     src/splitmix_gen.c include/testu01th/splitmix_gen.h include/testu01th/cinterface.h)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288 flea32x1
+foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
+    biski16
+    biski16_alt
+    biski32
+    biski32_alt
+    chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288_64 cswb4288 flea32x1
     hicg64 hc256
     isaac64
     jkiss jkiss32
-    kiss64 kiss93 kiss99
+    kiss64 kiss93 kiss99 kiss4691
+    kiss11_32
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258 lrnd64_255 lrnd64_1023
     melg607 melg19937 melg44497
     minstd mixmax mrg32k3a msws mularx64_u32 mulberry32 mwc32x
     mwc32xxa8 mwc40xxa8 mwc48xxa16
+    mwc64_2p58
     mwc64 mwc64x mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616x mwc4691
     mwc8222
     mlfib17_5
@@ -96,9 +103,12 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32 chacha chacha_avx covey
     stormdrop stormdrop_old
     swblux swbw swblarge
     squares64 sqxor sqxor32 superduper64 superduper96 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
-    xabc8 xabc16 xabc32 xkiss8_awc xkiss16_awc
+    ultra
+    xabc8 xabc16 xabc32 xkiss8_awc xkiss16_awc xkiss16sh_awc
+    xkiss32_awc xkiss32sh_awc
     xoroshiro32pp xoroshiro64pp xoroshiro64st
-    xorshift64st xoroshiro128 xoroshiro128p xoroshiro128stst xoroshiro1024st xorshift128 xorshift128p xoshiro128p xoshiro128pp xorwow xsh ziff98)
+    xorshift64st xoroshiro128 xoroshiro128p xoroshiro128stst xoroshiro1024st
+    xorshift128 xorshift128p xorshift128rp xoshiro128p xoshiro128pp xorwow xsh ziff98)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
