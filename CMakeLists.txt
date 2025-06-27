@@ -82,7 +82,7 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
     biski16_alt
     biski32
     biski32_alt
-    chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288_64 cswb4288 flea32x1
+    chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288_64 cswb4288 combo flea32x1
     hicg64 hc256
     isaac64
     jkiss jkiss32
