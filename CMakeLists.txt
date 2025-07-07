@@ -82,11 +82,12 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
     biski16_alt
     biski32
     biski32_alt
-    chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288_64 cswb4288 combo flea32x1
-    hicg64 hc256
+    chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288_64 cswb4288 combo cwg64 flea32x1
+    gjrand32
+    hicg64 hc256    
     isaac64
     jkiss jkiss32
-    kiss64 kiss93 kiss99 kiss4691
+    kiss64 kiss93 kiss96 kiss99 kiss4691
     kiss11_32
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258 lrnd64_255 lrnd64_1023
@@ -95,19 +96,23 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
     mwc32xxa8 mwc40xxa8 mwc48xxa16
     mwc64_2p58
     mwc64 mwc64x mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616x mwc4691
-    mwc8222
+    mwc8222    
     mlfib17_5
+    mzran13 ncombo
     pcg32 pcg64 philox philox32 r1279 randu ranrot32 ranval rc4 rc4ok rrmxmx # philox2x32
     sapparot sapparot2
-    seed64 sezgin63 sfc64 shr3 speck128 speck128_avx splitmix32 splitmix32cbc
+    seed64 sezgin63 sfc64
+    skiss32
+    shr3 speck128 speck128_avx splitmix32 splitmix32cbc
     stormdrop stormdrop_old
     swblux swbw swblarge
+    swbmwc32
     squares64 sqxor sqxor32 superduper64 superduper96 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
     ultra
     xabc8 xabc16 xabc32 xkiss8_awc xkiss16_awc xkiss16sh_awc
     xkiss32_awc xkiss32sh_awc
     xoroshiro32pp xoroshiro64pp xoroshiro64st
-    xorshift64st xoroshiro128 xoroshiro128p xoroshiro128stst xoroshiro1024st
+    xorshift64st xoroshiro128 xoroshiro128aox xoroshiro128p xoroshiro128stst xoroshiro1024st
     xorshift128 xorshift128p xorshift128rp xoshiro128p xoshiro128pp xorwow xsh ziff98)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/testu01th/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
