@@ -59,6 +59,15 @@ add_library(testu01threads
     include/testu01th/cinterface.h    src/cinterface.cpp)
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
+target_link_libraries(${program} testu01threads)
+
+
+add_executable(testu01th_loader src/testu01th_loader.cpp)
+target_include_directories(testu01th_loader PRIVATE include)
+target_include_directories(testu01th_loader PRIVATE ../smokerand/include)
+target_link_libraries(testu01th_loader smokerand_core)
+target_link_directories(testu01th_loader PRIVATE ../smokerand/lib)
+
 
 # Executables that call TestU01-threads library
 add_executable(testu01th_run src/testu01th_run.cpp)
@@ -83,7 +92,7 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
     biski32
     biski32_alt
     chacha chacha_avx coveyou64 cmwc4096 cmwc4827 cswb4288_64 cswb4288 combo cwg64 flea32x1
-    gjrand32
+    gjrand16 gjrand32
     hicg64 hc256    
     isaac64
     jkiss jkiss32
@@ -91,6 +100,7 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
     kiss11_32
     lcg32prime lcg64 lcg64prime lcg64prime_il lcg128 lcg69069 lfib_ranmar lfib4
     lfsr113 lfsr258 lrnd64_255 lrnd64_1023
+    macmarsa
     melg607 melg19937 melg44497
     minstd mixmax mrg32k3a msws mularx64_u32 mulberry32 mwc32x
     mwc32xxa8 mwc40xxa8 mwc48xxa16
@@ -100,15 +110,18 @@ foreach(prng_name alfib_lux alfib_mod alfib alfib8 ara32
     mlfib17_5
     mzran13 ncombo
     pcg32 pcg64 philox philox32 r1279 randu ranrot32 ranval rc4 rc4ok rrmxmx # philox2x32
+    ranq1 ranq2
     sapparot sapparot2
-    seed64 sezgin63 sfc64
+    seed64 sezgin63 sfc32 sfc64
     skiss32
     shr3 speck128 speck128_avx splitmix32 splitmix32cbc
     stormdrop stormdrop_old
     swblux swbw swblarge
-    swbmwc32
-    squares64 sqxor sqxor32 superduper64 superduper96 superduper73 taus88 tinymt32 threefry v3b wich1982 wich2006 wyrand
+    swbmwc32 swbmwc64
+    squares64 sqxor sqxor32 superduper64 superduper96 superduper73 taus88
+    tinymt32 tinymt64 threefry v3b wich1982 wich2006 wyrand
     ultra
+    wob2m
     xabc8 xabc16 xabc32 xkiss8_awc xkiss16_awc xkiss16sh_awc
     xkiss32_awc xkiss32sh_awc
     xoroshiro32pp xoroshiro64pp xoroshiro64st
