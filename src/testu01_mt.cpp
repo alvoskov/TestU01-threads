@@ -243,18 +243,6 @@ UniformGenerator::UniformGenerator(const std::string &name)
 //////////////////////////////////////////////////
 
 
-UniformGeneratorC::UniformGeneratorC(const GenInfoC *gi)
-: UniformGenerator(""), gen_module(*gi)
-{
-    this->name = std::string(gi->name);
-    gen.state = gi->init_state();
-    gen.param = nullptr;
-    gen.Write = WrExternGen;
-    gen.GetU01 = gi->get_u01;
-    gen.GetBits = gi->get_bits32;
-    gen.name = const_cast<char *>(name.c_str());
-}
-
 //////////////////////////////////////////
 ///// BatteryIO class implementation /////
 //////////////////////////////////////////

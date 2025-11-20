@@ -45,7 +45,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-add_library(testu01threads
+set(LIB_FILES
     include/testu01th/batteries.h
     include/testu01th/bigcrush.h      src/bigcrush.cpp
     include/testu01th/crush.h         src/crush.cpp
@@ -56,17 +56,23 @@ add_library(testu01threads
     include/testu01th/speedtest.h     src/speedtest.cpp
     include/testu01th/pdiehard.h      src/pdiehard.cpp 
     include/testu01th/testu01_mt.h    src/testu01_mt.cpp
+    include/testu01th/testu01_plugin.h    src/testu01_plugin.cpp
     include/testu01th/cinterface.h    src/cinterface.cpp)
+
+
+add_library(testu01threads ${LIB_FILES})
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 target_link_libraries(${program} testu01threads)
 
+add_library(testu01th_shared SHARED src/testu01_shared.cpp ${LIB_FILES})
+target_include_directories(testu01th_shared PRIVATE ${TESTU01_INCLUDE} include)
+target_link_directories(testu01th_shared PRIVATE ${TESTU01_LINK})
+target_link_libraries(testu01th_shared ${TESTU01_LIBS})
+if (WIN32)
+    target_link_libraries(testu01th_shared ws2_32)
+endif()
 
-add_executable(testu01th_loader src/testu01th_loader.cpp)
-target_include_directories(testu01th_loader PRIVATE include)
-target_include_directories(testu01th_loader PRIVATE ../smokerand/include)
-target_link_libraries(testu01th_loader smokerand_core)
-target_link_directories(testu01th_loader PRIVATE ../smokerand/lib)
 
 
 # Executables that call TestU01-threads library

@@ -18,35 +18,8 @@
 #ifndef __TESTU01_MT_H
 #define __TESTU01_MT_H
 
-extern "C" {
-#include "unif01.h"
-#include "gdef.h"
-#ifndef PACKAGE_STRING
-#include "config.h"
-#endif
-#include "bbattery.h"
-#include "fbar.h"
-#include "gofw.h"
-#include "gofs.h"
-#include "smultin.h"
-#include "sknuth.h"
-#include "smarsa.h"
-#include "snpair.h"
-#include "svaria.h"
-#include "sstring.h"
-#include "swalk.h"
-#include "scomp.h"
-#include "sspectral.h"
-#include "swrite.h"
-#include "sres.h"
-#include "num.h"
-#include "unif01.h"
-#include "ufile.h"
-}
-
-#define THOUSAND 1000
-#define MILLION (THOUSAND * THOUSAND)
-#define BILLION (THOUSAND * MILLION)
+#include <cstddef>
+#include <cstdint>
 
 
 /**
@@ -54,9 +27,13 @@ extern "C" {
  */
 constexpr size_t ELEMENTS_PER_BLOCK = 1024;
 
+#if defined(__GNUC__) && defined(__x86_64__)
+#include <x86intrin.h>
+#undef STDC_HEADERS
+#endif
 
-#include "cinterface.h"
-#include "dummy_module.h"
+#include <stdint.h>
+#include <time.h>
 #include "entropy.h"
 #include <string>
 #include <functional>
@@ -66,39 +43,9 @@ constexpr size_t ELEMENTS_PER_BLOCK = 1024;
 #include <mutex>
 #include <algorithm>
 
+#include "testu01_mt_intf.h"
 
 namespace testu01_threads {
-
-/**
- * @brief Object-oriented envelope for TestU01 structures.
- * Allows to use RAII paradigm instead of manual calloc/free.
- */
-class UniformGenerator
-{
-    static void WrExternGen(void *junk2) { (void) junk2; }
-    std::string name;    
-
-    UniformGenerator(const UniformGenerator &obj) = delete;
-    UniformGenerator &operator=(const UniformGenerator &obj) = delete;
-    static double GetU01Handle(void *param, void *state);
-    static unsigned long GetBits32(void *param, void *state);
-
-protected:
-    unif01_Gen gen;
-    
-public:
-    UniformGenerator(const std::string &name);
-    unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
-    const std::string &GetName() { return name; }
-    virtual double GetU01() = 0;
-    virtual uint32_t GetBits32() = 0;
-    virtual uint64_t GetBits64();
-    virtual void GetArray32(uint32_t *out, size_t len);
-    virtual void GetArray64(uint64_t *out, size_t len);
-    virtual uint32_t GetSum32(size_t len);
-    virtual uint64_t GetSum64(size_t len);
-};
-
 
 /**
  * @brief Always returns 0, has no internal state.
@@ -111,67 +58,6 @@ public:
     uint32_t GetBits32() override { return 0; }
 };
 
-
-/**
- * @brief A variant of UniformGenerator that is designed as an interface
- * for C program.
- * @details The next functions should be supplied by the C module:
- *
- * - `double get_u01(void *param, void *state)` - that returns uniformly
- *    distributed pseudorandom numbers from the [0;1) interval.
- * - `unsigned long get_bits32(void *param, void *state)` - that returns
- *    uniformly distributed 32-bit unsigned pseudorandom numbers.
- * - `void gen_delete(void *param, void *state)` - destroys the generator.
- *
- * The module also can supply optional functions that are useful
- * for PractRand and for performance measurements:
- *
- * - `uint64_t get_bits64(void *param, void *state)` - returns uniformly
- *    distributed 64-bit unsigned pseudorandom numbers.
- * - `void get_array32(void *param, void *state, uint32_t *out, size_t len)`
- *   Returns array of 32-bit unsigned integer pseudorandom numbers.
- * - `void get_array64(void *param, void *state, uint64_t *out, size_t len)`
- *   Returns array of 64-bit unsigned integer pseudorandom numbers.
- */
-class UniformGeneratorC : public UniformGenerator
-{
-    static void WrExternGen(void *junk2) { (void) junk2; }
-    std::string name;
-    const GenInfoC gen_module;
-    UniformGeneratorC(const UniformGeneratorC &obj) = delete;
-    UniformGeneratorC &operator=(const UniformGeneratorC &obj) = delete;
-    
-public:
-    UniformGeneratorC(const GenInfoC *gi);
-    unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
-    const std::string &GetName() { return name; }
-    double GetU01() override { return gen.GetU01(gen.param, gen.state); }
-    uint32_t GetBits32() override { return gen.GetBits(gen.param, gen.state); }
-    uint64_t GetBits64() override
-    {
-        return gen_module.get_bits64(gen.param, gen.state);
-    }
-    void GetArray32(uint32_t *out, size_t len) override
-    {
-        return gen_module.get_array32(gen.param, gen.state, out, len);
-    }
-    void GetArray64(uint64_t *out, size_t len) override
-    {
-        return gen_module.get_array64(gen.param, gen.state, out, len);
-    }
-    uint32_t GetSum32(size_t len) override
-    {
-        return gen_module.get_sum32(gen.param, gen.state, len);
-    }
-    uint64_t GetSum64(size_t len) override
-    {
-        return gen_module.get_sum64(gen.param, gen.state, len);
-    }
-    virtual ~UniformGeneratorC()
-    {
-        gen_module.delete_state(gen.param, gen.state);
-    }
-};
 
 
 /**

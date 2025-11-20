@@ -1,4 +1,5 @@
 #include "testu01th/speedtest.h"
+#include "testu01th/testu01_mt_c.h"
 #include <iostream>
 #include <cmath>
 

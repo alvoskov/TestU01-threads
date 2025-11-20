@@ -3,6 +3,7 @@
 #include "testu01th/smallcrush.h"
 #include "testu01th/crush.h"
 #include "testu01th/bigcrush.h"
+#include "testu01th/testu01_mt_c.h"
 
 using namespace testu01_threads;
 

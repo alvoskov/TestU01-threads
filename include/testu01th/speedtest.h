@@ -15,6 +15,7 @@
 #ifndef __SPEEDTEST_H
 #define __SPEEDTEST_H
 #include "testu01_mt.h"
+#include "testu01th/dummy_module.h"
 
 namespace testu01_threads {
 
