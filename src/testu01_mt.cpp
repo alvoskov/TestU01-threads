@@ -153,76 +153,11 @@ double UniformGenerator::GetU01Handle(void *param, void *state)
     return obj->GetU01();
 }
 
-unsigned long UniformGenerator::GetBits32(void *param, void *state)
+unsigned long UniformGenerator::GetBits32Handle(void *param, void *state)
 {
     (void) param;
     UniformGenerator *obj = static_cast<UniformGenerator *>(state);
     return obj->GetBits32();
-}
-
-/**
- * @brief Returns 64 bits from PRNG. Not used by TestU01, reserved
- * mainly for future use and testing 64-bit generators by PractRand.
- */
-uint64_t UniformGenerator::GetBits64()
-{
-    return 0;
-}
-
-
-/**
- * @brief Returns array of 32-bit unsigned integers. Designed for
- * code vectorization and removing overhead for multiple calls
- * of GetBits32.
- * @param out  Pointer to output buffer
- * @param len  Number of elements in the buffer.
- */
-void UniformGenerator::GetArray32(uint32_t *out, size_t len)
-{
-    for (size_t i = 0; i < len; i++) {
-        out[i] = GetBits32();
-    }
-}
-
-/**
- * @brief Returns array of 64-bit unsigned integers. Designed for
- * code vectorization and removing overhead for multiple calls
- * of GetBits64.
- * @param out  Pointer to output buffer
- * @param len  Number of elements in the buffer.
- */
-void UniformGenerator::GetArray64(uint64_t *out, size_t len)
-{
-    for (size_t i = 0; i < len; i++) {
-        out[i] = GetBits64();
-    }
-}
-
-
-/**
- * @brief Returns the modulo-32 sum of pseudorandom sequence.
- * Designed for performance measurements.
- */
-uint32_t UniformGenerator::GetSum32(size_t len)
-{
-    uint32_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += GetBits32();
-    }
-    return sum;
-}
-
-/**
- * @brief Returns the modulo-64 sum of pseudorandom sequence.
- * Designed for performance measurements.
- */
-uint64_t UniformGenerator::GetSum64(size_t len)
-{
-    uint64_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += GetBits64();
-    }
-    return sum;
 }
 
 
@@ -233,14 +168,10 @@ UniformGenerator::UniformGenerator(const std::string &name)
     gen.param = nullptr;
     gen.Write = WrExternGen;
     gen.GetU01 = GetU01Handle;
-    gen.GetBits = GetBits32;
+    gen.GetBits = GetBits32Handle;
     gen.name = const_cast<char *>(name.c_str());
 }
 
-
-//////////////////////////////////////////////////
-///// UniformGeneratorC class implementation /////
-//////////////////////////////////////////////////
 
 
 //////////////////////////////////////////
@@ -662,56 +593,6 @@ void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
         fwrite(buf, sizeof(uint32_t), 256, stdout);
     }
 }
-
-/**
- * @brief Dump a VECTORIZED output of a 32-bit PRNG to the stdout
- * in the format suitable for PractRand.
- */
-void prng_array32_to_file(std::shared_ptr<UniformGenerator> genptr)
-{
-    constexpr size_t len = 1024;
-    uint32_t buf[len];
-    set_bin_stdout();
-    while (1) {
-        genptr->GetArray32(buf, len);
-        fwrite(buf, sizeof(uint32_t), len, stdout);
-    }
-}
-
-/**
- * @brief Dump an output of a 64-bit PRNG to the stdout in the format suitable
- * for PractRand.
- */
-void prng_bits64_to_file(std::shared_ptr<UniformGenerator> genptr)
-{
-    uint64_t buf[256];
-    set_bin_stdout();
-    while (1) {
-        for (int i = 0; i < 256; i++) {
-            buf[i] = genptr->GetBits64();
-        }
-        fwrite(buf, sizeof(uint64_t), 256, stdout);
-    }
-}
-
-
-/**
- * @brief Dump a VECTORIZED output of a 64-bit PRNG to the stdout
- * in the format suitable for PractRand.
- */
-void prng_array64_to_file(std::shared_ptr<UniformGenerator> genptr)
-{
-    constexpr size_t len = 1024;
-    uint64_t buf[len];
-    set_bin_stdout();
-    while (1) {
-        genptr->GetArray64(buf, len);
-        fwrite(buf, sizeof(uint32_t), len, stdout);
-    }
-}
-
-
-
 
 ///////////////////////////////////////////////////////
 ///// Functions that generate callbacks for tests /////

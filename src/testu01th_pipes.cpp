@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <thread>
 #include <mutex>
+#include <iostream>
 
 using namespace testu01_threads;
 

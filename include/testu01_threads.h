@@ -19,8 +19,5 @@
 #define __TESTU01_THREADS_H
 #include "testu01th/testu01_mt.h"
 #include "testu01th/batteries.h"
-#include "testu01th/entropy.h"
 #include "testu01th/generators.h"
-#include "testu01th/dummy_module.h"
-#include "testu01th/speedtest.h"
 #endif

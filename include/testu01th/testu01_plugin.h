@@ -1,7 +1,7 @@
 #ifndef __TESTU01_PLUGIN_H
 #define __TESTU01_PLUGIN_H
 
-#include "testu01_mt_intf.h"
+#include "testu01_mt.h"
 
 extern "C" {
 #include "smokerand/apidefs.h"

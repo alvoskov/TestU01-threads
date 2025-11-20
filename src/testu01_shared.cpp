@@ -5,17 +5,35 @@
 using namespace testu01_threads;
 
 
+void print_help()
+{
+    static const std::string helptext(
+    "This is a plugin for SmokeRand PRNG test suite containing a multi-threaded\n"
+    "version of TestU01. The parallel mode allows to use all cores of CPU for\n"
+    "computations and used its own dispatcher. The serial version runs in\n"
+    "one-threaded mode and just runs the batteries from TestU01 without\n"
+    "modification.\n\n"
+    "Usage: smokerand s=testu01_shared.so genlib --batparam=battery [options]\n"
+    "  battery: SmallCrush, Crush, BigCrush, pseudoDIEHARD\n"
+    "  gen_lib: A shared library with generator, plugin for SmokeRand");
+    std::cout << helptext << std::endl << std::endl;
+}
+
 extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
     const CallerAPI *intf, const BatteryOptions *opts)
 {
-    (void) opts;
     auto create_gen = [gen, intf] () -> std::shared_ptr<UniformGeneratorPlugin> {
         return std::shared_ptr<UniformGeneratorPlugin>(new UniformGeneratorPlugin(gen, intf));
     };
 
     const std::string battery(opts->param);
+    if (battery == "") {
+        print_help();
+        return BATTERY_PASSED;
+    }
+
     if (opts->nthreads == 1) {
-        if (battery == "SmallCrush" || battery == "") {
+        if (battery == "SmallCrush") {
             auto objptr = create_gen();
             bbattery_SmallCrush(objptr->GetPtr());
         } else if (battery == "Crush") {
@@ -47,35 +65,5 @@ extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
             std::cout << results.report;
         }
     }
-/*
-    if (battery == "SmallCrush") {
-        SmallCrushBattery bat(create_gen);
-        RunBattery(bat, test_id, entropy);
-    } else if (battery == "Crush") {
-        CrushBattery bat(create_gen);
-        RunBattery(bat, test_id, entropy);
-    } else if (battery == "BigCrush") {
-        BigCrushBattery bat(create_gen);
-        RunBattery(bat, test_id, entropy);
-    } else if (battery == "pseudoDIEHARD") {
-        PseudoDiehardBattery bat(create_gen);
-        RunBattery(bat, test_id, entropy);
-    } else if (battery == "SmallCrush_ser") {
-        auto objptr = create_gen();
-        bbattery_SmallCrush(objptr->GetPtr());
-    } else if (battery == "Crush_ser") {
-        auto objptr = create_gen();
-        bbattery_Crush(objptr->GetPtr());
-    } else if (battery == "BigCrush_ser") {
-        auto objptr = create_gen();
-        bbattery_BigCrush(objptr->GetPtr());
-    } else if (battery == "pseudoDIEHARD_ser") {
-        auto objptr = create_gen();
-        bbattery_pseudoDIEHARD(objptr->GetPtr());
-*/
-
-
-//    SmallCrushBattery bat(create_gen);
-//    std::cout << bat.Run().report << std::endl;
     return BATTERY_PASSED;
 }

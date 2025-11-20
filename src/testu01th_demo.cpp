@@ -14,7 +14,6 @@
  * would be appreciated.
  */
 #include "testu01_threads.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -57,7 +56,7 @@ int main(int argc, char *argv[])
     if (argc != 3) {
         std::cout << "Usage: testu01th_demo battery generator" << std::endl;
         std::cout << "battery: battery name; possible variants are:" << std::endl;
-        std::cout << "  SmallCrush, Crush, BigCrush, pseudoDIEHARD, stdout32, stdout64" << std::endl;
+        std::cout << "  SmallCrush, Crush, BigCrush, pseudoDIEHARD, stdout" << std::endl;
         std::cout << "generator: PRNG name. The supported generators are:" << std::endl;
         std::vector<std::string> gnames;
         for (auto &kv : gen_map) {
@@ -91,10 +90,8 @@ int main(int argc, char *argv[])
     } else if (battery == "pseudoDIEHARD") {
         PseudoDiehardBattery bat(create_gen);
         std::cout << bat.Run().report << std::endl;
-    } else if (battery == "stdout32") {
+    } else if (battery == "stdout") {
         prng_bits32_to_file(create_gen());
-    } else if (battery == "stdout64") {
-        prng_bits64_to_file(create_gen());
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
     }
