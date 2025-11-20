@@ -2,7 +2,8 @@
  * @file smallcrush.h
  * @brief A multithreaded version of SmallCrush battery from TestU01 library.
  * Based on the `bbattery.c` file.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.

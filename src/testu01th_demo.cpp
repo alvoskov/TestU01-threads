@@ -30,7 +30,7 @@
 
 using namespace testu01_threads;
 
-int main(int argc, char *argv[]) 
+int main(int argc, char* argv[]) 
 {
     const std::map<std::string, GenFactoryFunc> gen_map = {
         {"LCG", [] () -> std::shared_ptr<UniformGenerator> {
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         }
 
         std::sort(gnames.begin(), gnames.end());
-        for (auto &n : gnames) {
+        for (auto& n : gnames) {
             printf("  %s\n", n.c_str());
         }
         return 0;

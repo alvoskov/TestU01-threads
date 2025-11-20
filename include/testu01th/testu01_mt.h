@@ -2,7 +2,8 @@
  * @file testu01_mt.h
  * @brief A multithreaded extension of TestU01 library. Partially based on its
  * source code, especiall on the `bbattery.c` file and some other header files.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
@@ -59,9 +60,9 @@ extern "C" {
 #include "ufile.h"
 }
 
-#define THOUSAND 1000
-#define MILLION (THOUSAND * THOUSAND)
-#define BILLION (THOUSAND * MILLION)
+static constexpr long THOUSAND = 1000;
+static constexpr long MILLION = THOUSAND * THOUSAND;
+static constexpr long BILLION = THOUSAND * MILLION;
 
 
 #include <stdint.h>
@@ -73,6 +74,8 @@ extern "C" {
 #include <thread>
 #include <mutex>
 #include <algorithm>
+#include <random>
+#include <chrono>
 
 namespace testu01_threads {
 
@@ -83,22 +86,22 @@ namespace testu01_threads {
  */
 class UniformGenerator
 {
-    static void WrExternGen(void *junk2) { (void) junk2; }
+    static void WrExternGen(void* junk2) { (void) junk2; }
     std::string name;    
 
-    UniformGenerator(const UniformGenerator &obj) = delete;
-    UniformGenerator &operator=(const UniformGenerator &obj) = delete;
-    static double GetU01Handle(void *param, void *state);
-    static unsigned long GetBits32Handle(void *param, void *state);
+    UniformGenerator(const UniformGenerator& obj) = delete;
+    UniformGenerator& operator=(const UniformGenerator& obj) = delete;
+    static double GetU01Handle(void* param, void* state);
+    static unsigned long GetBits32Handle(void* param, void* state);
 
 protected:
     unif01_Gen gen;
     
 public:
-    UniformGenerator(const std::string &name);
+    UniformGenerator(const std::string& name);
     virtual ~UniformGenerator() {}
-    unif01_Gen *GetPtr() const { return const_cast<unif01_Gen *>(&gen); }
-    const std::string &GetName() { return name; }
+    unif01_Gen* GetPtr() const { return const_cast<unif01_Gen* >(&gen); }
+    const std::string& GetName() { return name; }
     virtual double GetU01() = 0;
     virtual uint32_t GetBits32() = 0;
 };
@@ -128,11 +131,11 @@ public:
     std::string name; ///< Test name.
     double pvalue; ///< The obtained p-value.
 
-    PValueRecord(int id_, const std::string &name_, double pvalue_)
+    PValueRecord(int id_, const std::string& name_, double pvalue_)
     : id(id_), name(name_), pvalue(pvalue_) {}
     PValueRecord() : id(-1), name("-----"), pvalue(-1.0) {}
 
-    friend bool operator<(const PValueRecord &a, const PValueRecord &b)
+    friend bool operator<(const PValueRecord& a, const PValueRecord& b)
     {
         return a.id < b.id;
     }
@@ -152,7 +155,7 @@ class BatteryIO
 
 public:
     BatteryIO(std::shared_ptr<UniformGenerator> gobj) : gen(gobj) {}
-    inline unif01_Gen *Gen() const { return gen.get()->GetPtr(); }
+    inline unif01_Gen* Gen() const { return gen.get()->GetPtr(); }
 
     /**
      * @brief Adds the result of statistical test to the battery.
@@ -165,13 +168,13 @@ public:
         results.emplace_back(id, name, pvalue);
     }
 
-    void Add(const BatteryIO &obj);
+    void Add(const BatteryIO& obj);
     size_t GetNTestsFailed() const;
     inline size_t GetNResults() const { return results.size(); }
-    inline const PValueRecord &GetPValueRecord(size_t ind) { return results[ind]; }
+    inline const PValueRecord& GetPValueRecord(size_t ind) { return results[ind]; }
     std::string WritePValue(double p);
-    std::string WriteReport(const char *batName, const char *genName,
-        chrono_Chrono *timer, size_t ms_total);
+    std::string WriteReport(const char* batName, const char* genName,
+        chrono_Chrono* timer, std::chrono::milliseconds ms_total);
 };
 
 
@@ -199,7 +202,7 @@ class TestDescr;
  * result in BatteryIO class using the test description from
  * TestDescr.
  */
-typedef std::function<void(TestDescr &, BatteryIO &)> TestCbFunc;
+typedef std::function<void(TestDescr&, BatteryIO&)> TestCbFunc;
 
 /**
  * @brief Function that returns the `std::shared_ptr` smart pointer
@@ -212,14 +215,14 @@ class TestDescr
 {
     int id;
     std::string name;
-    std::function<void (TestDescr &td, BatteryIO &io)> pvalue_func;
+    std::function<void (TestDescr& td, BatteryIO& io)> pvalue_func;
 
 public:
     inline int GetId() const { return id; }
-    inline const std::string &GetName() const { return name; }
-    inline void Run(BatteryIO &io) { pvalue_func(*this, io); }
+    inline const std::string& GetName() const { return name; }
+    inline void Run(BatteryIO& io) { pvalue_func(*this, io); }
 
-    TestDescr(int testid, const std::string &testname, TestCbFunc f)
+    TestDescr(int testid, const std::string& testname, TestCbFunc f)
     : id(testid),
         name(testname), pvalue_func(f)
     {
@@ -236,16 +239,16 @@ class TestsPull
     size_t pos;
 
     size_t GetNThreads() const;
-    static void ThreadFunc(TestsPull &pull, BatteryIO &io, int thread_id);
+    static void ThreadFunc(TestsPull& pull, BatteryIO& io, int thread_id);
 
 
 public:
     TestsPull() {}
-    TestsPull(const std::vector<TestDescr> &obj);
-    const TestDescr *Get(std::string &pos_msg);
+    TestsPull(const std::vector<TestDescr>& obj, std::seed_seq* seq);
+    const TestDescr* Get(std::string& pos_msg);
 
     BatteryResults Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
-        const std::string &battery_name);
+        const std::string& battery_name);
 };
 
 
@@ -264,8 +267,8 @@ protected:
 
 public:
     TestsBattery(GenFactoryFunc genf);
-    BatteryResults Run() const;
-    BatteryResults RunTest(int id) const;
+    BatteryResults Run(std::seed_seq* seq = nullptr) const;
+    BatteryResults RunTest(int id, std::seed_seq* seq = nullptr) const;
 };
 
 
@@ -279,7 +282,8 @@ TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int 
 TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t);
 TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t);
 TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d);
-TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m, const std::string &mess, bool flag);
+TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m,
+    const std::string& mess, bool flag);
 TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m);
 TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t);
 TestCbFunc smarsa_Dna_cb(int i);

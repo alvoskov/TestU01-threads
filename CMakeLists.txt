@@ -6,7 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 if (NOT MSVC)
     set(PROF_FLAGS "")
     set(CMODULE_LINK_FLAGS "-nostdlib")
-    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
+    set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wconversion -Wshadow -Wno-attributes -march=native")
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
@@ -45,7 +45,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-set(LIB_FILES
+add_library(testu01threads
     include/testu01th/batteries.h
     include/testu01th/bigcrush.h      src/bigcrush.cpp
     include/testu01th/crush.h         src/crush.cpp
@@ -55,15 +55,14 @@ set(LIB_FILES
     include/testu01th/testu01_mt.h    src/testu01_mt.cpp
     include/testu01th/testu01_plugin.h    src/testu01_plugin.cpp)
 
-add_library(testu01threads ${LIB_FILES})
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 target_link_libraries(${program} testu01threads)
 
-add_library(testu01th_shared SHARED src/testu01_shared.cpp ${LIB_FILES})
+add_library(testu01th_shared SHARED src/testu01_shared.cpp)
 target_include_directories(testu01th_shared PRIVATE ${TESTU01_INCLUDE} include)
 target_link_directories(testu01th_shared PRIVATE ${TESTU01_LINK})
-target_link_libraries(testu01th_shared ${TESTU01_LIBS})
+target_link_libraries(testu01th_shared ${TESTU01_LIBS} testu01threads)
 if (WIN32)
     target_link_libraries(testu01th_shared ws2_32)
 endif()

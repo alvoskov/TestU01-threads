@@ -2,6 +2,7 @@
 #include "testu01th/batteries.h"
 #include <memory>
 #include <iostream>
+#include <random>
 using namespace testu01_threads;
 
 
@@ -19,8 +20,8 @@ void print_help()
     std::cout << helptext << std::endl << std::endl;
 }
 
-extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
-    const CallerAPI *intf, const BatteryOptions *opts)
+extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo* gen,
+    const CallerAPI* intf, const BatteryOptions* opts)
 {
     auto create_gen = [gen, intf] () -> std::shared_ptr<UniformGeneratorPlugin> {
         return std::shared_ptr<UniformGeneratorPlugin>(new UniformGeneratorPlugin(gen, intf));
@@ -45,24 +46,35 @@ extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
         } else if (battery == "pseudoDIEHARD") {
             auto objptr = create_gen();
             bbattery_pseudoDIEHARD(objptr->GetPtr());
+        } else {
+            std::cerr << "Unknown battery " << battery << std::endl;
+            return BATTERY_ERROR;
         }
     } else {
-        if (battery == "SmallCrush" || battery == "") {
+        // Obtain seeds for the internal permutations in the batteries
+        uint32_t seed[8];
+        seeds_to_array_u32(intf, seed, 8);
+        std::seed_seq seq(seed, seed + 8);
+
+        if (battery == "SmallCrush") {
             SmallCrushBattery bat(create_gen);
-            auto results = bat.RunTest(opts->testid);
+            auto results = bat.RunTest(opts->testid, &seq);
             std::cout << results.report;
         } else if (battery == "Crush") {
             CrushBattery bat(create_gen);
-            auto results = bat.RunTest(opts->testid);
+            auto results = bat.RunTest(opts->testid, &seq);
             std::cout << results.report;
         } else if (battery == "BigCrush") {
             BigCrushBattery bat(create_gen);
-            auto results = bat.RunTest(opts->testid);
+            auto results = bat.RunTest(opts->testid, &seq);
             std::cout << results.report;
         } else if (battery == "pseudoDIEHARD") {
             PseudoDiehardBattery bat(create_gen);
-            auto results = bat.RunTest(opts->testid);
+            auto results = bat.RunTest(opts->testid, &seq);
             std::cout << results.report;
+        } else {
+            std::cerr << "Unknown battery " << battery << std::endl;
+            return BATTERY_ERROR;
         }
     }
     return BATTERY_PASSED;

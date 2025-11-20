@@ -16,7 +16,7 @@ class UniformGeneratorPlugin : public UniformGenerator
     GeneratorState obj;
 
 public:
-    UniformGeneratorPlugin(const GeneratorInfo *gi, const CallerAPI *intf);
+    UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf);
     ~UniformGeneratorPlugin() override;
 
     virtual double GetU01() override;

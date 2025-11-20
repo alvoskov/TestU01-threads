@@ -6,7 +6,7 @@ using namespace testu01_threads;
 ///////////////////////////////////////////////////////
 
 
-UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo *gi, const CallerAPI *intf)
+UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf)
 : UniformGenerator(gi->name)
 {
     obj.gi = gi;
@@ -24,12 +24,14 @@ UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo *gi, const Ca
 double UniformGeneratorPlugin::GetU01()
 {
     static constexpr double INV32 = 1.0 / (static_cast<uint64_t>(1) << 32);
-    return (obj.gi->get_bits(obj.state) >> (obj.gi->nbits - 32)) * INV32;
+    const uint64_t u = obj.gi->get_bits(obj.state);
+    return static_cast<double>(u >> (obj.gi->nbits - 32)) * INV32;
 }
 
 uint32_t UniformGeneratorPlugin::GetBits32()
 {
-    return obj.gi->get_bits(obj.state) >> (obj.gi->nbits - 32);
+    const uint64_t u = obj.gi->get_bits(obj.state);
+    return static_cast<uint32_t>(u >> (obj.gi->nbits - 32));
 }
 
 UniformGeneratorPlugin::~UniformGeneratorPlugin()

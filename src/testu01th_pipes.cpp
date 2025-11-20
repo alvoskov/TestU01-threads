@@ -79,7 +79,7 @@ void print_help()
 /**
  * @brief Program entry point.
  */
-int main(int argc, char *argv[]) 
+int main(int argc, char* argv[]) 
 {
     Stdin32Collector stdin_prng;
     if (argc < 2) {
