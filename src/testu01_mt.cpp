@@ -120,7 +120,7 @@ std::string chrono_tostring(chrono_Chrono* C, chrono_TimeFormat Form)
             temps -= static_cast<double>(minute) * 60.0;
         const long second = static_cast<long>(temps);
         const long centisecond = static_cast<long>(100.0 * (temps - static_cast<double>(second)));
-        return printf_tos("%02ld:%02ld:%02ld:.%02ld",
+        return printf_tos("%02ld:%02ld:%02ld.%02ld",
             hour, minute, second, centisecond);
         }
 

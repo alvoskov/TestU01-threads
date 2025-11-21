@@ -28,12 +28,16 @@ extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo* gen,
     };
 
     const std::string battery(opts->param);
+    // A battery is not selected: show help.
     if (battery == "") {
         print_help();
         return BATTERY_PASSED;
     }
 
-    if (opts->nthreads == 1) {
+    if (opts->nthreads == 1 && opts->testid == TESTS_ALL) {
+        // Run an unmodified battery. It doesn't support tests selection
+        // by ID, so if a user passed `testid` we should use our own
+        // dispatcher.
         if (battery == "SmallCrush") {
             auto objptr = create_gen();
             bbattery_SmallCrush(objptr->GetPtr());
@@ -51,11 +55,12 @@ extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo* gen,
             return BATTERY_ERROR;
         }
     } else {
-        // Obtain seeds for the internal permutations in the batteries
+        // Run a battery using our own multithreaded dispatcher.
+        // a) Obtain seeds for the internal permutations in the batteries
         uint32_t seed[8];
         seeds_to_array_u32(intf, seed, 8);
         std::seed_seq seq(seed, seed + 8);
-
+        // b) Run battery
         if (battery == "SmallCrush") {
             SmallCrushBattery bat(create_gen);
             auto results = bat.RunTest(opts->testid, &seq);
