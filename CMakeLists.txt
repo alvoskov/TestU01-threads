@@ -7,13 +7,15 @@ if (NOT MSVC)
     set(PROF_FLAGS "")
     set(CMODULE_LINK_FLAGS "-nostdlib")
     set(C_CXX_FLAGS "-O2 -Wall -Werror -Wextra -Wconversion -Wshadow -Wno-attributes -march=native")
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_C_STANDARD 99)
     #set(PROF_FLAGS "-g -pg")
     if (WIN32)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding ${C_CXX_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} ${C_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -ffreestanding ${C_CXX_FLAGS}")
     else()
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} -std=gnu++14 ${C_CXX_FLAGS}")
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99  -ffreestanding ${C_CXX_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROF_FLAGS} ${C_CXX_FLAGS}")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -ffreestanding ${C_CXX_FLAGS}")
     endif()
 else()
     set(CMODULE_LINK_FLAGS " ")
@@ -47,34 +49,33 @@ find_library(M_LIB m)
 # Source files names
 add_library(testu01threads
     include/testu01th/batteries.h
-    include/testu01th/bigcrush.h      src/bigcrush.cpp
-    include/testu01th/crush.h         src/crush.cpp
-    include/testu01th/generators.h    src/generators.cpp 
-    include/testu01th/smallcrush.h    src/smallcrush.cpp
-    include/testu01th/pdiehard.h      src/pdiehard.cpp 
-    include/testu01th/testu01_mt.h    src/testu01_mt.cpp
-    include/testu01th/testu01_plugin.h    src/testu01_plugin.cpp)
+    include/testu01th/bigcrush.h       src/bigcrush.cpp
+    include/testu01th/crush.h          src/crush.cpp
+    include/testu01th/generators.h     src/generators.cpp 
+    include/testu01th/smallcrush.h     src/smallcrush.cpp
+    include/testu01th/pdiehard.h       src/pdiehard.cpp 
+    include/testu01th/testu01_mt.h     src/testu01_mt.cpp
+    include/testu01th/testu01_plugin.h src/testu01_plugin.cpp)
 
+# testu01threads core library
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)
 target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
 target_link_libraries(${program} testu01threads)
 
-add_library(testu01th_shared SHARED src/testu01_shared.cpp)
-target_include_directories(testu01th_shared PRIVATE ${TESTU01_INCLUDE} include)
-target_link_directories(testu01th_shared PRIVATE ${TESTU01_LINK})
-target_link_libraries(testu01th_shared ${TESTU01_LIBS} testu01threads)
+# Shared library: plugin for SmokeRand test suite
+add_library(testu01th_sr_ext SHARED src/testu01_sr_ext.cpp)
+target_include_directories(testu01th_sr_ext PRIVATE ${TESTU01_INCLUDE} include)
+target_link_directories(testu01th_sr_ext PRIVATE ${TESTU01_LINK})
+target_link_libraries(testu01th_sr_ext ${TESTU01_LIBS} testu01threads)
 if (WIN32)
-    target_link_libraries(testu01th_shared ws2_32)
+    target_link_libraries(testu01th_sr_ext ws2_32)
 endif()
-
-
 
 # Executables that call TestU01-threads library
 add_executable(testu01th_demo src/testu01th_demo.cpp)
 target_include_directories(testu01th_demo PRIVATE include)
 add_executable(testu01th_pipes src/testu01th_pipes.cpp)
 target_include_directories(testu01th_pipes PRIVATE include)
-
 
 # Link executables
 foreach (program testu01th_demo testu01th_pipes)

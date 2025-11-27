@@ -1,3 +1,19 @@
+/**
+ * @file testu01_plugin.h
+ * @brief Wrappers for pseudorandom number generators from SmokeRand test suite.
+ * source code.
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #ifndef __TESTU01_PLUGIN_H
 #define __TESTU01_PLUGIN_H
 
