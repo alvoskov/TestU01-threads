@@ -60,11 +60,6 @@ extern "C" {
 #include "ufile.h"
 }
 
-static constexpr long THOUSAND = 1000;
-static constexpr long MILLION = THOUSAND * THOUSAND;
-static constexpr long BILLION = THOUSAND * MILLION;
-
-
 #include <stdint.h>
 #include <time.h>
 #include <string>
@@ -76,6 +71,12 @@ static constexpr long BILLION = THOUSAND * MILLION;
 #include <algorithm>
 #include <random>
 #include <chrono>
+#include <limits>
+
+static constexpr long THOUSAND = 1000;
+static constexpr long MILLION = THOUSAND * THOUSAND;
+static constexpr long BILLION = THOUSAND * MILLION;
+static constexpr unsigned int NTHREADS_DEFAULT = std::numeric_limits<unsigned int>::max();
 
 namespace testu01_threads {
 
@@ -189,7 +190,7 @@ public:
     std::string report;
 
     BatteryResults() {}
-    BatteryResults(size_t nthreads) : pvalues(nthreads) {}
+    BatteryResults(unsigned int nthreads) : pvalues(nthreads) {}
     std::string ToString() const;
 };
 
@@ -238,7 +239,7 @@ class TestsPull
     std::mutex get_mutex;
     size_t pos;
 
-    size_t GetNThreads() const;
+    unsigned int GetNThreads() const;
     static void ThreadFunc(TestsPull& pull, BatteryIO& io, int thread_id);
 
 
@@ -248,7 +249,7 @@ public:
     const TestDescr* Get(std::string& pos_msg);
 
     BatteryResults Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
-        const std::string& battery_name);
+        const std::string& battery_name, unsigned int nthreads = NTHREADS_DEFAULT);
 };
 
 
@@ -267,8 +268,8 @@ protected:
 
 public:
     TestsBattery(GenFactoryFunc genf);
-    BatteryResults Run(std::seed_seq* seq = nullptr) const;
-    BatteryResults RunTest(int id, std::seed_seq* seq = nullptr) const;
+    BatteryResults Run(std::seed_seq* seq = nullptr, unsigned int nthreads = NTHREADS_DEFAULT) const;
+    BatteryResults RunTest(int id, std::seed_seq* seq = nullptr, unsigned int nthreads = NTHREADS_DEFAULT) const;
 };
 
 

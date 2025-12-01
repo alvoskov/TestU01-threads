@@ -100,19 +100,19 @@ extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo* gen,
         // b) Run battery
         if (battery == "SmallCrush") {
             SmallCrushBattery bat(create_gen);
-            auto results = bat.RunTest(testid, &seq);
+            auto results = bat.RunTest(testid, &seq, opts->nthreads);
             SaveProtocol(results);
         } else if (battery == "Crush") {
             CrushBattery bat(create_gen);
-            auto results = bat.RunTest(testid, &seq);
+            auto results = bat.RunTest(testid, &seq, opts->nthreads);
             SaveProtocol(results);
         } else if (battery == "BigCrush") {
             BigCrushBattery bat(create_gen);
-            auto results = bat.RunTest(testid, &seq);
+            auto results = bat.RunTest(testid, &seq, opts->nthreads);
             SaveProtocol(results);
         } else if (battery == "pseudoDIEHARD") {
             PseudoDiehardBattery bat(create_gen);
-            auto results = bat.RunTest(testid, &seq);
+            auto results = bat.RunTest(testid, &seq, opts->nthreads);
             SaveProtocol(results);
         } else {
             std::cerr << "Unknown battery " << battery << std::endl;

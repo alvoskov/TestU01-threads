@@ -111,11 +111,13 @@ std::string chrono_tostring(chrono_Chrono* C, chrono_TimeFormat Form)
 
     case chrono_hms:
         {
+        constexpr double hours_in_sec = 1.0 / 3600.0;
+        constexpr double mins_in_sec = 1.0 / 60.0;
         temps = chrono_Val(C, chrono_sec);
-        const long hour = static_cast<long>(temps * 2.777777778E-4);
+        const long hour = static_cast<long>(temps * hours_in_sec);
         if (hour > 0)
             temps -= static_cast<double>(hour) * 3600.0;
-        const long minute = static_cast<long>(temps * 1.666666667E-2);
+        const long minute = static_cast<long>(temps * mins_in_sec);
         if (minute > 0)
             temps -= static_cast<double>(minute) * 60.0;
         const long second = static_cast<long>(temps);
@@ -242,8 +244,8 @@ std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
     txt += printf_tos(" Version:                      %s\n", PACKAGE_STRING);
     txt += printf_tos(" Generator:                    ") + gen_name;
 
-    txt += printf_tos("\n Number of statistics:         %1d\n",
-        (int) results.size());
+    txt += printf_tos("\n Number of statistics:         %1u\n",
+        static_cast<unsigned int>(results.size()));
     txt += printf_tos(" Total CPU time (all cores):   ");
     txt += chrono_tostring(timer, chrono_hms);
     txt += printf_tos("\n Elapsed time:                 ");
@@ -295,15 +297,12 @@ std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
 
 std::string BatteryResults::ToString() const
 {
-    std::string txt;
-    txt += report;
+    std::string txt = report;
     for (size_t i = 0; i < pvalues.size(); i++) {
         txt += "===== Tests for thread " + std::to_string(i) + " =====\n";
-        for (auto &rec : pvalues[i]) {
-            char buf[512];
-            snprintf(buf, 512, "  %5d %32s %.6g\n",
+        for (auto& rec : pvalues[i]) {
+            txt += printf_tos("  %5d %32s %.6g\n",
                 (int) rec.id, rec.name.c_str(), rec.pvalue);
-            txt += std::string(buf);
         }
     }
     return txt;
@@ -365,10 +364,10 @@ const TestDescr* TestsPull::Get(std::string& pos_msg)
 }
 
 
-size_t TestsPull::GetNThreads() const
+unsigned int TestsPull::GetNThreads() const
 {
     const size_t ntests = tests.size();
-    size_t nthreads = std::thread::hardware_concurrency();
+    unsigned int nthreads = std::thread::hardware_concurrency();
     while (nthreads > ntests)
         nthreads /= 2;
     return nthreads;
@@ -407,15 +406,17 @@ void TestsPull::ThreadFunc(TestsPull& pull, BatteryIO& io, int thread_id)
 
 
 BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
-    const std::string& battery_name)
+    const std::string& battery_name, unsigned int nthreads)
 {
     // Timers and threads number
     chrono_Chrono* timer = chrono_Create();
-    const size_t nthreads = GetNThreads();
-    fprintf(stderr, "=====> Number of threads: %d\n", (int) nthreads);
+    if (nthreads == NTHREADS_DEFAULT) {
+        nthreads = GetNThreads();
+    }
+    fprintf(stderr, "=====> Number of threads: %u\n", nthreads);
     BatteryResults results(nthreads);
     std::vector<BatteryIO> threads_bats;
-    for (size_t i = 0; i < nthreads; i++) {
+    for (unsigned int i = 0; i < nthreads; i++) {
         threads_bats.emplace_back(create_gen());
     }
     // Disable thread unsafe features of TestU01
@@ -473,7 +474,7 @@ TestsBattery::TestsBattery(GenFactoryFunc genf)
 /**
  * @brief Run all tests from the battery.
  */
-BatteryResults TestsBattery::Run(std::seed_seq* seq) const
+BatteryResults TestsBattery::Run(std::seed_seq* seq, unsigned int nthreads) const
 {
     printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
         "                 Starting %s\n"
@@ -482,18 +483,20 @@ BatteryResults TestsBattery::Run(std::seed_seq* seq) const
         battery_name.c_str(), PACKAGE_STRING);
 
     TestsPull pull(tests, seq);
-    return pull.Run(create_gen, battery_name);
+    return pull.Run(create_gen, battery_name, nthreads);
 }
 
 /**
  * @brief Run selected test(s) from the battery.
  * @param id  Test ID (if it is <= 0 -- all tests will be run)
+ * @param seq  Seed for PRNG that shuffles the tests between threads.
+ * @param nthreads Number of threads (or `NTHREADS_DEFAULT` for autodetection)
  */
-BatteryResults TestsBattery::RunTest(int id, std::seed_seq* seq) const
+BatteryResults TestsBattery::RunTest(int id, std::seed_seq* seq, unsigned int nthreads) const
 {
     // Run all tests
     if (id <= 0) {
-        return Run(seq);
+        return Run(seq, nthreads);
     }
     // Run selected tests
     std::vector<TestDescr> t;
@@ -512,7 +515,7 @@ BatteryResults TestsBattery::RunTest(int id, std::seed_seq* seq) const
         battery_name.c_str(), id, PACKAGE_STRING);
 
     TestsPull pull(t, seq);
-    return pull.Run(create_gen, battery_name + " test " + std::to_string(id));
+    return pull.Run(create_gen, battery_name + " test " + std::to_string(id), nthreads);
 }
 
 

@@ -12,15 +12,15 @@ SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
     tests.emplace_back(++j2, "BirthdaySpacings", // 1
         smarsa_BirthdaySpacings_cb(1, 5 * MILLION, r, 1073741824, 2, 1));
 
-    tests.emplace_back(++j2, "Collision", [] (TestDescr &td, BatteryIO &io) { // 2
-        auto *res3 = sknuth_CreateRes2 ();
+    tests.emplace_back(++j2, "Collision", [] (TestDescr& td, BatteryIO& io) { // 2
+        auto* res3 = sknuth_CreateRes2 ();
         sknuth_Collision(io.Gen(), res3, 1, 5 * MILLION, 0, 65536, 2);
         io.Add(td.GetId(), td.GetName(), res3->Pois->pVal2);
         sknuth_DeleteRes2(res3);
     });
 
     tests.emplace_back(++j2, "Gap", // 3
-        sknuth_Gap_cb(1, MILLION / 5, 22, 0.0, .00390625));
+        sknuth_Gap_cb(1, MILLION / 5, 22, 0.0, 1.0 / 256.0));
 
     tests.emplace_back(++j2, "SimpPoker", // 4
         sknuth_SimpPoker_cb(1, 2 * MILLION / 5, 24, 64, 64));
@@ -31,8 +31,8 @@ SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
     tests.emplace_back(++j2, "MaxOft", // 6-7
         sknuth_MaxOft_cb(1, 2 * MILLION, 0, MILLION / 10, 6));
 
-    tests.emplace_back(++j2, "WeightDistrib", [] (TestDescr &td, BatteryIO &io) { // 8
-        auto *res2 = sres_CreateChi2 ();
+    tests.emplace_back(++j2, "WeightDistrib", [] (TestDescr& td, BatteryIO& io) { // 8
+        auto* res2 = sres_CreateChi2();
         svaria_WeightDistrib (io.Gen(), res2, 1, MILLION / 5, 27, 256, 0.0, 0.125);
         io.Add(td.GetId(), td.GetName(), res2->pVal2[gofw_Mean]);
         sres_DeleteChi2(res2);

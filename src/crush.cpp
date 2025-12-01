@@ -125,14 +125,14 @@ CrushBattery::CrushBattery(GenFactoryFunc genf)
         sknuth_Gap_cb(1, 5 * MILLION, 22, 0.0, 1.0/256.0));
 
     // Run of U01
-    tests.emplace_back(++j2, "Run of U01, r = 0", [] (TestDescr &td, BatteryIO &io) {
+    tests.emplace_back(++j2, "Run of U01, r = 0", [] (TestDescr& td, BatteryIO& io) {
         sres_Chi2 *res = sres_CreateChi2();
         sknuth_Run(io.Gen(), res, 1, 500 * MILLION, 0, TRUE);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
         sres_DeleteChi2(res);
     });
 
-    tests.emplace_back(++j2, "Run of U01, r = 15", [] (TestDescr &td, BatteryIO &io) {
+    tests.emplace_back(++j2, "Run of U01, r = 15", [] (TestDescr& td, BatteryIO& io) {
         sres_Chi2 *res = sres_CreateChi2();
         sknuth_Run(io.Gen(), res, 1, 500 * MILLION, 15, FALSE);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -147,15 +147,15 @@ CrushBattery::CrushBattery(GenFactoryFunc genf)
         sknuth_Permutation_cb(1, 50 * MILLION, 0, 10));
 
     // CollisionPermut tests
-    tests.emplace_back(++j2, "CollisionPermut, r = 0", [] (TestDescr &td, BatteryIO &io) {
-        sknuth_Res2 *res = sknuth_CreateRes2 ();
+    tests.emplace_back(++j2, "CollisionPermut, r = 0", [] (TestDescr& td, BatteryIO& io) {
+        sknuth_Res2* res = sknuth_CreateRes2();
         sknuth_CollisionPermut(io.Gen(), res, 5, 10 * MILLION, 0, 13);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
         sknuth_DeleteRes2(res);
     });
 
-    tests.emplace_back(++j2, "CollisionPermut, r = 15", [] (TestDescr &td, BatteryIO &io) {
-        sknuth_Res2 *res = sknuth_CreateRes2 ();
+    tests.emplace_back(++j2, "CollisionPermut, r = 15", [] (TestDescr& td, BatteryIO& io) {
+        sknuth_Res2* res = sknuth_CreateRes2();
         sknuth_CollisionPermut (io.Gen(), res, 5, 10 * MILLION, 15, 13);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
         sknuth_DeleteRes2(res);
