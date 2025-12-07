@@ -18,12 +18,7 @@
 #define __TESTU01_PLUGIN_H
 
 #include "testu01_mt.h"
-
-extern "C" {
-#include "smokerand/apidefs.h"
-#include "smokerand/core.h"
-}
-
+#include "smokerand/plugindefs.h"
 
 namespace testu01_threads {
 
