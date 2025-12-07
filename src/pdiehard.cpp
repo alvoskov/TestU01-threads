@@ -10,7 +10,7 @@ PseudoDiehardBattery::PseudoDiehardBattery(GenFactoryFunc genf)
 
     auto BirthdaySpacings_func = [] (TestDescr& td, BatteryIO& io) {
         long Count[7];
-        const double NumExp[7] = {
+        double NumExp[7] = {
             67.668, 135.335, 135.335, 90.224, 45.112, 18.045, 8.282
         };
         sres_Chi2* Chi = sres_CreateChi2();
