@@ -4,7 +4,7 @@
  * source code.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -22,7 +22,7 @@ using namespace testu01_threads;
 ///////////////////////////////////////////////////////
 
 UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf)
-: UniformGenerator(gi->name)
+: UniformGenerator(GetGeneratorName(gi))
 {
     obj.gi = gi;
     obj.state = gi->create(gi, intf);

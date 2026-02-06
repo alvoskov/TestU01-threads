@@ -4,7 +4,7 @@
  * source code.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -25,6 +25,14 @@ namespace testu01_threads {
 class UniformGeneratorPlugin : public UniformGenerator
 {
     GeneratorState obj;
+    static inline std::string GetGeneratorName(const GeneratorInfo* gi)
+    {
+        if (gi->parent != nullptr) {
+            return std::string(gi->name) + ":" + gi->parent->name;
+        } else {
+            return std::string(gi->name);
+        }
+    }
 
 public:
     UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf);
