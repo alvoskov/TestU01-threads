@@ -1,9 +1,9 @@
 /**
  * @file testu01_mt.h
  * @brief A multithreaded extension of TestU01 library. Partially based on its
- * source code, especiall on the `bbattery.c` file and some other header files.
+ * source code, especially on the `bbattery.c` file and some other header files.
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
@@ -26,7 +26,7 @@
 /**
  * @brief Block size (in elements) for vectorized PRNG calls.
  */
-constexpr size_t ELEMENTS_PER_BLOCK = 1024;
+constexpr size_t ELEMENTS_PER_BLOCK{1024};
 
 #if defined(__GNUC__) && defined(__x86_64__)
 #include <x86intrin.h>
@@ -73,10 +73,10 @@ extern "C" {
 #include <chrono>
 #include <limits>
 
-static constexpr long THOUSAND = 1000;
-static constexpr long MILLION = THOUSAND * THOUSAND;
-static constexpr long BILLION = THOUSAND * MILLION;
-static constexpr unsigned int NTHREADS_DEFAULT = std::numeric_limits<unsigned int>::max();
+static constexpr long THOUSAND{1000};
+static constexpr long MILLION{THOUSAND * THOUSAND};
+static constexpr long BILLION{THOUSAND * MILLION};
+static constexpr unsigned int NTHREADS_DEFAULT{std::numeric_limits<unsigned int>::max()};
 
 namespace testu01_threads {
 
@@ -133,8 +133,8 @@ public:
     double pvalue; ///< The obtained p-value.
 
     PValueRecord(int id_, const std::string& name_, double pvalue_)
-    : id(id_), name(name_), pvalue(pvalue_) {}
-    PValueRecord() : id(-1), name("-----"), pvalue(-1.0) {}
+    : id{id_}, name{name_}, pvalue{pvalue_} {}
+    PValueRecord() : id{-1}, name{"-----"}, pvalue{-1.0} {}
 
     friend bool operator<(const PValueRecord& a, const PValueRecord& b)
     {
@@ -157,6 +157,7 @@ class BatteryIO
 public:
     BatteryIO(std::shared_ptr<UniformGenerator> gobj) : gen(gobj) {}
     inline unif01_Gen* Gen() const { return gen.get()->GetPtr(); }
+    uint64_t GetResultsChecksum() const;
 
     /**
      * @brief Adds the result of statistical test to the battery.
@@ -164,7 +165,7 @@ public:
      * @param name   Test name
      * @param pvalue The obtained p-value.
      */
-    inline void Add(int id, const std::string &name, double pvalue)
+    inline void Add(int id, const std::string& name, double pvalue)
     {
         results.emplace_back(id, name, pvalue);
     }
@@ -190,7 +191,7 @@ public:
     std::string report;
 
     BatteryResults() {}
-    BatteryResults(unsigned int nthreads) : pvalues(nthreads) {}
+    BatteryResults(unsigned int nthreads) : pvalues{nthreads} {}
     std::string ToString() const;
 };
 
@@ -203,7 +204,7 @@ class TestDescr;
  * result in BatteryIO class using the test description from
  * TestDescr.
  */
-typedef std::function<void(TestDescr&, BatteryIO&)> TestCbFunc;
+typedef std::function<void(const TestDescr&, BatteryIO&)> TestCbFunc;
 
 /**
  * @brief Function that returns the `std::shared_ptr` smart pointer
@@ -216,23 +217,34 @@ class TestDescr
 {
     int id;
     std::string name;
-    std::function<void (TestDescr& td, BatteryIO& io)> pvalue_func;
+    std::function<void (const TestDescr& td, BatteryIO& io)> pvalue_func;
 
 public:
     inline int GetId() const { return id; }
     inline const std::string& GetName() const { return name; }
-    inline void Run(BatteryIO& io) { pvalue_func(*this, io); }
+    inline void Run(BatteryIO& io) const { pvalue_func(*this, io); }
 
     TestDescr(int testid, const std::string& testname, TestCbFunc f)
-    : id(testid),
-        name(testname), pvalue_func(f)
+    : id{testid}, name{testname}, pvalue_func{f}
     {
     }
 };
 
 
+/**
+ * @brief Used to pass the current thread index together with the current
+ * number of threads to the thread function (useful for diagnostic messages)
+ */
+class ThreadIndex
+{
+public:
+    unsigned int index;
+    unsigned int nthreads;
+};
 
-
+/**
+ * @brief Implementation of the multithreaded run of TestU01 batteries.
+ */
 class TestsPull
 {
     std::vector<TestDescr> tests;
@@ -240,13 +252,13 @@ class TestsPull
     size_t pos;
 
     unsigned int GetNThreads() const;
-    static void ThreadFunc(TestsPull& pull, BatteryIO& io, int thread_id);
-
+    std::string GetPosMessage();
+    static void ThreadFunc(TestsPull& pull, BatteryIO& io,
+        const std::vector<size_t>& tests_inds, const ThreadIndex& thr_ind);
 
 public:
     TestsPull() {}
     TestsPull(const std::vector<TestDescr>& obj, std::seed_seq* seq);
-    const TestDescr* Get(std::string& pos_msg);
 
     BatteryResults Run(std::function<std::shared_ptr<UniformGenerator>()> create_gen,
         const std::string& battery_name, unsigned int nthreads = NTHREADS_DEFAULT);
@@ -262,12 +274,11 @@ class TestsBattery
 {
 protected:
     std::vector<TestDescr> tests;
-    GenFactoryFunc create_gen;
     std::string battery_name;
-    std::string generator_name;
+    GenFactoryFunc create_gen;
 
 public:
-    TestsBattery(GenFactoryFunc genf);
+    TestsBattery(const std::string& bat_name, GenFactoryFunc genf);
     BatteryResults Run(std::seed_seq* seq = nullptr, unsigned int nthreads = NTHREADS_DEFAULT) const;
     BatteryResults RunTest(int id, std::seed_seq* seq = nullptr, unsigned int nthreads = NTHREADS_DEFAULT) const;
 };
@@ -293,7 +304,7 @@ TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta);
 TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s);
 TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L);
 TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d);
-TestCbFunc sstring_HammingWeight2_cb(long N, int r, int s, long L, long K);
+TestCbFunc sstring_HammingWeight2_cb(long N, long n, int r, int s, long L);
 TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s);
 TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s);
 TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L);
@@ -319,4 +330,4 @@ TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
 
 } // namespace testu01_threads
 
-#endif
+#endif // __TESTU01_MT_H

@@ -1,13 +1,30 @@
+/**
+ * @file bigcrush.cpp
+ * @brief A multithreaded version of BigCrush battery from TestU01 library.
+ * Based on the `bbattery.c` file.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+ * e-mail: lecuyer@iro.umontreal.ca
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #include "testu01th/bigcrush.h"
 
 using namespace testu01_threads;
 
 BigCrushBattery::BigCrushBattery(GenFactoryFunc genf)
-    : TestsBattery(genf)
+    : TestsBattery{"BigCrush(mt)", genf}
 {
     constexpr int s = 30, r = 0;
     int j2 = 0;
-    battery_name = "BigCrush(mt)";
 
     // SerialOver tests
     tests.emplace_back(++j2, "SerialOver, r = 0",

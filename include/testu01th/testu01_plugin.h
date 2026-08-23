@@ -45,4 +45,4 @@ public:
 
 } // namespace testu01_threads
 
-#endif
+#endif // __TESTU01_PLUGIN_H

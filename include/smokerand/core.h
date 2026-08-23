@@ -4,7 +4,7 @@
  * of statistical tests.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -41,6 +41,7 @@ void CallerAPI_free(void);
 void set_cmd_param(const char *param);
 void set_entropy_textseed(const char *seed);
 int set_entropy_base64_seed(const char *seed);
+char *get_entropy_base64_seed(void);
 void set_use_stderr_for_printf(int val);
 
 /**
@@ -84,6 +85,7 @@ typedef struct {
 
 
 TestResults TestResults_create(const char *name);
+void TestResults_set_pmin_ntests(TestResults *obj, unsigned long ntests, double pmin);
 
 typedef enum {
     REPORT_BRIEF = 0,
@@ -156,10 +158,12 @@ typedef enum {
 const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
 void quicksort64(uint64_t *x, size_t len);
+void quicksort32(uint32_t *x, size_t len);
 void radixsort32(uint32_t *x, size_t len);
-void radixsort64(uint64_t *x, size_t len);
-void fastsort64(const RamInfo *info, uint64_t *x, size_t len);
-
+void radixsort32_inplace(uint32_t *x, size_t len);
+void radixsort64_inplace(uint64_t *x, size_t len);
+void fastsort32(uint32_t *x, size_t len);
+void fastsort64(uint64_t *x, size_t len);
 
 typedef struct {
     void *original_state;
@@ -171,6 +175,8 @@ GeneratorInfo define_reversed_generator(const GeneratorInfo *gi);
 GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi);
 GeneratorInfo define_high32_generator(const GeneratorInfo *gi);
 GeneratorInfo define_low32_generator(const GeneratorInfo *gi);
+GeneratorInfo define_uint31_generator(const GeneratorInfo *gi);
+GeneratorInfo define_uint63_generator(const GeneratorInfo *gi);
 
 
 typedef struct {
@@ -182,10 +188,15 @@ typedef struct {
 
 TimeHMS nseconds_to_hms(unsigned long long nseconds_total);
 void print_elapsed_time(unsigned long long nseconds_total);
+void snprintf_elapsed_time(char *buf, size_t len, unsigned long long nseconds_total);
 
 void set_bin_stdout(void);
 void set_bin_stdin(void);
 void GeneratorInfo_bits_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2);
+void GeneratorInfo_floats_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2);
+void GeneratorInfo_accurate_floats_to_file(GeneratorInfo *gen,
     const CallerAPI *intf, unsigned int maxlen_log2);
 
 ////////////////////////////////////////
@@ -295,6 +306,36 @@ static inline uint64_t reverse_bits64(uint64_t x)
     x = ((x & 0xCCCCCCCCCCCCCCCC) >> 2)  | ((x & 0x3333333333333333) << 2);
     x = ((x & 0xAAAAAAAAAAAAAAAA) >> 1)  | ((x & 0x5555555555555555) << 1);
     return x;
+}
+
+/**
+ * @brief Count leading zeros for an unsigned 64-bit integer.
+ */
+static inline unsigned int countl_zero_u64(uint64_t x)
+{
+#ifdef __GNUC__
+    if (x == 0) { // To prevent undefined behaviour
+        return 64;
+    }
+    return (unsigned int) __builtin_clzll(x);
+#else
+    // A cross-platform version
+    unsigned int n = 64;
+    uint64_t y;
+    y = x >> 32; if (y != 0) { n = n - 32; x = y; }
+    y = x >> 16; if (y != 0) { n = n - 16; x = y; }
+    y = x >>  8; if (y != 0) { n = n -  8; x = y; }
+    y = x >>  4; if (y != 0) { n = n -  4; x = y; }
+    y = x >>  2; if (y != 0) { n = n -  2; x = y; }
+    y = x >>  1; if (y != 0) return n - 2;
+    return (unsigned int) (n - x);
+#endif
+}
+
+#define ASSERT_MALLOC_PTR(ptr, msg) \
+if (ptr == NULL) { \
+    fprintf(stderr, "***** %s: not enough memory *****\n", msg); \
+    exit(EXIT_FAILURE); \
 }
 
 #endif // __SMOKERAND_CORE_H

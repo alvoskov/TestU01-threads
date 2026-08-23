@@ -10,12 +10,12 @@ MT19937Generator::MT19937Generator() : UniformGenerator("MT19937") {}
 
 double MT19937Generator::GetU01()
 {
-    return gen() * INV32;
+    return static_cast<double>(gen()) * INV32;
 }
 
 uint32_t MT19937Generator::GetBits32()
 {
-    return gen();
+    return static_cast<uint32_t>(gen());
 }
 
 

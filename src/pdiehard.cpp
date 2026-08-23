@@ -1,14 +1,31 @@
+/**
+ * @file pdiehard.cpp
+ * @brief A multithreaded version of pseudoDIEHARD battery from TestU01 library.
+ * Based on the `bbattery.c` file.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+ * e-mail: lecuyer@iro.umontreal.ca
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #include "testu01th/pdiehard.h"
 
 using namespace testu01_threads;
 
 PseudoDiehardBattery::PseudoDiehardBattery(GenFactoryFunc genf)
-    : TestsBattery(genf)
+    : TestsBattery{"pseudoDIEHARD(mt)", genf}
 {
     int j2 = 0;
-    battery_name = "pseudoDIEHARD(mt)";
 
-    auto BirthdaySpacings_func = [] (TestDescr& td, BatteryIO& io) {
+    auto BirthdaySpacings_func = [] (const TestDescr& td, BatteryIO& io) {
         long Count[7];
         double NumExp[7] = {
             67.668, 135.335, 135.335, 90.224, 45.112, 18.045, 8.282
@@ -54,7 +71,7 @@ PseudoDiehardBattery::PseudoDiehardBattery(GenFactoryFunc genf)
     }
 
 
-    tests.emplace_back(++j2, "MultinomialBitsOver", [] (TestDescr& td, BatteryIO& io) {
+    tests.emplace_back(++j2, "MultinomialBitsOver", [] (const TestDescr& td, BatteryIO& io) {
         double ValDelta[] = { 1 };
         smultin_Param* par = smultin_CreateParam(1, ValDelta, smultin_GenerCellSerial, 0);
         smultin_Res* res = smultin_CreateRes(par);

@@ -1,5 +1,5 @@
 /**
- * @file testu01_plugin.h
+ * @file testu01_plugin.cpp
  * @brief Wrappers for pseudorandom number generators from SmokeRand test suite.
  * source code.
  *
@@ -22,12 +22,12 @@ using namespace testu01_threads;
 ///////////////////////////////////////////////////////
 
 UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf)
-: UniformGenerator(GetGeneratorName(gi))
+: UniformGenerator{GetGeneratorName(gi)}
 {
     obj.gi = gi;
     obj.state = gi->create(gi, intf);
     obj.intf = intf;
-    if (obj.state == NULL) {
+    if (obj.state == nullptr) {
         fprintf(stderr,
             "Cannot create an example of generator '%s' with parameter '%s'\n",
             gi->name, intf->get_param());
@@ -38,14 +38,14 @@ UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo* gi, const Ca
 
 double UniformGeneratorPlugin::GetU01()
 {
-    static constexpr double INV32 = 1.0 / (static_cast<uint64_t>(1) << 32);
-    const uint64_t u = obj.gi->get_bits(obj.state);
+    static constexpr double INV32{1.0 / (static_cast<uint64_t>(1) << 32)};
+    const uint64_t u{obj.gi->get_bits(obj.state)};
     return static_cast<double>(u >> (obj.gi->nbits - 32)) * INV32;
 }
 
 uint32_t UniformGeneratorPlugin::GetBits32()
 {
-    const uint64_t u = obj.gi->get_bits(obj.state);
+    const uint64_t u{obj.gi->get_bits(obj.state)};
     return static_cast<uint32_t>(u >> (obj.gi->nbits - 32));
 }
 

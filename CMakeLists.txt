@@ -39,7 +39,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 # Source files names
-add_library(testu01threads
+add_library(testu01threads STATIC
     include/testu01th/batteries.h
     include/testu01th/bigcrush.h       src/bigcrush.cpp
     include/testu01th/crush.h          src/crush.cpp
@@ -48,6 +48,7 @@ add_library(testu01threads
     include/testu01th/pdiehard.h       src/pdiehard.cpp 
     include/testu01th/testu01_mt.h     src/testu01_mt.cpp
     include/testu01th/testu01_plugin.h src/testu01_plugin.cpp)
+set_property(TARGET testu01threads PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # testu01threads core library
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)

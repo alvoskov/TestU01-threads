@@ -1,8 +1,9 @@
 /**
  * @file testu01_threads.h
  * @brief A multithreaded extension of TestU01 library. Partially based on its
- * source code, especiall on the `bbattery.c` file and some other header files.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * source code, especially on the `bbattery.c` file and some other header files.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.

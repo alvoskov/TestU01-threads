@@ -3,7 +3,8 @@
  * @brief Runs TestU01 batteries for some pre-defined pseudorandom
  * number generators. Cannot load tests from DLLs.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -30,9 +31,32 @@
 
 using namespace testu01_threads;
 
+static void print_help(const std::map<std::string, GenFactoryFunc>& gen_map)
+{
+    std::cout << "Usage: testu01th_demo battery generator [--full-report]\n"
+              << "battery: battery name; possible variants are:\n"
+              << "  SmallCrush, Crush, BigCrush, pseudoDIEHARD, stdout\n"
+              << "generator: PRNG name. The supported generators are:\n";
+    std::vector<std::string> gnames;
+    for (const auto& kv : gen_map) {
+        gnames.push_back(kv.first);
+    }
+
+    std::sort(gnames.begin(), gnames.end());
+    for (const auto& n : gnames) {
+        std::cout << "  " << n << "\n";
+    }
+}
+
+static void run_battery(TestsBattery& bat, bool full_report)
+{
+    const auto res = bat.Run();
+    std::cout << ((full_report) ? res.ToString() : res.report) << std::endl;
+}
+
 int main(int argc, char* argv[]) 
 {
-    const std::map<std::string, GenFactoryFunc> gen_map = {
+    static const std::map<std::string, GenFactoryFunc> gen_map = {
         {"LCG", [] () -> std::shared_ptr<UniformGenerator> {
             return std::shared_ptr<UniformGenerator>(new LcgGenerator());
         }},
@@ -53,24 +77,23 @@ int main(int argc, char* argv[])
         }}
     };
 
-    if (argc != 3) {
-        std::cout << "Usage: testu01th_demo battery generator" << std::endl;
-        std::cout << "battery: battery name; possible variants are:" << std::endl;
-        std::cout << "  SmallCrush, Crush, BigCrush, pseudoDIEHARD, stdout" << std::endl;
-        std::cout << "generator: PRNG name. The supported generators are:" << std::endl;
-        std::vector<std::string> gnames;
-        for (auto &kv : gen_map) {
-            gnames.push_back(kv.first);
-        }
-
-        std::sort(gnames.begin(), gnames.end());
-        for (auto& n : gnames) {
-            printf("  %s\n", n.c_str());
-        }
+    if (argc < 3 || argc > 4) {
+        print_help(gen_map);
         return 0;
     }
 
-    std::string battery(argv[1]), generator(argv[2]);
+    bool full_report{false};
+    if (argc >= 4) {
+        if (std::string(argv[3]) != "--full-report") {
+            std::cerr << "Unknown argument" << argv[3] << std::endl;
+            return 1;
+        } else {
+            full_report = true;
+        }
+    }
+
+    const std::string battery{argv[1]};
+    const std::string generator{argv[2]};
 
     if (gen_map.count(generator) == 0) {
         std::cerr << "Unknown generator " << generator << std::endl;
@@ -80,16 +103,16 @@ int main(int argc, char* argv[])
     auto create_gen = gen_map.at(generator);    
     if (battery == "SmallCrush") {
         SmallCrushBattery bat(create_gen);
-        std::cout << bat.Run().report << std::endl;
+        run_battery(bat, full_report);
     } else if (battery == "Crush") {
         CrushBattery bat(create_gen);
-        std::cout << bat.Run().report << std::endl;
+        run_battery(bat, full_report);
     } else if (battery == "BigCrush") {
         BigCrushBattery bat(create_gen);
-        std::cout << bat.Run().report << std::endl;
+        run_battery(bat, full_report);
     } else if (battery == "pseudoDIEHARD") {
         PseudoDiehardBattery bat(create_gen);
-        std::cout << bat.Run().report << std::endl;
+        run_battery(bat, full_report);
     } else if (battery == "stdout") {
         prng_bits32_to_file(create_gen());
     } else {

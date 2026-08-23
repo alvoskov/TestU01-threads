@@ -3,7 +3,8 @@
  * @brief Reads pseudorandom numbers from stdin as uint32_t in binary form
  * and sends it to one-threaded version of TestU01.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -28,7 +29,7 @@ using namespace testu01_threads;
  */
 class Stdin32Collector : public UniformGenerator
 {
-    static constexpr size_t buffer_size = 2048;
+    static constexpr size_t buffer_size{2048};
     uint32_t buffer[buffer_size];
     size_t pos;
 
@@ -41,13 +42,16 @@ public:
 
     void FillBuffer()
     {
-        fread(buffer, sizeof(uint32_t), buffer_size, stdin);
+        if (fread(buffer, sizeof(uint32_t), buffer_size, stdin) != buffer_size) {
+            std::cerr << "Stdin32Collector::FillBuffer: cannot read from stdin" << std::endl;
+            exit(1);
+        }
         pos = 0;
     }
 
     double GetU01() override
     {
-        return (double) GetBits32() / ((double) UINT_MAX + 1.0);
+        return static_cast<double>(GetBits32()) / (static_cast<double>(UINT_MAX) + 1.0);
     }
 
     uint32_t GetBits32() override

@@ -4,7 +4,7 @@
    ==  in this case for the TestU01-threads library code.                 ==
    =========================================================================
 TestU01-threads library code
-Copyright 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+Copyright 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
 
 The library contains some parts derived from TestU01 library also licensed
 under Apache 2.0 license.

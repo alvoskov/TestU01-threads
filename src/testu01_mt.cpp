@@ -1,8 +1,30 @@
+/**
+ * @file testu01_mt.h
+ * @brief A multithreaded extension of TestU01 library. Partially based on its
+ * source code, especially on the `bbattery.c` file and some other header files.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+ * e-mail: lecuyer@iro.umontreal.ca
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #include "testu01th/testu01_mt.h"
 #include <iostream>
 #include <cstring>
+#include <cmath>
 #include <random>
+#include <sstream>
+#ifdef USE_LOADLIBRARY
 #include <io.h>
+#endif
 #include <fcntl.h>
 #include <stdarg.h>
 
@@ -111,17 +133,17 @@ std::string chrono_tostring(chrono_Chrono* C, chrono_TimeFormat Form)
 
     case chrono_hms:
         {
-        constexpr double hours_in_sec = 1.0 / 3600.0;
-        constexpr double mins_in_sec = 1.0 / 60.0;
+        constexpr double hours_in_sec{1.0 / 3600.0};
+        constexpr double mins_in_sec{1.0 / 60.0};
         temps = chrono_Val(C, chrono_sec);
-        const long hour = static_cast<long>(temps * hours_in_sec);
+        const long hour{static_cast<long>(temps * hours_in_sec)};
         if (hour > 0)
             temps -= static_cast<double>(hour) * 3600.0;
-        const long minute = static_cast<long>(temps * mins_in_sec);
+        const long minute{static_cast<long>(temps * mins_in_sec)};
         if (minute > 0)
             temps -= static_cast<double>(minute) * 60.0;
-        const long second = static_cast<long>(temps);
-        const long centisecond = static_cast<long>(100.0 * (temps - static_cast<double>(second)));
+        const long second{static_cast<long>(temps)};
+        const long centisecond{static_cast<long>(100.0 * (temps - static_cast<double>(second)))};
         return printf_tos("%02ld:%02ld:%02ld.%02ld",
             hour, minute, second, centisecond);
         }
@@ -132,8 +154,6 @@ std::string chrono_tostring(chrono_Chrono* C, chrono_TimeFormat Form)
 }
 
 
-
-
 /////////////////////////////////////////////////
 ///// UniformGenerator class implementation /////
 /////////////////////////////////////////////////
@@ -141,20 +161,20 @@ std::string chrono_tostring(chrono_Chrono* C, chrono_TimeFormat Form)
 double UniformGenerator::GetU01Handle(void* param, void* state)
 {
     (void) param;
-    UniformGenerator* obj = static_cast<UniformGenerator*>(state);
+    UniformGenerator* obj{static_cast<UniformGenerator*>(state)};
     return obj->GetU01();
 }
 
 unsigned long UniformGenerator::GetBits32Handle(void* param, void* state)
 {
     (void) param;
-    UniformGenerator* obj = static_cast<UniformGenerator*>(state);
+    UniformGenerator* obj{static_cast<UniformGenerator*>(state)};
     return obj->GetBits32();
 }
 
 
 UniformGenerator::UniformGenerator(const std::string& name_)
-    : name(name_)
+    : name{name_}
 {
     gen.state = static_cast<void*>(this);
     gen.param = nullptr;
@@ -173,8 +193,8 @@ UniformGenerator::UniformGenerator(const std::string& name_)
 
 size_t BatteryIO::GetNTestsFailed() const
 {
-    size_t co = 0;
-    for (auto &r : results) {
+    size_t co{0};
+    for (const auto& r : results) {
         if ((r.pvalue < gofw_Suspectp) || (r.pvalue > 1.0 - gofw_Suspectp)) {
             co++;
         }
@@ -183,31 +203,50 @@ size_t BatteryIO::GetNTestsFailed() const
 }
 
 /**
+ * @brief Returns a non-cryptographic checksum of p-values. May be useful
+ * for reproducibility testing, especially in a multithreaded environment.
+ * @details The algorithm is partially based on the djb2 algorithm.
+ */
+uint64_t BatteryIO::GetResultsChecksum() const
+{
+    uint64_t sum{0x123456789ABCDEF};
+    for (const auto& r : results) {
+        int pvalue_exp;
+        uint64_t pvalue_x64{static_cast<uint64_t>(std::frexp(r.pvalue, &pvalue_exp) * 16777216U)};
+        pvalue_x64 |= (static_cast<uint64_t>(pvalue_exp) + 32768U) << 32;
+        const uint64_t inc{(static_cast<uint64_t>(r.id) << 48) | pvalue_x64};
+        sum = 6906969069U * sum + inc;
+    }    
+    return sum;
+}
+
+
+/**
  * @brief Write a p-value with a nice format.
  */
 std::string BatteryIO::WritePValue(double p)
 {
-    std::string txt;
+    std::stringstream sout;
     if (p < gofw_Suspectp) {
-        txt += p0_tostring(p);
+        sout << p0_tostring(p);
     } else if (p > 1.0 - gofw_Suspectp) {
         if (p >= 1.0 - gofw_Epsilonp1) {
-            txt += printf_tos(" 1 - eps1");
+            sout << " 1 - eps1";
         } else if (p >= 1.0 - 1.0e-4) {
-            txt += printf_tos(" 1 - ");
-            txt += double_tostring(1.0 - p, 7, 2, 2);
+            sout << " 1 - "
+                 << double_tostring(1.0 - p, 7, 2, 2);
         } else if (p >= 1.0 - 1.0e-2) {
-            txt += printf_tos("  %.4f ", p);
+            sout << printf_tos("  %.4f ", p);
         } else {
-            txt += printf_tos("   %.2f", p);
+            sout << printf_tos("   %.2f", p);
         }
     }
-    return txt;
+    return sout.str();
 }
 
 void BatteryIO::Add(const BatteryIO& obj)
 {
-    for (auto& o : obj.results) {
+    for (const auto& o : obj.results) {
         results.push_back(o);
     }
     std::sort(results.begin(), results.end());
@@ -218,11 +257,11 @@ void BatteryIO::Add(const BatteryIO& obj)
  */
 static std::string ms_to_hms(std::chrono::milliseconds ms_total)
 {
-    const long long ms_num = static_cast<long long>(ms_total.count());
-    const auto ms = ms_num % 1000;
-    const auto s = (ms_num / 1000) % 60;
-    const auto m = (ms_num / 60000) % 60;
-    const auto h = (ms_num / 3600000);
+    const long long ms_num{static_cast<long long>(ms_total.count())};
+    const auto ms{ms_num % 1000};
+    const auto s{(ms_num / 1000) % 60};
+    const auto m{(ms_num / 60000) % 60};
+    const auto h{ms_num / 3600000};
     return printf_tos("%.2lld:%.2lld:%.2lld.%.3lld", h, m, s, ms);
 }
 
@@ -238,55 +277,55 @@ static std::string ms_to_hms(std::chrono::milliseconds ms_total)
 std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
     chrono_Chrono* timer, std::chrono::milliseconds ms_total)
 {
-    std::string txt;
-    txt += printf_tos("\n========= Summary results of %s", bat_name);
-    txt += printf_tos(" =========\n\n");
-    txt += printf_tos(" Version:                      %s\n", PACKAGE_STRING);
-    txt += printf_tos(" Generator:                    ") + gen_name;
-
-    txt += printf_tos("\n Number of statistics:         %1u\n",
-        static_cast<unsigned int>(results.size()));
-    txt += printf_tos(" Total CPU time (all cores):   ");
-    txt += chrono_tostring(timer, chrono_hms);
-    txt += printf_tos("\n Elapsed time:                 ");
-    txt += ms_to_hms(ms_total);
+    std::stringstream sout;
+    sout << printf_tos("\n========= Summary results of %s", bat_name)
+         << printf_tos(" =========\n\n")
+         << printf_tos(" Version:                      %s\n", PACKAGE_STRING)
+         << printf_tos(" Generator:                    ") << gen_name
+         << printf_tos("\n Number of statistics:         %1u\n",
+                static_cast<unsigned int>(results.size()))
+         << printf_tos(" Total CPU time (all cores):   ")
+         << chrono_tostring(timer, chrono_hms)
+         << printf_tos("\n Elapsed time:                 ")
+         << ms_to_hms(ms_total)
+         << printf_tos("\n p-values checksum:            0x%llX",
+            (unsigned long long) GetResultsChecksum());
 
     if (GetNTestsFailed() == 0) {
-        txt += printf_tos("\n\n All tests were passed\n\n\n\n");
-        return txt;
+        sout << printf_tos("\n\n All tests were passed\n\n\n\n");
+        return sout.str();
     }
 
     if (gofw_Suspectp >= 0.01) {
-        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.2f]",
+        sout << printf_tos("\n The following tests gave p-values outside [%.4g, %.2f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
     } else if (gofw_Suspectp >= 0.0001) {
-        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.4f]",
+        sout << printf_tos("\n The following tests gave p-values outside [%.4g, %.4f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
     } else if (gofw_Suspectp >= 0.000001) {
-        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.6f]",
+        sout << printf_tos("\n The following tests gave p-values outside [%.4g, %.6f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
     } else {
-        txt += printf_tos("\n The following tests gave p-values outside [%.4g, %.14f]",
+        sout << printf_tos("\n The following tests gave p-values outside [%.4g, %.14f]",
             gofw_Suspectp, 1.0 - gofw_Suspectp);
     }
-    txt += printf_tos(":\n (eps  means a value < %6.1e)", gofw_Epsilonp);
-    txt += printf_tos(":\n (eps1 means a value < %6.1e)", gofw_Epsilonp1);
-    txt += printf_tos(":\n\n       Test                          p-value\n");
-    txt += printf_tos(" ----------------------------------------------\n");
+    sout << printf_tos(":\n (eps  means a value < %6.1e)", gofw_Epsilonp)
+         << printf_tos(":\n (eps1 means a value < %6.1e)", gofw_Epsilonp1)
+         << printf_tos(":\n\n       Test                          p-value\n")
+         << printf_tos(" ----------------------------------------------\n");
 
     for (auto& r : results) {
         if ((r.pvalue >= gofw_Suspectp) && (r.pvalue <= 1.0 - gofw_Suspectp))
             continue; // That test was passed
-        txt += printf_tos(" %2d ", r.id);
-        txt += printf_tos(" %-30s", r.name.c_str());
-        txt += WritePValue(r.pvalue);
-        txt += "\n";
+        sout << printf_tos(" %2d ", r.id)
+             << printf_tos(" %-30s", r.name.c_str())
+             << WritePValue(r.pvalue) << "\n";
     }
 
-    txt += printf_tos(" ----------------------------------------------\n");
-    txt += printf_tos(" All other tests were passed\n");
-    txt += printf_tos("\n\n\n");
-    return txt;
+    sout << " ----------------------------------------------\n"
+         << " All other tests were passed\n"
+         << "\n\n\n";
+    return sout.str();
 }
 
 
@@ -297,15 +336,16 @@ std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
 
 std::string BatteryResults::ToString() const
 {
-    std::string txt = report;
+    std::stringstream sout;
+    sout << report;
     for (size_t i = 0; i < pvalues.size(); i++) {
-        txt += "===== Tests for thread " + std::to_string(i) + " =====\n";
-        for (auto& rec : pvalues[i]) {
-            txt += printf_tos("  %5d %32s %.6g\n",
-                (int) rec.id, rec.name.c_str(), rec.pvalue);
+        sout << "===== Tests for thread " << i << " =====\n";
+        for (const auto& rec : pvalues[i]) {
+            sout << printf_tos("  %5d %32s %.6g\n",
+                static_cast<int>(rec.id), rec.name.c_str(), rec.pvalue);
         }
     }
-    return txt;
+    return sout.str();
 }
 
 
@@ -316,7 +356,7 @@ std::string BatteryResults::ToString() const
 TestsPull::TestsPull(const std::vector<TestDescr>& obj, std::seed_seq* seq)
 {
     pos = 0;
-    const size_t len = obj.size();
+    const size_t len{obj.size()};
     std::vector<size_t> tests_inds(len);
     for (size_t i = 0; i < len; i++) {
         tests_inds[i] = i;
@@ -336,72 +376,63 @@ TestsPull::TestsPull(const std::vector<TestDescr>& obj, std::seed_seq* seq)
     }
     std::cout << std::endl;
 */
-    
-
     for (auto ind : tests_inds) {
         tests.push_back(obj[ind]);
     }
 }
 
 /**
- * @brief Returns the pointer to the next test that was not processed.
- * @param[out] pos_msg Buffer for the `test _ of _` message.
- * @return Pointer to the test (success) or nullptr (failure, i.e.
- * no more tests left).
+ * @brief Returns the `test _ of _` message. Uses a counter controlled
+ * by a mutex.
  */
-const TestDescr* TestsPull::Get(std::string& pos_msg)
+std::string TestsPull::GetPosMessage()
 {
-    // TODO: make it deterministic!
     std::lock_guard<std::mutex> lock(get_mutex);
     if (pos < tests.size()) {
-        pos_msg = "test " + std::to_string(pos + 1) +
+        pos++;
+        return "test " + std::to_string(pos) +
             " of " + std::to_string(tests.size());
-        return &tests[pos++];
     } else {
-        pos_msg = "NONE";
-        return nullptr;
+        return "NONE";
     }
 }
 
 
 unsigned int TestsPull::GetNThreads() const
 {
-    const size_t ntests = tests.size();
-    unsigned int nthreads = std::thread::hardware_concurrency();
+    const size_t ntests{tests.size()};
+    unsigned int nthreads{std::thread::hardware_concurrency()};
     while (nthreads > ntests)
         nthreads /= 2;
     return nthreads;
 }
 
 
-void TestsPull::ThreadFunc(TestsPull& pull, BatteryIO& io, int thread_id)
+void TestsPull::ThreadFunc(TestsPull& pull, BatteryIO& io,
+    const std::vector<size_t>& tests_inds, const ThreadIndex& thr_ind)
 {
-    fprintf(stderr, "vvvvvvvvvv  Thread #%d started  vvvvvvvvvv\n", thread_id);
-    const TestDescr* test = nullptr;
-    std::string pos_msg;
-    while ((test = pull.Get(pos_msg)) != nullptr) {
-        TestDescr t = *test;
-        fprintf(stderr, "vvvvv  Thread #%d: test %s started (%s)\n",
-            thread_id, t.GetName().c_str(), pos_msg.c_str());
-        size_t ind1 = io.GetNResults();
+    fprintf(stderr, "vvvvvvvvvv  Thread #%u started  vvvvvvvvvv\n", thr_ind.index);
+    for (auto test_ind : tests_inds) {
+        const TestDescr& t = pull.tests[test_ind];
+        const std::string pos_msg = pull.GetPosMessage();
+        fprintf(stderr, "vvvvv  Thread #%u: test %s started (%s)\n",
+            thr_ind.index, t.GetName().c_str(), pos_msg.c_str());
+        const size_t ind1{io.GetNResults()};
         t.Run(io);
-        size_t ind2 = io.GetNResults();
-        fprintf(stderr, "^^^^^  Thread #%d: test %s finished (%s)",
-            thread_id, t.GetName().c_str(), pos_msg.c_str());
+        const size_t ind2{io.GetNResults()};
+        fprintf(stderr, "^^^^^  Thread #%u: test %s finished (%s)",
+            thr_ind.index, t.GetName().c_str(), pos_msg.c_str());
         if (ind2 > ind1) {
-            ind2--;
             fprintf(stderr, "; p = [");
-            for (size_t i = ind1; i <= ind2; i++) {
+            for (size_t i = ind1; i < ind2; i++) {
                 fprintf(stderr, "%g ", io.GetPValueRecord(i).pvalue);
             }
             fprintf(stderr, "]\n");
         } else {
             fprintf(stderr, "\n");
         }
-        
-
     }
-    fprintf(stderr, "^^^^^^^^^^  Thread #%d finished  ^^^^^^^^^^\n", thread_id);
+    fprintf(stderr, "^^^^^^^^^^  Thread #%u finished  ^^^^^^^^^^\n", thr_ind.index);
 }
 
 
@@ -421,14 +452,32 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
     }
     // Disable thread unsafe features of TestU01
     swrite_Host = FALSE;
+    // Create tests indexes arrays for each thread
+    std::vector<std::vector<size_t>> thrd_testinds(nthreads);
+    for (size_t i = 0; i < tests.size(); i++) {
+        thrd_testinds[i % nthreads].push_back(i);
+    }
+    for (unsigned int i = 0; i < nthreads; i++) {
+        const auto& testinds = thrd_testinds[i];
+        fprintf(stderr, "=====> Thread %u tests: ", i);
+        for (const auto tind : testinds) {
+            fprintf(stderr, "%d(%s) ",
+                tests[tind].GetId(),
+                tests[tind].GetName().c_str()
+            );
+        }
+        fprintf(stderr, "\n");
+    }
     // Multi-threaded run
     const auto tic = std::chrono::high_resolution_clock::now();
     std::vector<std::thread> threads;
     for (size_t i = 0; i < nthreads; i++) {
+        const ThreadIndex thr_ind{static_cast<unsigned int>(i), nthreads};
         threads.emplace_back(ThreadFunc,
             std::ref(*this),
             std::ref(threads_bats[i]),
-            i);
+            std::ref(thrd_testinds[i]),
+            thr_ind);
     }
     for (auto& th : threads) {
         th.join();
@@ -448,7 +497,7 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
         gen_name = "Dummy";
     }
     BatteryIO io(std::make_shared<DummyGenerator>());
-    for (auto& bat : threads_bats) {
+    for (const auto& bat : threads_bats) {
         io.Add(bat);
     }
     // Estimate the elapsed time
@@ -464,10 +513,14 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
 ///// TestsBattery class implementation /////
 /////////////////////////////////////////////
 
-
-
-TestsBattery::TestsBattery(GenFactoryFunc genf)
-    : create_gen(genf)
+/**
+ * @brief Initializes the battery name and PRNG factory function. Should be
+ * called by derived classes.
+ * @param bat_name  Battery name.
+ * @param genf      Generator factory function.
+ */
+TestsBattery::TestsBattery(const std::string& bat_name, GenFactoryFunc genf)
+    : battery_name{bat_name}, create_gen{genf}
 {
 }
 
@@ -608,7 +661,7 @@ void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
 
 TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
         svaria_AppearanceSpacings(io.Gen(), res, N, Q, K, r, s, L);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -618,7 +671,7 @@ TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, in
 
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
         sstring_AutoCor(io.Gen(), res, N, n, r, s, d);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
@@ -628,7 +681,7 @@ TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d)
 
 TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Poisson* res = sres_CreatePoisson();
         smarsa_BirthdaySpacings(io.Gen(), res, N, n, r, d, t, p);
         io.Add(td.GetId(), td.GetName(), res->pVal2);
@@ -638,7 +691,7 @@ TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int 
 
 TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         smarsa_Res* res = smarsa_CreateRes();
         smarsa_CollisionOver (io.Gen(), res, N, n, r, d, t);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
@@ -648,7 +701,7 @@ TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
 
 TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sknuth_Res2* res = sknuth_CreateRes2();
         sknuth_CollisionPermut(io.Gen(), res, N, n, r, t);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
@@ -658,7 +711,7 @@ TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t)
 
 TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         auto* res2 = sres_CreateChi2();
         sknuth_CouponCollector (io.Gen(), res2, N, n, r, d);
         io.Add(td.GetId(), td.GetName(), res2->pVal2[gofw_Mean]);
@@ -670,7 +723,7 @@ TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d)
 TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m,
     const std::string& mess, bool flag)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         snpair_Res* res = snpair_CreateRes();
         snpair_ClosePairs(io.Gen(), res, N, n, r, k, p, m);
         GetPValue_CPairs(io, 10, res, td.GetId(), mess, flag);
@@ -683,7 +736,7 @@ TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m,
  */
 TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         snpair_Res* res = snpair_CreateRes();
         snpair_ClosePairs(io.Gen(), res, N, n, r, k, p, m);
         io.Add(td.GetId(), td.GetName(), res->pVal[snpair_NP]);
@@ -693,7 +746,7 @@ TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m)
 
 TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t)
 {
-    return [=] (TestDescr &td, BatteryIO &io) {
+    return [=] (const TestDescr &td, BatteryIO &io) {
         snpair_Res* res = snpair_CreateRes();
         snpair_ClosePairsBitMatch(io.Gen(), res, N, n, r, t);
         io.Add(td.GetId(), td.GetName(), res->pVal[snpair_BM]);
@@ -706,8 +759,8 @@ TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t)
  */
 TestCbFunc smarsa_Dna_cb(int i)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
-        printf ("***********************************************************\n"
+    return [=] (const TestDescr& td, BatteryIO& io) {
+        printf("***********************************************************\n"
             "Test DNA calling smarsa_CollisionOver\n\n");
         smarsa_Res* res = smarsa_CreateRes();
         smarsa_CollisionOver(io.Gen(), res, 1, 2097152, i, 4, 10);
@@ -718,7 +771,7 @@ TestCbFunc smarsa_Dna_cb(int i)
 
 TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sspectral_Res* res = sspectral_CreateRes();
         sspectral_Fourier3(io.Gen(), res, N, k, r, s);
         io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_AD]);
@@ -729,7 +782,7 @@ TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s)
 
 TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         sknuth_Gap(io.Gen(), res, N, n, r, Alpha, Beta);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -740,7 +793,7 @@ TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta)
 
 TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         smarsa_Res2* res = smarsa_CreateRes2();
         smarsa_GCD(io.Gen(), res, N, n, r, s);
         if (N == 1)
@@ -754,7 +807,7 @@ TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s)
 
 TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sstring_Res* res = sstring_CreateRes();
         sstring_HammingCorr(io.Gen(), res, N, n, r, s, L);
         io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
@@ -763,9 +816,10 @@ TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L)
     };
 }
 
+
 TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sstring_Res* res = sstring_CreateRes();
         sstring_HammingIndep(io.Gen(), res, N, n, r, s, L, d);
         if (N == 1)
@@ -776,11 +830,12 @@ TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
     };
 }
 
-TestCbFunc sstring_HammingWeight2_cb(long N, int r, int s, long L, long K)
+
+TestCbFunc sstring_HammingWeight2_cb(long N, long n, int r, int s, long L)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
-        sstring_HammingWeight2(io.Gen(), res, N, r, s, L, K);
+        sstring_HammingWeight2(io.Gen(), res, N, n, r, s, L);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
         sres_DeleteBasic (res);
     };
@@ -789,7 +844,7 @@ TestCbFunc sstring_HammingWeight2_cb(long N, int r, int s, long L, long K)
 
 TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
         scomp_LempelZiv(io.Gen(), res, N, t, r, s);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
@@ -800,7 +855,7 @@ TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s)
 
 TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         scomp_Res* res = scomp_CreateRes();
         scomp_LinearComp(io.Gen(), res, N, n, r, s);
         io.Add(td.GetId(), td.GetName(), res->JumpNum->pVal2[gofw_Mean]);
@@ -811,7 +866,7 @@ TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s)
 
 TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sstring_Res2* res = sstring_CreateRes2();
         sstring_LongestHeadRun(io.Gen(), res, N, n, r, s, L);
         io.Add(td.GetId(), td.GetName(), res->Chi->pVal2[gofw_Mean]);
@@ -823,7 +878,7 @@ TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L)
 
 TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         smarsa_MatrixRank(io.Gen(), res, N, n, r, s, L, k);
         if (N == 1)
@@ -836,7 +891,7 @@ TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
 
 TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         gofw_TestType type_chi = gofw_Sum, type_bas = gofw_AD;
         if (N == 1) {
             type_chi = gofw_Mean;
@@ -855,7 +910,7 @@ TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
 
 TestCbFunc smarsa_Opso_cb(long N, int r, int p)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         smarsa_Res* res = smarsa_CreateRes();
         smarsa_Opso(io.Gen(), res, N, r, p);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
@@ -868,8 +923,8 @@ TestCbFunc smarsa_Opso_cb(long N, int r, int p)
  */
 TestCbFunc smarsa_Oqso_cb(int i)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
-        printf ("***********************************************************\n"
+    return [=] (const TestDescr& td, BatteryIO& io) {
+        printf("***********************************************************\n"
             "Test OQSO calling smarsa_CollisionOver\n\n");
         smarsa_Res* res = smarsa_CreateRes();
         smarsa_CollisionOver(io.Gen(), res, 1, 2097152, i, 32, 4);
@@ -882,7 +937,7 @@ TestCbFunc smarsa_Oqso_cb(int i)
 
 TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         sstring_PeriodsInStrings(io.Gen(), res, N, n, r, s);
         if (N == 1)        
@@ -895,7 +950,7 @@ TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s)
 
 TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         sknuth_Permutation(io.Gen(), res, N, n, r, t);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -907,7 +962,7 @@ TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t)
 TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
     long L0, long L1, const std::string &mess)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         auto* res = swalk_CreateRes();
         swalk_RandomWalk1(io.Gen(), res, N, n, r, s, L0, L1);
         GetPValue_Walk(io, 1, res, td.GetId(), mess.c_str());
@@ -917,7 +972,7 @@ TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
 
 TestCbFunc sknuth_Run_cb(long N, long n, int r, bool Up)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         sknuth_Run(io.Gen(), res, N, n, r, Up);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
@@ -928,7 +983,7 @@ TestCbFunc sknuth_Run_cb(long N, long n, int r, bool Up)
 
 TestCbFunc sstring_Run_cb(long N, long n, int r, int s)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sstring_Res3* res = sstring_CreateRes3();
         sstring_Run(io.Gen(), res, N, n, r, s);
         io.Add(td.GetId(), td.GetName(), res->NRuns->pVal2[gofw_Mean]);
@@ -939,7 +994,7 @@ TestCbFunc sstring_Run_cb(long N, long n, int r, int s)
 
 TestCbFunc svaria_SampleCorr_cb(long N, long n, int r, int k)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
         svaria_SampleCorr(io.Gen(), res, N, n, r, k);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -949,7 +1004,7 @@ TestCbFunc svaria_SampleCorr_cb(long N, long n, int r, int k)
 
 TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic *res = sres_CreateBasic();
         svaria_SampleProd(io.Gen(), res, N, n, r, t);
         if (N > 1) // Derived from comparison of Crush and BigCrush
@@ -962,7 +1017,7 @@ TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t)
 
 TestCbFunc svaria_SampleMean_cb(long N, long n, int r)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
         svaria_SampleMean(io.Gen(), res, N, n, r);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_AD]);
@@ -972,7 +1027,7 @@ TestCbFunc svaria_SampleMean_cb(long N, long n, int r)
 
 TestCbFunc smarsa_Savir2_cb(long N, long n, int r, long m, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         auto* res = sres_CreateChi2();
         smarsa_Savir2(io.Gen(), res, N, n, r, m, t);
         if (N == 1)
@@ -985,7 +1040,7 @@ TestCbFunc smarsa_Savir2_cb(long N, long n, int r, long m, int t)
 
 TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Basic* res = sres_CreateBasic();
         smarsa_SerialOver(io.Gen(), res, N, n, r, d, t);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -996,7 +1051,7 @@ TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t)
 
 TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         sknuth_SimpPoker(io.Gen(), res, N, n, r, d, k);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -1006,7 +1061,7 @@ TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
 
 TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         svaria_SumCollector(io.Gen(), res, N, n, r, g);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
@@ -1017,7 +1072,7 @@ TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g)
 TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
     double alpha, double beta)
 {
-    return [=] (TestDescr& td, BatteryIO& io) {
+    return [=] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2* res = sres_CreateChi2();
         svaria_WeightDistrib(io.Gen(), res, N, n, r, k, alpha, beta);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);

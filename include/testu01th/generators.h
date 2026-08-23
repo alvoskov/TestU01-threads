@@ -1,5 +1,20 @@
-#ifndef __GENERATORS_H
-#define __GENERATORS_H
+/**
+ * @file generators.h
+ * @brief Some pseudorandom number generators examples designed
+ * for TestU01-threads.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
+#ifndef __TESTU01_GENERATORS_H
+#define __TESTU01_GENERATORS_H
 #include "testu01_mt.h"
 #include <random>
 
@@ -142,27 +157,27 @@ class LFibMulGenerator : public UniformGenerator
     }
 
 public:
-    LFibMulGenerator(uint32_t seed = 0) : UniformGenerator(MakeGeneratorName())
+    LFibMulGenerator(uint32_t seed = 0)
+    : UniformGenerator(MakeGeneratorName()), i{lfib_a}, j{lfib_b}
     {
-        SplitMixGenerator splitmix(seed);
+        SplitMixGenerator splitmix{seed};
         for (size_t k = 1; k <= lfib_a; k++) {
             U[k] = splitmix.GetBits64() | 0x1; // The lowest bit must be 1
         }
-        i = lfib_a; j = lfib_b;
     }
 
     double GetU01() override { return uint64_to_udouble(GetBits64()); }
     uint32_t GetBits32() override { return static_cast<uint32_t>(GetBits64() >> 32); }
     inline uint64_t GetBits64()
     {
-        uint64_t x = U[i] * U[j];
+        const uint64_t x{U[i] * U[j]};
         U[i] = x;
-	    if(--i == 0) i = lfib_a;
-    	if(--j == 0) j = lfib_a;
+	    if (--i == 0) i = lfib_a;
+    	if (--j == 0) j = lfib_a;
         return x;
     }
 };
 
 } // namespace testu01_threads
 
-#endif
+#endif // __TESTU01_GENERATORS_H
