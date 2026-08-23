@@ -51,7 +51,7 @@ public:
 
     double GetU01() override
     {
-        return static_cast<double>(GetBits32()) / (static_cast<double>(UINT_MAX) + 1.0);
+        return static_cast<double>(GetBits32()) / static_cast<double>(1ULL << 32);
     }
 
     uint32_t GetBits32() override

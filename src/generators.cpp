@@ -30,8 +30,9 @@ LcgGenerator::LcgGenerator(int seed) : UniformGenerator("LCG")
 
 double LcgGenerator::GetU01()
 {                                                
+    constexpr double xdbl_norm = 1.0 / static_cast<double>(1ULL << 32);
     x = static_cast<std::uint32_t>(((static_cast<std::uint64_t>(x)) * a + 0) % m);
-    return (double) x / (UINT_MAX);
+    return static_cast<double>(x) / xdbl_norm;
 }
 
 uint32_t LcgGenerator::GetBits32()
