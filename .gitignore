@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# CMake intermediate files
+CMakeFiles/
+CMakeCache.txt
+
+# doxygen output
+latex/
+html/

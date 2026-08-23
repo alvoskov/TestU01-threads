@@ -19,49 +19,11 @@
 #ifndef __TESTU01_MT_H
 #define __TESTU01_MT_H
 
+#include "basictypes.h"
 #include <cstddef>
+#include <stddef.h>
 #include <cstdint>
-
-
-/**
- * @brief Block size (in elements) for vectorized PRNG calls.
- */
-constexpr size_t ELEMENTS_PER_BLOCK{1024};
-
-#if defined(__GNUC__) && defined(__x86_64__)
-#include <x86intrin.h>
-#undef STDC_HEADERS
-#endif
-
-
-extern "C" {
-#include "unif01.h"
-#include "gdef.h"
-#ifndef PACKAGE_STRING
-#include "config.h"
-#endif
-#include "bbattery.h"
-#include "fbar.h"
-#include "gofw.h"
-#include "gofs.h"
-#include "smultin.h"
-#include "sknuth.h"
-#include "smarsa.h"
-#include "snpair.h"
-#include "svaria.h"
-#include "sstring.h"
-#include "swalk.h"
-#include "scomp.h"
-#include "sspectral.h"
-#include "swrite.h"
-#include "sres.h"
-#include "num.h"
-#include "unif01.h"
-#include "ufile.h"
-}
-
-#include <stdint.h>
-#include <time.h>
+#include <ctime>
 #include <string>
 #include <functional>
 #include <memory>
@@ -72,14 +34,9 @@ extern "C" {
 #include <random>
 #include <chrono>
 #include <limits>
-
-static constexpr long THOUSAND{1000};
-static constexpr long MILLION{THOUSAND * THOUSAND};
-static constexpr long BILLION{THOUSAND * MILLION};
-static constexpr unsigned int NTHREADS_DEFAULT{std::numeric_limits<unsigned int>::max()};
+#include <ostream>
 
 namespace testu01_threads {
-
 
 /**
  * @brief Object-oriented envelope for TestU01 structures.
@@ -96,17 +53,22 @@ class UniformGenerator
     static unsigned long GetBits32Handle(void* param, void* state);
 
 protected:
-    unif01_Gen gen;
+    std::unique_ptr<Unif01GenWrapper> gen_wrapped; ///< Pointer to wrapped unif01_Gen
     
 public:
     UniformGenerator(const std::string& name);
-    virtual ~UniformGenerator() {}
-    unif01_Gen* GetPtr() const { return const_cast<unif01_Gen* >(&gen); }
+    virtual ~UniformGenerator();
+    Unif01GenWrapper* GetPtr() const { return gen_wrapped.get(); }
     const std::string& GetName() { return name; }
     virtual double GetU01() = 0;
-    virtual uint32_t GetBits32() = 0;
+    virtual std::uint32_t GetBits32() = 0;
 };
 
+/**
+ * @brief Function that returns the `std::shared_ptr` smart pointer
+ * to the initialized pseudorandom number generator.
+ */
+typedef std::function<std::shared_ptr<UniformGenerator>()> GenFactoryFunc;
 
 /**
  * @brief Always returns 0, has no internal state.
@@ -114,9 +76,9 @@ public:
 class DummyGenerator : public UniformGenerator
 {
 public:
-    DummyGenerator() : UniformGenerator("Dummy") {}
+    DummyGenerator() : UniformGenerator{"Dummy"} {}
     double GetU01() override { return 0.0; }
-    uint32_t GetBits32() override { return 0; }
+    std::uint32_t GetBits32() override { return 0; }
 };
 
 
@@ -156,8 +118,8 @@ class BatteryIO
 
 public:
     BatteryIO(std::shared_ptr<UniformGenerator> gobj) : gen(gobj) {}
-    inline unif01_Gen* Gen() const { return gen.get()->GetPtr(); }
-    uint64_t GetResultsChecksum() const;
+    inline Unif01GenWrapper* Gen() const { return gen.get()->GetPtr(); }
+    std::uint64_t GetResultsChecksum() const;
 
     /**
      * @brief Adds the result of statistical test to the battery.
@@ -176,7 +138,7 @@ public:
     inline const PValueRecord& GetPValueRecord(size_t ind) { return results[ind]; }
     std::string WritePValue(double p);
     std::string WriteReport(const char* batName, const char* genName,
-        chrono_Chrono* timer, std::chrono::milliseconds ms_total);
+        std::chrono::milliseconds ms_cpu_total, std::chrono::milliseconds ms_total);
 };
 
 
@@ -192,25 +154,16 @@ public:
 
     BatteryResults() {}
     BatteryResults(unsigned int nthreads) : pvalues{nthreads} {}
+    std::string GetThreadsLoadingReport() const;
     std::string ToString() const;
 };
 
 
-
-class TestDescr;
-
-/**
- * @brief Callback function that runs the test and saves its
- * result in BatteryIO class using the test description from
- * TestDescr.
- */
-typedef std::function<void(const TestDescr&, BatteryIO&)> TestCbFunc;
-
-/**
- * @brief Function that returns the `std::shared_ptr` smart pointer
- * to the initialized pseudorandom number generator.
- */
-typedef std::function<std::shared_ptr<UniformGenerator>()> GenFactoryFunc;
+static inline std::ostream& operator<<(std::ostream& os, const BatteryResults& obj)
+{
+    os << obj.ToString();
+    return os;
+}
 
 
 class TestDescr
@@ -288,46 +241,15 @@ void set_bin_stdout();
 void set_bin_stdin();
 void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr);
 
-TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);
-TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);
-TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p);
-TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t);
-TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t);
-TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d);
-TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m,
-    const std::string& mess, bool flag);
-TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m);
-TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t);
-TestCbFunc smarsa_Dna_cb(int i);
-TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s);
-TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta);
-TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s);
-TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L);
-TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d);
-TestCbFunc sstring_HammingWeight2_cb(long N, long n, int r, int s, long L);
-TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s);
-TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s);
-TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L);
-TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k);
-TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t);
-TestCbFunc smarsa_Opso_cb(long N, int r, int p);
-TestCbFunc smarsa_Oqso_cb(int i);
-TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s);
-TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t);
-TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
-    long L0, long L1, const std::string &mess);
-TestCbFunc sknuth_Run_cb(long N, long n, int r, bool Up);
-TestCbFunc sstring_Run_cb(long N, long n, int r, int s);
-TestCbFunc svaria_SampleCorr_cb(long N, long n, int r, int k);
-TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t);
-TestCbFunc svaria_SampleMean_cb(long N, long n, int r);
-TestCbFunc smarsa_Savir2_cb(long N, long n, int r, long m, int t);
-TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t);
-TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k);
-TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g);
-TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
-    double alpha, double beta);
-
 } // namespace testu01_threads
+
+
+namespace testu01_threads::original::battery {
+    void SmallCrush(UniformGenerator& gen);
+    void Crush(UniformGenerator& gen);
+    void BigCrush(UniformGenerator& gen);
+    void pseudoDIEHARD(UniformGenerator& gen);
+} // namespace testu01_threads::original::battery
+
 
 #endif // __TESTU01_MT_H

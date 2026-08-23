@@ -17,6 +17,7 @@
  * would be appreciated.
  */
 #include "testu01th/testu01_mt.h"
+#include "testu01th/testu01_callbacks.h"
 #include <iostream>
 #include <cstring>
 #include <cmath>
@@ -50,7 +51,7 @@ static std::string printf_tos(const char* format, ...)
  */
 std::string double_tostring(double x, int I, int J, int K)
 {
-    std::string txt;
+    std::stringstream sout;
     int PosEntier = 0; // Number of positions occupied by x integer part (%f format)
     int EntierSign; // 0-based position of . in string (%f format)
     int Neg = 0;    // Number is negative
@@ -58,7 +59,7 @@ std::string double_tostring(double x, int I, int J, int K)
     if (x == 0.0) {
         EntierSign = 1;
     } else {
-        EntierSign = PosEntier = (int) floor(log10(fabs(x)) + 1);
+        EntierSign = PosEntier = static_cast<int>(std::floor(std::log10(std::fabs(x)) + 1.0));
         if (x < 0.0)
             Neg = 1;
     }
@@ -68,24 +69,24 @@ std::string double_tostring(double x, int I, int J, int K)
 
     if ((x == 0.0) ||
         (((EntierSign + J) >= K) && (I >= (PosEntier + J + Neg + 1)))) {
-        txt += printf_tos("%*.*f", I, J, x);
+        sout << printf_tos("%*.*f", I, J, x);
     } else { // Use scientific (exponential) notation
         char S[100];
-        snprintf(S, 100, "%*.*e", I, K - 1, x);
-        char* p = strstr(S, "e+0");
+        std::snprintf(S, 100, "%*.*e", I, K - 1, x);
+        char* p = std::strstr(S, "e+0");
         if (p == nullptr) {
-            p = strstr(S, "e-0");
+            p = std::strstr(S, "e-0");
         }
         // Remove the 0 in e-0 and in e+0
         if (p) {
             p += 2;
             while ((*p = *(p + 1)))
 	            p++;
-            txt += " "; // Output must have at least 'I' spaces
+            sout << " "; // Output must have at least 'I' spaces
         }
-        txt += std::string(S);
+        sout << std::string(S);
     }
-    return txt;
+    return sout.str();
 }
 
 
@@ -153,6 +154,13 @@ std::string chrono_tostring(chrono_Chrono* C, chrono_TimeFormat Form)
     }
 }
 
+std::chrono::milliseconds chrono_to_ms(chrono_Chrono *C)
+{
+    const double ms_dbl{chrono_Val(C, chrono_sec) * 1000.0};
+    std::chrono::milliseconds ms(static_cast<unsigned long long>(ms_dbl));
+    return ms;    
+}
+
 
 /////////////////////////////////////////////////
 ///// UniformGenerator class implementation /////
@@ -174,17 +182,21 @@ unsigned long UniformGenerator::GetBits32Handle(void* param, void* state)
 
 
 UniformGenerator::UniformGenerator(const std::string& name_)
-    : name{name_}
+    : name{name_}, gen_wrapped{std::make_unique<Unif01GenWrapper>()}
 {
-    gen.state = static_cast<void*>(this);
-    gen.param = nullptr;
-    gen.Write = WrExternGen;
-    gen.GetU01 = GetU01Handle;
-    gen.GetBits = GetBits32Handle;
-    gen.name = const_cast<char*>(name.c_str());
+    unif01_Gen* gen = gen_wrapped.get()->GetPtr();
+    gen->state = static_cast<void*>(this);
+    gen->param = nullptr;
+    gen->Write = WrExternGen;
+    gen->GetU01 = GetU01Handle;
+    gen->GetBits = GetBits32Handle;
+    gen->name = const_cast<char*>(name.c_str());
 }
 
 
+UniformGenerator::~UniformGenerator()
+{
+}
 
 //////////////////////////////////////////
 ///// BatteryIO class implementation /////
@@ -207,14 +219,14 @@ size_t BatteryIO::GetNTestsFailed() const
  * for reproducibility testing, especially in a multithreaded environment.
  * @details The algorithm is partially based on the djb2 algorithm.
  */
-uint64_t BatteryIO::GetResultsChecksum() const
+std::uint64_t BatteryIO::GetResultsChecksum() const
 {
-    uint64_t sum{0x123456789ABCDEF};
+    std::uint64_t sum{0x123456789ABCDEF};
     for (const auto& r : results) {
         int pvalue_exp;
-        uint64_t pvalue_x64{static_cast<uint64_t>(std::frexp(r.pvalue, &pvalue_exp) * 16777216U)};
+        std::uint64_t pvalue_x64{static_cast<uint64_t>(std::frexp(r.pvalue, &pvalue_exp) * 16777216U)};
         pvalue_x64 |= (static_cast<uint64_t>(pvalue_exp) + 32768U) << 32;
-        const uint64_t inc{(static_cast<uint64_t>(r.id) << 48) | pvalue_x64};
+        const std::uint64_t inc{(static_cast<uint64_t>(r.id) << 48) | pvalue_x64};
         sum = 6906969069U * sum + inc;
     }    
     return sum;
@@ -268,14 +280,14 @@ static std::string ms_to_hms(std::chrono::milliseconds ms_total)
 
 /**
  * @brief Generate battery run report and return it as a string
- * @param bat_name  Battery name.
- * @param gen_name  Generator name.
- * @param timer     TestU01 timer that calculated CPU time for all cores.
- * @param ms_total  Elapsed time, milliseconds.
+ * @param bat_name      Battery name.
+ * @param gen_name      Generator name.
+ * @param ms_cpu_total  TestU01 timer that calculated CPU time for all cores.
+ * @param ms_total      Elapsed time, milliseconds.
  * @return Battery run report (ASCII string).
  */
 std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
-    chrono_Chrono* timer, std::chrono::milliseconds ms_total)
+    std::chrono::milliseconds ms_cpu_total, std::chrono::milliseconds ms_total)
 {
     std::stringstream sout;
     sout << printf_tos("\n========= Summary results of %s", bat_name)
@@ -285,7 +297,7 @@ std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
          << printf_tos("\n Number of statistics:         %1u\n",
                 static_cast<unsigned int>(results.size()))
          << printf_tos(" Total CPU time (all cores):   ")
-         << chrono_tostring(timer, chrono_hms)
+         << ms_to_hms(ms_cpu_total)
          << printf_tos("\n Elapsed time:                 ")
          << ms_to_hms(ms_total)
          << printf_tos("\n p-values checksum:            0x%llX",
@@ -334,10 +346,9 @@ std::string BatteryIO::WriteReport(const char* bat_name, const char* gen_name,
 ///////////////////////////////////////////////
 
 
-std::string BatteryResults::ToString() const
+std::string BatteryResults::GetThreadsLoadingReport() const
 {
     std::stringstream sout;
-    sout << report;
     for (size_t i = 0; i < pvalues.size(); i++) {
         sout << "===== Tests for thread " << i << " =====\n";
         for (const auto& rec : pvalues[i]) {
@@ -346,6 +357,11 @@ std::string BatteryResults::ToString() const
         }
     }
     return sout.str();
+}
+
+std::string BatteryResults::ToString() const
+{
+    return GetThreadsLoadingReport() + report;
 }
 
 
@@ -369,13 +385,6 @@ TestsPull::TestsPull(const std::vector<TestDescr>& obj, std::seed_seq* seq)
         std::mt19937 prng(*seq); 
         std::shuffle(tests_inds.begin(), tests_inds.end(), prng);
     }
-/*
-    std::cout << "INDS" << std::endl;
-    for (size_t i = 0; i < len; i++) {
-        std::cout << tests_inds[i] << "; ";
-    }
-    std::cout << std::endl;
-*/
     for (auto ind : tests_inds) {
         tests.push_back(obj[ind]);
     }
@@ -397,7 +406,9 @@ std::string TestsPull::GetPosMessage()
     }
 }
 
-
+/**
+ * @brief Get the number of threads optimal for the hardware.
+ */
 unsigned int TestsPull::GetNThreads() const
 {
     const size_t ntests{tests.size()};
@@ -492,7 +503,7 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
     // Merge results from different threads.
     const char* gen_name;
     if (nthreads > 0) {
-        gen_name = threads_bats[0].Gen()->name;
+        gen_name = threads_bats[0].Gen()->GetPtr()->name;
     } else {
         gen_name = "Dummy";
     }
@@ -504,7 +515,7 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
     const auto toc = std::chrono::high_resolution_clock::now();    
     const auto ms_total = std::chrono::duration_cast<std::chrono::milliseconds>(toc - tic);
     // Print report
-    results.report = io.WriteReport(battery_name.c_str(), gen_name, timer, ms_total);
+    results.report = io.WriteReport(battery_name.c_str(), gen_name, chrono_to_ms(timer), ms_total);
     chrono_Delete(timer);
     return results;
 }
@@ -579,49 +590,6 @@ BatteryResults TestsBattery::RunTest(int id, std::seed_seq* seq, unsigned int nt
 
 namespace testu01_threads {
 
-/**
- * @brief Get the p-values in a swalk_RandomWalk1 test
- * @details It is a rewrite of the `GetPVal_Walk` function from `bbattery.c`.
- */
-static void GetPValue_Walk(BatteryIO& io, long N, swalk_Res *res, int id, const std::string& mess)
-{
-   if (N == 1) {
-        io.Add(id, "RandomWalk1 H" + mess, res->H[0]->pVal2[gofw_Mean]);
-        io.Add(id, "RandomWalk1 M" + mess, res->M[0]->pVal2[gofw_Mean]);
-        io.Add(id, "RandomWalk1 J" + mess, res->J[0]->pVal2[gofw_Mean]);
-        io.Add(id, "RandomWalk1 R" + mess, res->R[0]->pVal2[gofw_Mean]);
-        io.Add(id, "RandomWalk1 C" + mess, res->C[0]->pVal2[gofw_Mean]);
-   } else {
-        io.Add(id, "RandomWalk1 H" + mess, res->H[0]->pVal2[gofw_Sum]);
-        io.Add(id, "RandomWalk1 M" + mess, res->M[0]->pVal2[gofw_Sum]);
-        io.Add(id, "RandomWalk1 J" + mess, res->J[0]->pVal2[gofw_Sum]);
-        io.Add(id, "RandomWalk1 R" + mess, res->R[0]->pVal2[gofw_Sum]);
-        io.Add(id, "RandomWalk1 C" + mess, res->C[0]->pVal2[gofw_Sum]);
-   }
-}
-
-/**
- * @brief Get the p-values in a snpair_ClosePairs test
- * @param flag Former snpair_mNP2S_Flag global variable (made local for thread safety).
- */
-static void GetPValue_CPairs(BatteryIO& io, long N, snpair_Res *res, int id, const std::string& mess, bool flag)
-{
-    if (N == 1) {
-        io.Add(id, "ClosePairs NP" + mess, res->pVal[snpair_NP]);
-        io.Add(id, "ClosePairs mNP" + mess, res->pVal[snpair_mNP]);
-   } else {
-        io.Add(id, "ClosePairs NP" + mess, res->pVal[snpair_NP]);
-        io.Add(id, "ClosePairs mNP" + mess, res->pVal[snpair_mNP]);
-        io.Add(id, "ClosePairs mNP1" + mess, res->pVal[snpair_mNP1]);
-        io.Add(id, "ClosePairs mNP2" + mess, res->pVal[snpair_mNP2]);
-        io.Add(id, "ClosePairs NJumps" + mess, res->pVal[snpair_NJumps]);
-        if (flag) {
-            io.Add(id, "ClosePairs mNP2S" + mess, res->pVal[snpair_mNP2S]);
-        }
-   }
-}
-
-
 void set_bin_stdout()
 {
 #ifdef USE_LOADLIBRARY
@@ -644,440 +612,42 @@ void set_bin_stdin()
  */
 void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
 {
-    uint32_t buf[256];
+    std::uint32_t buf[256];
     set_bin_stdout();
     while (1) {
         for (size_t i = 0; i < 256; i++) {
             buf[i] = genptr->GetBits32();
         }
-        fwrite(buf, sizeof(uint32_t), 256, stdout);
+        fwrite(buf, sizeof(std::uint32_t), 256, stdout);
     }
 }
 
-///////////////////////////////////////////////////////
-///// Functions that generate callbacks for tests /////
-///////////////////////////////////////////////////////
-
-
-TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        svaria_AppearanceSpacings(io.Gen(), res, N, Q, K, r, s, L);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    };
-}
-
-TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        sstring_AutoCor(io.Gen(), res, N, n, r, s, d);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteBasic(res);
-    };
-}
-
-TestCbFunc smarsa_BirthdaySpacings_cb(long N, long n, int r, long d, int t, int p)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Poisson* res = sres_CreatePoisson();
-        smarsa_BirthdaySpacings(io.Gen(), res, N, n, r, d, t, p);
-        io.Add(td.GetId(), td.GetName(), res->pVal2);
-        sres_DeletePoisson(res);
-    };
-}
-
-TestCbFunc smarsa_CollisionOver_cb(long N, long n, int r, long d, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        smarsa_Res* res = smarsa_CreateRes();
-        smarsa_CollisionOver (io.Gen(), res, N, n, r, d, t);
-        io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
-        smarsa_DeleteRes(res);
-    };
-}
-
-TestCbFunc sknuth_CollisionPermut_cb(long N, long n, int r, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sknuth_Res2* res = sknuth_CreateRes2();
-        sknuth_CollisionPermut(io.Gen(), res, N, n, r, t);
-        io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
-        sknuth_DeleteRes2 (res);
-    };
-}
-
-TestCbFunc sknuth_CouponCollector_cb(long N, long n, int r, int d)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        auto* res2 = sres_CreateChi2();
-        sknuth_CouponCollector (io.Gen(), res2, N, n, r, d);
-        io.Add(td.GetId(), td.GetName(), res2->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res2);
-    };
-}
-
-
-TestCbFunc snpair_ClosePairs_cb(long N, long n, int r, int k, int p, int m,
-    const std::string& mess, bool flag)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        snpair_Res* res = snpair_CreateRes();
-        snpair_ClosePairs(io.Gen(), res, N, n, r, k, p, m);
-        GetPValue_CPairs(io, 10, res, td.GetId(), mess, flag);
-        snpair_DeleteRes(res);
-    };
-}
-
-/**
- * @brief Needed for pseudoDIEHARD battery.
- */
-TestCbFunc snpair_ClosePairsNP_cb(long N, long n, int r, int k, int p, int m)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        snpair_Res* res = snpair_CreateRes();
-        snpair_ClosePairs(io.Gen(), res, N, n, r, k, p, m);
-        io.Add(td.GetId(), td.GetName(), res->pVal[snpair_NP]);
-        snpair_DeleteRes(res);
-    };
-}
-
-TestCbFunc snpair_ClosePairsBitMatch_cb(long N, long n, int r, int t)
-{
-    return [=] (const TestDescr &td, BatteryIO &io) {
-        snpair_Res* res = snpair_CreateRes();
-        snpair_ClosePairsBitMatch(io.Gen(), res, N, n, r, t);
-        io.Add(td.GetId(), td.GetName(), res->pVal[snpair_BM]);
-        snpair_DeleteRes(res);
-    };
-}
-
-/**
- * @brief An envelope for smarsa_CollisionOver for pseudoDIEHARD battery.
- */
-TestCbFunc smarsa_Dna_cb(int i)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        printf("***********************************************************\n"
-            "Test DNA calling smarsa_CollisionOver\n\n");
-        smarsa_Res* res = smarsa_CreateRes();
-        smarsa_CollisionOver(io.Gen(), res, 1, 2097152, i, 4, 10);
-        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
-        smarsa_DeleteRes(res);
-    };
-}
-
-TestCbFunc sspectral_Fourier3_cb(long N, int k, int r, int s)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sspectral_Res* res = sspectral_CreateRes();
-        sspectral_Fourier3(io.Gen(), res, N, k, r, s);
-        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_AD]);
-        sspectral_DeleteRes(res);
-    };
-}
-
-
-TestCbFunc sknuth_Gap_cb(long N, long n, int r, double Alpha, double Beta)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        sknuth_Gap(io.Gen(), res, N, n, r, Alpha, Beta);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res);
-    };
-}
-
-
-TestCbFunc smarsa_GCD_cb(long N, long n, int r, int s)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        smarsa_Res2* res = smarsa_CreateRes2();
-        smarsa_GCD(io.Gen(), res, N, n, r, s);
-        if (N == 1)
-            io.Add(td.GetId(), td.GetName(), res->GCD->pVal2[gofw_Mean]);
-        else
-            io.Add(td.GetId(), td.GetName(), res->GCD->pVal2[gofw_Sum]);
-        smarsa_DeleteRes2(res);
-    };
-}
-
-
-TestCbFunc sstring_HammingCorr_cb(long N, long n, int r, int s, int L)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sstring_Res* res = sstring_CreateRes();
-        sstring_HammingCorr(io.Gen(), res, N, n, r, s, L);
-        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
-        sstring_DeleteRes(res);
-
-    };
-}
-
-
-TestCbFunc sstring_HammingIndep_cb(long N, long n, int r, int s, int L, int d)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sstring_Res* res = sstring_CreateRes();
-        sstring_HammingIndep(io.Gen(), res, N, n, r, s, L, d);
-        if (N == 1)
-            io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
-        else
-            io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Sum]);
-        sstring_DeleteRes(res);
-    };
-}
-
-
-TestCbFunc sstring_HammingWeight2_cb(long N, long n, int r, int s, long L)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        sstring_HammingWeight2(io.Gen(), res, N, n, r, s, L);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteBasic (res);
-    };
-}
-
-
-TestCbFunc scomp_LempelZiv_cb(long N, int t, int r, int s)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        scomp_LempelZiv(io.Gen(), res, N, t, r, s);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteBasic(res);
-    };
-}
-
-
-TestCbFunc scomp_LinearComp_cb(long N, long n, int r, int s)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        scomp_Res* res = scomp_CreateRes();
-        scomp_LinearComp(io.Gen(), res, N, n, r, s);
-        io.Add(td.GetId(), td.GetName(), res->JumpNum->pVal2[gofw_Mean]);
-        io.Add(td.GetId(), td.GetName(), res->JumpSize->pVal2[gofw_Mean]);
-        scomp_DeleteRes(res);
-    };
-}
-
-TestCbFunc sstring_LongestHeadRun_cb(long N, long n, int r, int s, long L)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sstring_Res2* res = sstring_CreateRes2();
-        sstring_LongestHeadRun(io.Gen(), res, N, n, r, s, L);
-        io.Add(td.GetId(), td.GetName(), res->Chi->pVal2[gofw_Mean]);
-        io.Add(td.GetId(), td.GetName(), res->Disc->pVal2);
-        sstring_DeleteRes2(res);
-    };
-}
-
-
-TestCbFunc smarsa_MatrixRank_cb(long N, long n, int r, int s, int L, int k)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        smarsa_MatrixRank(io.Gen(), res, N, n, r, s, L, k);
-        if (N == 1)
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        else
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteChi2(res);
-    };
-}
-
-TestCbFunc sknuth_MaxOft_cb(long N, long n, int r, int d, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        gofw_TestType type_chi = gofw_Sum, type_bas = gofw_AD;
-        if (N == 1) {
-            type_chi = gofw_Mean;
-            type_bas = gofw_Mean;
-        }
-        auto* res5 = sknuth_CreateRes1();
-        sknuth_MaxOft(io.Gen(), res5, N, n, r, d, t);
-        io.Add(td.GetId(), td.GetName(), res5->Chi->pVal2[type_chi]);
-        std::string ad_name = td.GetName();
-        ad_name.replace(ad_name.find("MaxOft"), sizeof("MaxOft") - 1, "MaxOft AD");
-        io.Add(td.GetId(), ad_name, res5->Bas->pVal2[type_bas]);
-        sknuth_DeleteRes1(res5);        
-    };
-}
-
-
-TestCbFunc smarsa_Opso_cb(long N, int r, int p)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        smarsa_Res* res = smarsa_CreateRes();
-        smarsa_Opso(io.Gen(), res, N, r, p);
-        io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
-        smarsa_DeleteRes(res);
-    };
-}
-
-/**
- * @brief An envelope for smarsa_CollisionOver for pseudoDIEHARD battery.
- */
-TestCbFunc smarsa_Oqso_cb(int i)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        printf("***********************************************************\n"
-            "Test OQSO calling smarsa_CollisionOver\n\n");
-        smarsa_Res* res = smarsa_CreateRes();
-        smarsa_CollisionOver(io.Gen(), res, 1, 2097152, i, 32, 4);
-        io.Add(td.GetId(), td.GetName(), res->Bas->pVal2[gofw_Mean]);
-        smarsa_DeleteRes(res);
-    };
-}
-
-
-
-TestCbFunc sstring_PeriodsInStrings_cb(long N, long n, int r, int s)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        sstring_PeriodsInStrings(io.Gen(), res, N, n, r, s);
-        if (N == 1)        
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        else
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteChi2 (res);
-    };
-}
-
-TestCbFunc sknuth_Permutation_cb(long N, long n, int r, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        sknuth_Permutation(io.Gen(), res, N, n, r, t);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res);
-    };
-}
-
-
-TestCbFunc smarsa_RandomWalk1_cb(long N, long n, int r, int s,
-    long L0, long L1, const std::string &mess)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        auto* res = swalk_CreateRes();
-        swalk_RandomWalk1(io.Gen(), res, N, n, r, s, L0, L1);
-        GetPValue_Walk(io, 1, res, td.GetId(), mess.c_str());
-        swalk_DeleteRes(res);
-    };
-}
-
-TestCbFunc sknuth_Run_cb(long N, long n, int r, bool Up)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        sknuth_Run(io.Gen(), res, N, n, r, Up);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteChi2(res);
-    };
-}
-
-
-TestCbFunc sstring_Run_cb(long N, long n, int r, int s)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sstring_Res3* res = sstring_CreateRes3();
-        sstring_Run(io.Gen(), res, N, n, r, s);
-        io.Add(td.GetId(), td.GetName(), res->NRuns->pVal2[gofw_Mean]);
-        io.Add(td.GetId(), td.GetName(), res->NBits->pVal2[gofw_Mean]);
-        sstring_DeleteRes3 (res);
-    };
-}
-
-TestCbFunc svaria_SampleCorr_cb(long N, long n, int r, int k)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        svaria_SampleCorr(io.Gen(), res, N, n, r, k);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    };
-}
-
-TestCbFunc svaria_SampleProd_cb(long N, long n, int r, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic *res = sres_CreateBasic();
-        svaria_SampleProd(io.Gen(), res, N, n, r, t);
-        if (N > 1) // Derived from comparison of Crush and BigCrush
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_AD]);
-        else
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic(res);
-    };
-}
-
-TestCbFunc svaria_SampleMean_cb(long N, long n, int r)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        svaria_SampleMean(io.Gen(), res, N, n, r);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_AD]);
-        sres_DeleteBasic(res);
-    };
-}
-
-TestCbFunc smarsa_Savir2_cb(long N, long n, int r, long m, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        auto* res = sres_CreateChi2();
-        smarsa_Savir2(io.Gen(), res, N, n, r, m, t);
-        if (N == 1)
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        else
-            io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Sum]);
-        sres_DeleteChi2(res);
-    };
-}
-
-TestCbFunc smarsa_SerialOver_cb(long N, long n, int r, long d, int t)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Basic* res = sres_CreateBasic();
-        smarsa_SerialOver(io.Gen(), res, N, n, r, d, t);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteBasic (res);
-    };
-}
-
-
-TestCbFunc sknuth_SimpPoker_cb(long N, long n, int r, int d, int k)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        sknuth_SimpPoker(io.Gen(), res, N, n, r, d, k);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res);
-    };
-}
-
-TestCbFunc svaria_SumCollector_cb(long N, long n, int r, double g)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        svaria_SumCollector(io.Gen(), res, N, n, r, g);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res);
-    };
-}
-
-TestCbFunc svaria_WeightDistrib_cb(long N, long n, int r, long k,
-    double alpha, double beta)
-{
-    return [=] (const TestDescr& td, BatteryIO& io) {
-        sres_Chi2* res = sres_CreateChi2();
-        svaria_WeightDistrib(io.Gen(), res, N, n, r, k, alpha, beta);
-        io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
-        sres_DeleteChi2(res);
-    };
-}
 
 } // namespace testu01_threads
+
+///////////////////////////////////////////////////
+///// Wrappers for TestU01 original batteries /////
+///////////////////////////////////////////////////
+
+namespace testu01_threads::original::battery {
+    void SmallCrush(UniformGenerator& gen)
+    {
+        bbattery_SmallCrush(gen.GetPtr()->GetPtr());
+    }
+
+    void Crush(UniformGenerator& gen)
+    {
+        bbattery_Crush(gen.GetPtr()->GetPtr());
+    }
+
+    void BigCrush(UniformGenerator& gen)
+    {
+        bbattery_BigCrush(gen.GetPtr()->GetPtr());
+    }
+
+    void pseudoDIEHARD(UniformGenerator& gen)
+    {
+        bbattery_pseudoDIEHARD(gen.GetPtr()->GetPtr());
+    }
+} // namespace testu01_threads::original::battery
+

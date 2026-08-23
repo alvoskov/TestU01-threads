@@ -58,22 +58,22 @@ int main(int argc, char* argv[])
 {
     static const std::map<std::string, GenFactoryFunc> gen_map = {
         {"LCG", [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new LcgGenerator());
+            return std::make_shared<LcgGenerator>();
         }},
         {"LCG59", [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new LcgGenerator59());
+            return std::make_shared<LcgGenerator59>();
         }},
         {"LFIBMUL-17-5", [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new LFibMulGenerator<17,5>());
+            return std::make_shared<LFibMulGenerator<17,5>>();
         }},
         {"KISS93", [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new KISS93Generator());
+            return std::make_shared<KISS93Generator>();
         }},
         {"MT19937", [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new MT19937Generator());
+            return std::make_shared<MT19937Generator>();
         }},
         {"SPLITMIX", [] () -> std::shared_ptr<UniformGenerator> {
-            return std::shared_ptr<UniformGenerator>(new SplitMixGenerator());
+            return std::make_shared<SplitMixGenerator>();
         }}
     };
 

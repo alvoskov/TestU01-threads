@@ -92,13 +92,13 @@ int main(int argc, char* argv[])
     }
     std::string battery = argv[1];
     if (battery == "SmallCrush") {
-        bbattery_SmallCrush(stdin_prng.GetPtr());
+        original::battery::SmallCrush(stdin_prng);
     } else if (battery == "Crush") {
-        bbattery_Crush(stdin_prng.GetPtr());
+        original::battery::Crush(stdin_prng);
     } else if (battery == "BigCrush") {
-        bbattery_BigCrush(stdin_prng.GetPtr());
+        original::battery::BigCrush(stdin_prng);
     } else if (battery == "pseudoDIEHARD") {
-        bbattery_pseudoDIEHARD(stdin_prng.GetPtr());
+        original::battery::pseudoDIEHARD(stdin_prng);
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
         return 1;

@@ -13,9 +13,9 @@ double MT19937Generator::GetU01()
     return static_cast<double>(gen()) * INV32;
 }
 
-uint32_t MT19937Generator::GetBits32()
+std::uint32_t MT19937Generator::GetBits32()
 {
-    return static_cast<uint32_t>(gen());
+    return static_cast<std::uint32_t>(gen());
 }
 
 
@@ -29,14 +29,14 @@ LcgGenerator::LcgGenerator(int seed) : UniformGenerator("LCG")
 }
 
 double LcgGenerator::GetU01()
-{
-    x = static_cast<uint32_t>(((static_cast<uint64_t>(x)) * a + 0) % m);
+{                                                
+    x = static_cast<std::uint32_t>(((static_cast<std::uint64_t>(x)) * a + 0) % m);
     return (double) x / (UINT_MAX);
 }
 
 uint32_t LcgGenerator::GetBits32()
 {
-    x = static_cast<uint32_t>((static_cast<uint64_t>(x) *  a + 0) % m);
+    x = static_cast<std::uint32_t>((static_cast<std::uint64_t>(x) * a + 0) % m);
     return x;
 }
 
@@ -52,13 +52,13 @@ LcgGenerator59::LcgGenerator59(int seed) : UniformGenerator("LCG59")
 double LcgGenerator59::GetU01()
 {
     x = (a * x) & mask_mod;
-    return (double) x / m_2_pow_59;
+    return static_cast<double>(x) / m_2_pow_59;
 }
 
 uint32_t LcgGenerator59::GetBits32()
 {
     x = (a * x) & mask_mod;
-    return static_cast<uint32_t>(x >> 27);
+    return static_cast<std::uint32_t>(x >> 27);
 }
 
 
@@ -66,8 +66,13 @@ uint32_t LcgGenerator59::GetBits32()
 ///// KISS93Generator class implementation /////
 ////////////////////////////////////////////////
 
-KISS93Generator::KISS93Generator(uint32_t s1, uint32_t s2, uint32_t s3)
-: UniformGenerator("KISS93"), S1(s1), S2(s2), S3(s3) {}
+KISS93Generator::KISS93Generator(std::uint32_t s1, std::uint32_t s2, std::uint32_t s3)
+: UniformGenerator{"KISS93"},
+  lcg{s1},
+  xs1{(s2 != 0) ? s2 : 12345},
+  xs2{(s3 != 0) ? s3 : 67890}
+{
+}
 
 double KISS93Generator::GetU01()
 {
@@ -76,10 +81,13 @@ double KISS93Generator::GetU01()
 
 uint32_t KISS93Generator::GetBits32()
 {
-    S1 = 69069 * S1 + 23606797;
-    uint32_t b = S2 ^ (S2 << 17);
-    S2 = (b >> 15) ^ b;
-    b = ((S3 << 18) ^ S3) & MASK31;
-    S3 = (b >> 13) ^ b;
-    return S1 + S2 + S3;
+    // LCG part
+    lcg = 69069U * lcg + 23606797U;
+    // LFSR 1 part
+    xs1 ^= xs1 << 17;
+    xs1 ^= xs1 >> 15;
+    // LFSR 2 part
+    xs2 = ((xs2 << 18) ^ xs2) & MASK31;
+    xs2 ^= xs2 >> 13;
+    return lcg + xs1 + xs2;
 }

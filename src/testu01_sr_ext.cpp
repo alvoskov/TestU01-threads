@@ -65,16 +65,19 @@ run_original_testu01(const BatteryOptions* opts,
     const std::string battery{opts->param};
     if (battery == "SmallCrush") {
         auto objptr = create_gen();
-        bbattery_SmallCrush(objptr->GetPtr());
+        original::battery::SmallCrush(*objptr);
     } else if (battery == "Crush") {
         auto objptr = create_gen();
-        bbattery_Crush(objptr->GetPtr());
+        original::battery::Crush(*objptr);
     } else if (battery == "BigCrush") {
         auto objptr = create_gen();
-        bbattery_BigCrush(objptr->GetPtr());
+        original::battery::BigCrush(*objptr);
+        //bbattery_BigCrush(objptr->GetPtr());
     } else if (battery == "pseudoDIEHARD") {
         auto objptr = create_gen();
-        bbattery_pseudoDIEHARD(objptr->GetPtr());
+        original::battery::pseudoDIEHARD(*objptr);
+        //auto objptr = create_gen();
+        //bbattery_pseudoDIEHARD(objptr->GetPtr());
     } else {
         std::cerr << "Unknown battery " << battery << std::endl;
         return BATTERY_ERROR;
@@ -94,7 +97,7 @@ run_parallel_testu01(const BatteryOptions* opts,
     const std::string battery{opts->param};
     const unsigned int testid{opts->test.id};
     // a) Obtain seeds for the internal permutations in the batteries
-    uint32_t seed[8];
+    std::uint32_t seed[8];
     seeds_to_array_u32(intf, seed, 8);
     std::seed_seq seq(seed, seed + 8);
     // b) Run battery
@@ -128,7 +131,7 @@ extern "C" BatteryExitCode EXPORT battery_func(const GeneratorInfo* gen,
     const CallerAPI* intf, const BatteryOptions* opts)
 {
     auto create_gen = [gen, intf] () -> std::shared_ptr<UniformGeneratorPlugin> {
-        return std::shared_ptr<UniformGeneratorPlugin>(new UniformGeneratorPlugin(gen, intf));
+        return std::make_shared<UniformGeneratorPlugin>(gen, intf);
     };
     // A battery is not selected: show help.
     if (std::strlen(opts->param) == 0) {

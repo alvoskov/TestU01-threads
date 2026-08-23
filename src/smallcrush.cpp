@@ -17,6 +17,7 @@
  * would be appreciated.
  */
 #include "testu01th/smallcrush.h"
+#include "testu01th/testu01_callbacks.h"
 
 using namespace testu01_threads;
 
@@ -30,8 +31,8 @@ SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
         smarsa_BirthdaySpacings_cb(1, 5 * MILLION, r, 1073741824, 2, 1));
 
     tests.emplace_back(++j2, "Collision", [] (const TestDescr& td, BatteryIO& io) { // 2
-        auto* res3 = sknuth_CreateRes2 ();
-        sknuth_Collision(io.Gen(), res3, 1, 5 * MILLION, 0, 65536, 2);
+        auto* res3 = sknuth_CreateRes2();
+        sknuth_Collision(io.Gen()->GetPtr(), res3, 1, 5 * MILLION, 0, 65536, 2);
         io.Add(td.GetId(), td.GetName(), res3->Pois->pVal2);
         sknuth_DeleteRes2(res3);
     });
@@ -50,7 +51,7 @@ SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
 
     tests.emplace_back(++j2, "WeightDistrib", [] (const TestDescr& td, BatteryIO& io) { // 8
         auto* res2 = sres_CreateChi2();
-        svaria_WeightDistrib (io.Gen(), res2, 1, MILLION / 5, 27, 256, 0.0, 0.125);
+        svaria_WeightDistrib (io.Gen()->GetPtr(), res2, 1, MILLION / 5, 27, 256, 0.0, 0.125);
         io.Add(td.GetId(), td.GetName(), res2->pVal2[gofw_Mean]);
         sres_DeleteChi2(res2);
     });

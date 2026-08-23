@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 3.5)
-project (TestU01-threads)
+project (TestU01-threads VERSION 0.1 LANGUAGES CXX C)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Compiler settings
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 if (NOT MSVC)
     add_compile_options(-O2 -Wall -Werror -Wextra -Wconversion -Wshadow -Wno-attributes -march=native)
@@ -40,46 +40,38 @@ find_library(M_LIB m)
 
 # Source files names
 add_library(testu01threads STATIC
+    include/testu01th/basictypes.h
     include/testu01th/batteries.h
-    include/testu01th/bigcrush.h       src/bigcrush.cpp
-    include/testu01th/crush.h          src/crush.cpp
-    include/testu01th/generators.h     src/generators.cpp 
-    include/testu01th/smallcrush.h     src/smallcrush.cpp
-    include/testu01th/pdiehard.h       src/pdiehard.cpp 
-    include/testu01th/testu01_mt.h     src/testu01_mt.cpp
-    include/testu01th/testu01_plugin.h src/testu01_plugin.cpp)
+    include/testu01th/bigcrush.h          src/bigcrush.cpp
+    include/testu01th/crush.h             src/crush.cpp
+    include/testu01th/generators.h        src/generators.cpp 
+    include/testu01th/smallcrush.h        src/smallcrush.cpp
+    include/testu01th/pdiehard.h          src/pdiehard.cpp 
+    include/testu01th/testu01_callbacks.h src/testu01_callbacks.cpp
+    include/testu01th/testu01_mt.h        src/testu01_mt.cpp
+    include/testu01th/testu01_plugin.h    src/testu01_plugin.cpp)
 set_property(TARGET testu01threads PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # testu01threads core library
 target_include_directories(testu01threads PRIVATE ${TESTU01_INCLUDE} include)
-target_link_directories(testu01threads PRIVATE ${TESTU01_LINK})
-target_link_libraries(${program} testu01threads)
+target_link_directories(testu01threads PUBLIC ${TESTU01_LINK})
+target_link_libraries(testu01threads PRIVATE ${TESTU01_LIBS})
+if (WIN32)
+    target_link_libraries(testu01threads PRIVATE ws2_32)
+endif()
+
 
 # Shared library: plugin for SmokeRand test suite
 add_library(testu01th_sr_ext SHARED src/testu01_sr_ext.cpp)
-target_include_directories(testu01th_sr_ext PRIVATE ${TESTU01_INCLUDE} include)
-target_link_directories(testu01th_sr_ext PRIVATE ${TESTU01_LINK})
-target_link_libraries(testu01th_sr_ext ${TESTU01_LIBS} testu01threads)
-if (WIN32)
-    target_link_libraries(testu01th_sr_ext ws2_32)
-endif()
-
-# Executables that call TestU01-threads library
-add_executable(testu01th_demo src/testu01th_demo.cpp)
-target_include_directories(testu01th_demo PRIVATE include)
-add_executable(testu01th_pipes src/testu01th_pipes.cpp)
-target_include_directories(testu01th_pipes PRIVATE include)
+target_include_directories(testu01th_sr_ext PRIVATE include)
+target_link_libraries(testu01th_sr_ext testu01threads)
 
 # Link executables
-foreach (program testu01th_demo testu01th_pipes)
+foreach (program testu01th_demo testu01th_pipes example)
+    add_executable(${program} src/${program}.cpp)
+    target_include_directories(${program} PRIVATE include)
     if(M_LIB)
         target_link_libraries (${program})
     endif()
     target_link_libraries(${program} testu01threads)
-    target_include_directories(${program} PRIVATE ${TESTU01_INCLUDE})
-    target_link_directories(${program} PRIVATE ${TESTU01_LINK})
-    target_link_libraries(${program} ${TESTU01_LIBS})
-    if (WIN32)
-        target_link_libraries(${program} ws2_32)
-    endif()
 endforeach (program)

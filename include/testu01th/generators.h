@@ -22,10 +22,10 @@
  * @brief Conversion of unsigned (pseudorandom) 64-bit integer
  * to the double that belongs to the [0;1) interval.
  */
-static inline double uint64_to_udouble(uint64_t val)
+static inline double uint64_to_udouble(std::uint64_t val)
 {
     union {
-        uint64_t i;
+        std::uint64_t i;
         double f;
     } x;
     x.i = val;
@@ -50,7 +50,7 @@ namespace testu01_threads {
 class MT19937Generator : public UniformGenerator
 {
     std::mt19937 gen;
-    static constexpr double INV32 = 1.0 / (static_cast<uint64_t>(1) << 32);
+    static constexpr double INV32{1.0 / (static_cast<std::uint64_t>(1) << 32)};
 
 public:
     MT19937Generator();
@@ -64,14 +64,14 @@ public:
  */
 class LcgGenerator : public UniformGenerator
 {
-    uint32_t x;
-    static constexpr uint64_t a = 397204094;
-    static constexpr uint64_t m = 2147483647; // 2^31 - 1
+    std::uint32_t x;
+    static constexpr std::uint64_t a{397204094};
+    static constexpr std::uint64_t m{2147483647}; // 2^31 - 1
 
 public:
     LcgGenerator(int seed = 1);
     double GetU01() override;
-    uint32_t GetBits32() override;
+    std::uint32_t GetBits32() override;
 };
 
 
@@ -81,15 +81,15 @@ public:
  */
 class LcgGenerator59 : public UniformGenerator
 {
-    uint64_t x;
-    static constexpr uint64_t mask_mod = (static_cast<uint64_t>(2) << 59) - 1;
-    static constexpr uint64_t m_2_pow_59 = (static_cast<uint64_t>(2) << 59);
-    static constexpr uint64_t a = 302875106592253; ///< 13^13
+    std::uint64_t x;
+    static constexpr std::uint64_t mask_mod{(static_cast<std::uint64_t>(2) << 59) - 1};
+    static constexpr std::uint64_t m_2_pow_59{(static_cast<std::uint64_t>(2) << 59)};
+    static constexpr std::uint64_t a{302875106592253}; ///< 13^13
 
 public:
     LcgGenerator59(int seed = 1);
     double GetU01() override;
-    uint32_t GetBits32() override;
+    std::uint32_t GetBits32() override;
 };
 
 
@@ -100,22 +100,23 @@ public:
  */
 class SplitMixGenerator: public UniformGenerator
 {
-    uint64_t x;
+    std::uint64_t x;
 
 public:
-    SplitMixGenerator(uint64_t seed = 0) : UniformGenerator("SplitMix"), x(seed) {}
+    SplitMixGenerator(std::uint64_t seed = 0)
+    : UniformGenerator{"SplitMix"}, x{seed} {}
 
     inline uint64_t GetBits64()
     {
-        constexpr uint64_t gamma = UINT64_C(0x9E3779B97F4A7C15);
-        uint64_t z = (x += gamma);
+        constexpr std::uint64_t gamma{0x9E3779B97F4A7C15};
+        std::uint64_t z = (x += gamma);
         z = (z ^ (z >> 30)) * UINT64_C(0xBF58476D1CE4E5B9);
         z = (z ^ (z >> 27)) * UINT64_C(0x94D049BB133111EB);
         return z ^ (z >> 31);
     }
 
     double GetU01() override { return uint64_to_udouble(GetBits64()); }
-    uint32_t GetBits32() override { return static_cast<uint32_t>(GetBits64() >> 32); }
+    std::uint32_t GetBits32() override { return static_cast<std::uint32_t>(GetBits64() >> 32); }
 };
 
 
@@ -128,16 +129,16 @@ public:
  */
 class KISS93Generator : public UniformGenerator
 {
-    uint32_t S1; ///< PRNG internal state.
-    uint32_t S2; ///< PRNG internal state.
-    uint32_t S3; ///< PRNG internal state.
-    static constexpr uint32_t MASK31 = 0x7fffffffU; ///< Mask of 31 bits
-    static constexpr double INV32 = 2.3283064365386963E-10; ///< 1 / 2^32
+    std::uint32_t lcg; ///< LCG internal staet.
+    std::uint32_t xs1; ///< LFSR 1 internal state.
+    std::uint32_t xs2; ///< LFSR 2 internal state.
+    static constexpr uint32_t MASK31{0x7fffffffU}; ///< Mask of 31 bits
+    static constexpr double INV32{2.3283064365386963E-10}; ///< 1 / 2^32
 
 public:
     KISS93Generator(uint32_t s1 = 12345, uint32_t s2 = 6789, uint32_t s3 = 111213);
     double GetU01() override;
-    uint32_t GetBits32() override;
+    std::uint32_t GetBits32() override;
 };
 
 /**
@@ -146,7 +147,7 @@ public:
 template<size_t lfib_a, size_t lfib_b>
 class LFibMulGenerator : public UniformGenerator
 {
-    uint64_t U[lfib_a + 1];
+    std::uint64_t U[lfib_a + 1];
     int i;
     int j;
 
@@ -157,8 +158,8 @@ class LFibMulGenerator : public UniformGenerator
     }
 
 public:
-    LFibMulGenerator(uint32_t seed = 0)
-    : UniformGenerator(MakeGeneratorName()), i{lfib_a}, j{lfib_b}
+    LFibMulGenerator(std::uint32_t seed = 0)
+    : UniformGenerator{MakeGeneratorName()}, i{lfib_a}, j{lfib_b}
     {
         SplitMixGenerator splitmix{seed};
         for (size_t k = 1; k <= lfib_a; k++) {
@@ -167,10 +168,10 @@ public:
     }
 
     double GetU01() override { return uint64_to_udouble(GetBits64()); }
-    uint32_t GetBits32() override { return static_cast<uint32_t>(GetBits64() >> 32); }
-    inline uint64_t GetBits64()
+    std::uint32_t GetBits32() override { return static_cast<std::uint32_t>(GetBits64() >> 32); }
+    inline std::uint64_t GetBits64()
     {
-        const uint64_t x{U[i] * U[j]};
+        const std::uint64_t x{U[i] * U[j]};
         U[i] = x;
 	    if (--i == 0) i = lfib_a;
     	if (--j == 0) j = lfib_a;

@@ -17,6 +17,7 @@
  * would be appreciated.
  */
 #include "testu01th/pdiehard.h"
+#include "testu01th/testu01_callbacks.h"
 
 using namespace testu01_threads;
 
@@ -40,7 +41,7 @@ PseudoDiehardBattery::PseudoDiehardBattery(GenFactoryFunc genf)
             for (int k = 0; k <= 6; k++)
                 Count[k] = 0;
             for (int k = 0; k < 500; k++) {
-                smarsa_BirthdaySpacings(io.Gen(), res, 1, 512, i, 16777216, 1, 1);
+                smarsa_BirthdaySpacings(io.Gen()->GetPtr(), res, 1, 512, i, 16777216, 1, 1);
                 if (res->sVal2 >= 6)
                     ++Count[6];
                 else
@@ -75,7 +76,7 @@ PseudoDiehardBattery::PseudoDiehardBattery(GenFactoryFunc genf)
         double ValDelta[] = { 1 };
         smultin_Param* par = smultin_CreateParam(1, ValDelta, smultin_GenerCellSerial, 0);
         smultin_Res* res = smultin_CreateRes(par);
-        smultin_MultinomialBitsOver(io.Gen(), par, res, 20, 2097152, 0, 32, 20, TRUE);
+        smultin_MultinomialBitsOver(io.Gen()->GetPtr(), par, res, 20, 2097152, 0, 32, 20, TRUE);
         io.Add(td.GetId(), td.GetName(), res->pVal2[0][gofw_AD]);
         smultin_DeleteRes (res);
         smultin_DeleteParam (par);

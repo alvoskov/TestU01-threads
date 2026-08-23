@@ -17,6 +17,7 @@
  * would be appreciated.
  */
 #include "testu01th/bigcrush.h"
+#include "testu01th/testu01_callbacks.h"
 
 using namespace testu01_threads;
 

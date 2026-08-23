@@ -39,7 +39,7 @@ public:
     ~UniformGeneratorPlugin() override;
 
     virtual double GetU01() override;
-    virtual uint32_t GetBits32() override;
+    virtual std::uint32_t GetBits32() override;
 };
 
 

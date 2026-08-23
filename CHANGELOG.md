@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.10] 2026-08-23
+## [0.10] 2026-08-24
 
 An initial pre-release.
 
@@ -12,6 +12,8 @@ An initial pre-release.
 
 - Multithreaded runs of TestU01 batteries are now fully reproducible.
 - Some refactoring (more `const`, especially for references etc.)
+- TestU01 internals are now completely wrapped, i.e. no TestU01 header
+  files are directly used by a TestU01-threads user.
 
 ### Bugfix
 

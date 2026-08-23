@@ -17,6 +17,7 @@
  * would be appreciated.
  */
 #include "testu01th/crush.h"
+#include "testu01th/testu01_callbacks.h"
 
 using namespace testu01_threads;
 
@@ -144,14 +145,14 @@ CrushBattery::CrushBattery(GenFactoryFunc genf)
     // Run of U01
     tests.emplace_back(++j2, "Run of U01, r = 0", [] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2 *res = sres_CreateChi2();
-        sknuth_Run(io.Gen(), res, 1, 500 * MILLION, 0, TRUE);
+        sknuth_Run(io.Gen()->GetPtr(), res, 1, 500 * MILLION, 0, TRUE);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
         sres_DeleteChi2(res);
     });
 
     tests.emplace_back(++j2, "Run of U01, r = 15", [] (const TestDescr& td, BatteryIO& io) {
         sres_Chi2 *res = sres_CreateChi2();
-        sknuth_Run(io.Gen(), res, 1, 500 * MILLION, 15, FALSE);
+        sknuth_Run(io.Gen()->GetPtr(), res, 1, 500 * MILLION, 15, FALSE);
         io.Add(td.GetId(), td.GetName(), res->pVal2[gofw_Mean]);
         sres_DeleteChi2(res);
     });
@@ -166,14 +167,14 @@ CrushBattery::CrushBattery(GenFactoryFunc genf)
     // CollisionPermut tests
     tests.emplace_back(++j2, "CollisionPermut, r = 0", [] (const TestDescr& td, BatteryIO& io) {
         sknuth_Res2* res = sknuth_CreateRes2();
-        sknuth_CollisionPermut(io.Gen(), res, 5, 10 * MILLION, 0, 13);
+        sknuth_CollisionPermut(io.Gen()->GetPtr(), res, 5, 10 * MILLION, 0, 13);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
         sknuth_DeleteRes2(res);
     });
 
     tests.emplace_back(++j2, "CollisionPermut, r = 15", [] (const TestDescr& td, BatteryIO& io) {
         sknuth_Res2* res = sknuth_CreateRes2();
-        sknuth_CollisionPermut (io.Gen(), res, 5, 10 * MILLION, 15, 13);
+        sknuth_CollisionPermut(io.Gen()->GetPtr(), res, 5, 10 * MILLION, 15, 13);
         io.Add(td.GetId(), td.GetName(), res->Pois->pVal2);
         sknuth_DeleteRes2(res);
     });
