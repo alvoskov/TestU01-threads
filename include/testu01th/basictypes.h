@@ -1,3 +1,19 @@
+/**
+ * @file basictypes.h
+ * @brief Some basic types used by different parts of TestU01-threads.
+ * Contains some forward declarations of classes/structs.
+ *
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #ifndef __TESTU01_BASICTYPES_H
 #define __TESTU01_BASICTYPES_H
 #include <functional>

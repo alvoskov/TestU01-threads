@@ -13,7 +13,11 @@ An initial pre-release.
 - Multithreaded runs of TestU01 batteries are now fully reproducible.
 - Some refactoring (more `const`, especially for references etc.)
 - TestU01 internals are now completely wrapped, i.e. no TestU01 header
-  files are directly used by a TestU01-threads user.
+  files are directly used by a TestU01-threads user. That includes wrappers
+  for the original single-threaded versions of SmallCrush, Crush, BigCrush
+  and pseudoDIEHARD.
+- `src/example.cpp`: a very simple "Hello, World" example that shows how
+  to use TestU01-threads for custom PRNGs testing.
 
 ### Bugfix
 

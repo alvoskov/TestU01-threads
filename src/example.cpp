@@ -1,3 +1,20 @@
+/**
+ * @file example.cpp
+ * @brief A very simple "Hello, World" example of TestU01-threads usage
+ * for custom pseudorandom generators testing.
+ * source code.
+ *
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #include "testu01_threads.h"
 #include <iostream>
 #include <cstdint>

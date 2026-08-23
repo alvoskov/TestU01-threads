@@ -1,3 +1,23 @@
+/**
+ * @file testu01_callbacks.h
+ * @brief Some lower-level code that wraps some internal structures/functions
+ * of TestU01 library. Hides TestU01 internals (header files) from
+ * TestU01-threads users.
+ *
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * (c) 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+ * e-mail: lecuyer@iro.umontreal.ca
+ *
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
+ *
+ * In scientific publications which used this software, a reference to it
+ * would be appreciated.
+ */
 #ifndef __TESTU01_CALLBACKS_H
 #define __TESTU01_CALLBACKS_H
 #include "basictypes.h"
