@@ -20,13 +20,21 @@
  */
 #ifndef __TESTU01_CALLBACKS_H
 #define __TESTU01_CALLBACKS_H
-#include "basictypes.h"
 
 extern "C" {
 #include "unif01.h"
 #include "gdef.h"
 #ifndef PACKAGE_STRING
-#include "config.h"
+    #ifdef STDC_HEADERS
+        #undef STDC_HEADERS
+        #include "config.h"
+        #ifndef STDC_HEADERS
+            #define STDC_HEADERS
+        #endif
+    #else
+        #include "config.h"
+        #undef STDC_HEADER
+    #endif
 #endif
 #include "bbattery.h"
 #include "fbar.h"
@@ -48,7 +56,7 @@ extern "C" {
 #include "ufile.h"
 }
 
-
+#include "basictypes.h"
 #include <string>
 #include <functional>
 #include <memory>

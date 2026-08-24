@@ -9,8 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 ### Bugfix
 
 - Some potential data races fixed (see the `init_TestU01_internals` function
-  in `src\testu01_callbacls.cpp` for details). The bug was reported by
+  in `src\testu01_callbacks.cpp` for details). The bug was reported by
   [skeeto](https://www.reddit.com/r/RNG/comments/1vwnr1l/comment/p5invw8).
+- `include/testu01_callbacks.h`: some workarounds for `STDC_HEADERS`
+  redefinition inside TestU01 files.
 - Binary stdin/stdout mode now correctly works in `src/testu01th_demo.cpp` and
   `src/testu01th_pipes.cpp`. It allows to send PRNG output to TestU01 through
   stdin/stdout (just as in PractRand) but only in one-threaded mode.
