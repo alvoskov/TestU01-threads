@@ -21,8 +21,40 @@
 #include "testu01th/testu01_callbacks.h"
 #include "testu01th/testu01_mt.h"
 
-
 namespace testu01_threads {
+
+/**
+ * @brief Intializes internal structures of TestU01. Should be called
+ * before its usage in a multithreaded environment.
+ * @details The next places are not reentrant:
+ *
+ * - `probdist/fbar.c`: `AndersonDarlingInit`, called in `fbar_AndersonDarling`.
+ * - `probdist/fdist.c`: `WatsonGInit`, called in `fdist_WatsonG`.
+ * - `testu01/snpair.c`: `InitBBp0k2`, called in `FDistBBp0k2`.
+ * - `testu01/snpair.c`: `InitBBp2k2`, called in `FDistBBp2k2`.
+ * - `testu01/snpair.c`: `InitBBp0k15`, called in `FDistBBp0k15`.
+ *
+ * Note: that functions from `testu01/snpair.c` are `static`! However
+ * they used in the `snpair_BickelBreiman` function that are not
+ * used in SmallCrush, Crush, BigCrush and pseudoDIEHARD batteries.
+ *
+ * @param verbose Enable/disable debug output from TestU01 functions. That
+ *                output is not thread safe, i.e. output from different parallel
+ *                runs may be mixed chaotically.
+ */
+void init_TestU01_internals(bool verbose)
+{
+    // Fill some internal interpolation tables
+    (void) fbar_AndersonDarling(10, 0.75);
+    (void) fdist_WatsonG(10, 0.75);
+    // TODO: probably some workaround for static functions in snpair.c
+    // However they are not used in SmallCrush, Crush, BigCrush
+    // and pseudoDIEHARD batteries, so it is not a high priority task.
+    swrite_Host = FALSE;
+    if (!verbose) {
+        swrite_Basic = FALSE;
+    }
+}
 
 ///////////////////////////////////////////////
 ///// Some helpers required for callbacks /////

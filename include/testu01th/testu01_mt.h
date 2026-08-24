@@ -68,7 +68,7 @@ public:
  * @brief Function that returns the `std::shared_ptr` smart pointer
  * to the initialized pseudorandom number generator.
  */
-typedef std::function<std::shared_ptr<UniformGenerator>()> GenFactoryFunc;
+using GenFactoryFunc = std::function<std::shared_ptr<UniformGenerator>()>;
 
 /**
  * @brief Always returns 0, has no internal state.
@@ -202,7 +202,7 @@ class TestsPull
 {
     std::vector<TestDescr> tests;
     std::mutex get_mutex;
-    size_t pos;
+    size_t pos{0};
 
     unsigned int GetNThreads() const;
     std::string GetPosMessage();

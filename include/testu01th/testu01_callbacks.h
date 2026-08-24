@@ -53,11 +53,11 @@ extern "C" {
 #include <functional>
 #include <memory>
 
+namespace testu01_threads {
+
 static constexpr long THOUSAND{1000};
 static constexpr long MILLION{THOUSAND * THOUSAND};
 static constexpr long BILLION{THOUSAND * MILLION};
-
-namespace testu01_threads {
 
 /**
  * @brief Needed only to make forward declaration (for pointers) possible.
@@ -67,6 +67,8 @@ public:
     unif01_Gen gen;
     inline unif01_Gen* GetPtr() { return &gen; }
 };
+
+void init_TestU01_internals(bool verbose = false);
 
 TestCbFunc svaria_AppearanceSpacings_cb(long N, long Q, long K, int r, int s, int L);
 TestCbFunc sstring_AutoCor_cb(long N, long n, int r, int s, int d);

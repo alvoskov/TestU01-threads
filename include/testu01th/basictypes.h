@@ -21,7 +21,7 @@
 
 namespace testu01_threads {
 
-static constexpr unsigned int NTHREADS_DEFAULT{std::numeric_limits<unsigned int>::max()};
+constexpr unsigned int NTHREADS_DEFAULT{std::numeric_limits<unsigned int>::max()};
 
 class TestDescr;
 class BatteryIO;
@@ -32,7 +32,7 @@ class Unif01GenWrapper;
  * result in BatteryIO class using the test description from
  * TestDescr.
  */
-typedef std::function<void(const TestDescr&, BatteryIO&)> TestCbFunc;
+using TestCbFunc = std::function<void(const TestDescr&, BatteryIO&)>;
 
 } // namespace testu01_threads
 

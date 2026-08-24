@@ -42,9 +42,11 @@ public:
 
     void FillBuffer()
     {
-        if (fread(buffer, sizeof(uint32_t), buffer_size, stdin) != buffer_size) {
-            std::cerr << "Stdin32Collector::FillBuffer: cannot read from stdin" << std::endl;
-            exit(1);
+        const auto nvals = std::fread(buffer, sizeof(uint32_t), buffer_size, stdin);
+        if (nvals != buffer_size) {
+            std::cerr << "Stdin32Collector::FillBuffer: cannot read from stdin; "
+                      << nvals << " values were received" << std::endl;
+            exit(EXIT_FAILURE);
         }
         pos = 0;
     }
@@ -67,7 +69,7 @@ public:
 
 void print_help()
 {
-    const std::string helptext(
+    static const std::string helptext{
     "Runs TestU01 batteries from binary data from stdin. Data are\n"
     "processed as unsigned 32-bit integers. All batteries are working\n"
     "in one-threaded mode. Multi-threaded mode is available only for\n"
@@ -75,8 +77,8 @@ void print_help()
     "Usage: test01th_pipes battery\n"
     "  battery: SmallCrush, Crush, BigCrush, pseudoDIEHARD\n\n"
     "Example:\n"
-    "  testu01th_run.exe stdout32 gen.dll | testu01th_pipes.exe SmallCrush\n\n"
-    );
+    "  testu01th_demo.exe stdout KISS93 | testu01th_pipes.exe SmallCrush\n\n"
+    };
     std::cout << helptext << std::endl;
 }
 

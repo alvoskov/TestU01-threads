@@ -16,6 +16,11 @@
  * In scientific publications which used this software, a reference to it
  * would be appreciated.
  */
+
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
+#define ENABLE_BIN_STDIN
+#endif
+
 #include "testu01th/testu01_mt.h"
 #include "testu01th/testu01_callbacks.h"
 #include <iostream>
@@ -23,7 +28,7 @@
 #include <cmath>
 #include <random>
 #include <sstream>
-#ifdef USE_LOADLIBRARY
+#ifdef ENABLE_BIN_STDIN
 #include <io.h>
 #endif
 #include <fcntl.h>
@@ -371,7 +376,6 @@ std::string BatteryResults::ToString() const
 
 TestsPull::TestsPull(const std::vector<TestDescr>& obj, std::seed_seq* seq)
 {
-    pos = 0;
     const size_t len{obj.size()};
     std::vector<size_t> tests_inds(len);
     for (size_t i = 0; i < len; i++) {
@@ -462,7 +466,7 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
         threads_bats.emplace_back(create_gen());
     }
     // Disable thread unsafe features of TestU01
-    swrite_Host = FALSE;
+    init_TestU01_internals();
     // Create tests indexes arrays for each thread
     std::vector<std::vector<size_t>> thrd_testinds(nthreads);
     for (size_t i = 0; i < tests.size(); i++) {
@@ -590,17 +594,23 @@ BatteryResults TestsBattery::RunTest(int id, std::seed_seq* seq, unsigned int nt
 
 namespace testu01_threads {
 
+/**
+ * @brief Needed to enable binary stdout on Windows
+ */
 void set_bin_stdout()
 {
-#ifdef USE_LOADLIBRARY
-    _setmode( _fileno(stdout), _O_BINARY); // needed to allow binary stdout on windows
+#ifdef ENABLE_BIN_STDIN
+    _setmode( _fileno(stdout), _O_BINARY);
 #endif
 }
 
 
+/**
+ * @brief Needed to enable binary stdin on Windows
+ */
 void set_bin_stdin()
 {
-#ifdef USE_LOADLIBRARY
+#ifdef ENABLE_BIN_STDIN
     _setmode( _fileno(stdin), _O_BINARY); // needed to allow binary stdin on windows
 #endif
 }
@@ -630,21 +640,37 @@ void prng_bits32_to_file(std::shared_ptr<UniformGenerator> genptr)
 ///////////////////////////////////////////////////
 
 namespace testu01_threads::original::battery {
+    /**
+     * @brief Directly calls the unmodified (single-threaded) TestU01
+     * SmallCrush battery.
+     */
     void SmallCrush(UniformGenerator& gen)
     {
         bbattery_SmallCrush(gen.GetPtr()->GetPtr());
     }
 
+    /**
+     * @brief Directly calls the unmodified (single-threaded) TestU01
+     * Crush battery.
+     */
     void Crush(UniformGenerator& gen)
     {
         bbattery_Crush(gen.GetPtr()->GetPtr());
     }
 
+    /**
+     * @brief Directly calls the unmodified (single-threaded) TestU01
+     * BigCrush battery.
+     */
     void BigCrush(UniformGenerator& gen)
     {
         bbattery_BigCrush(gen.GetPtr()->GetPtr());
     }
 
+    /**
+     * @brief Directly calls the unmodified (single-threaded) TestU01
+     * pseudoDIEHARD battery.
+     */
     void pseudoDIEHARD(UniformGenerator& gen)
     {
         bbattery_pseudoDIEHARD(gen.GetPtr()->GetPtr());
