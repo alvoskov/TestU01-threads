@@ -44,13 +44,19 @@ and don't include full SmallCrush, Crush, BigCrush and pseudoDIEHARD batteries.
   Cluj-Napoca, Cluj, Romania, 2014, pp. 311-315, doi: 10.1109/ICCP.2014.6937014.
 - https://github.com/adamsolomou/TestU01
 
+The next solution likely includes all batteries but is not accessible and
+requires HTCondor:
+
+- https://doi.org/10.48550/arXiv.1703.08212
+
 TestU01-threads uses an entirely different approach: it doesn't modify the
 original TestU01 library but just replaces single-threaded batteries
 implementation from `bbattery.c` (sequental call of statistical tests) to its
 own multithreaded version (parallel call of statistical tests from different
-threads). These statistical tests are reentrant. Such modification also
-requires new API for pseudorandom number generators: threads should be able to
-create its own examples of generators.
+threads). These statistical tests are mostly reentrant with some exceptions
+caused by lazy initialization of some interpolation tables for some
+distributions. Such modification also requires new API for pseudorandom number
+generators: threads should be able to create its own examples of generators.
 
 There is another program with similar approach: TestU01-parallel. However, it
 was forked from an older non-free version of TestU01. It also almost not
@@ -64,9 +70,10 @@ Executables
 
   Executable           | Function
 -----------------------|---------------------------------------------------
- `testu01th_run`       | Runs PRNGs tests for arbitrary PRNG from C module
- `testu01th_pipes`     | Reads PRNG output from stdin and sends to TestU01
+ `example`             | A very simple "Hello, World" example
  `libtestu01th_sr_ext` | Plugin for SmokeRand
+ `testu01th_demo`      | Runs PRNGs tests for some predefined generators
+ `testu01th_pipes`     | Reads PRNG output from stdin and sends to TestU01
 
 
 Supplied PRNGs external modules
