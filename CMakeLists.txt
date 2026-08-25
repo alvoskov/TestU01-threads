@@ -44,6 +44,7 @@ add_library(testu01threads STATIC
     include/testu01th/batteries.h
     include/testu01th/bigcrush.h          src/bigcrush.cpp
     include/testu01th/crush.h             src/crush.cpp
+    include/testu01th/fileio.h            src/fileio.cpp
     include/testu01th/generators.h        src/generators.cpp 
     include/testu01th/smallcrush.h        src/smallcrush.cpp
     include/testu01th/pdiehard.h          src/pdiehard.cpp 

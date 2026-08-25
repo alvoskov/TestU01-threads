@@ -186,6 +186,12 @@ unsigned long UniformGenerator::GetBits32Handle(void* param, void* state)
 }
 
 
+void UniformGenerator::Invalidate()
+{
+}
+
+
+
 UniformGenerator::UniformGenerator(const std::string& name_)
     : name{name_}, gen_wrapped{std::make_unique<Unif01GenWrapper>()}
 {
@@ -448,6 +454,7 @@ void TestsPull::ThreadFunc(TestsPull& pull, BatteryIO& io,
         }
     }
     fprintf(stderr, "^^^^^^^^^^  Thread #%u finished  ^^^^^^^^^^\n", thr_ind.index);
+    io.InvalidateGenerator();
 }
 
 

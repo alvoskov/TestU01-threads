@@ -62,6 +62,7 @@ public:
     const std::string& GetName() { return name; }
     virtual double GetU01() = 0;
     virtual std::uint32_t GetBits32() = 0;
+    virtual void Invalidate();
 };
 
 /**
@@ -136,6 +137,7 @@ public:
     size_t GetNTestsFailed() const;
     inline size_t GetNResults() const { return results.size(); }
     inline const PValueRecord& GetPValueRecord(size_t ind) { return results[ind]; }
+    inline void InvalidateGenerator() { gen->Invalidate(); }
     std::string WritePValue(double p);
     std::string WriteReport(const char* batName, const char* genName,
         std::chrono::milliseconds ms_cpu_total, std::chrono::milliseconds ms_total);

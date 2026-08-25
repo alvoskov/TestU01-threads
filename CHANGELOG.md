@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [0.11]
 
+### Added
+
+- An experimental multithreaded mode for `testu01th_pipes` (`--threads` optional
+  extra key). Not as efficient as direct usage C++ interface but still faster
+  than the single-threaded original version TestU01.
+
 ### Bugfix
 
 - Some potential data races fixed (see the `init_TestU01_internals` function
