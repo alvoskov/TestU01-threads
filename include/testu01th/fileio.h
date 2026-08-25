@@ -75,6 +75,7 @@ class Stdin32ParallelCollector
     size_t ngenerators_all{0}; ///< Total number of allocated generators
     size_t ngenerators_waiting{0}; ///< Number of generator that are waiting for the buffer refresh
     size_t generation{0}; ///< Barrier generation
+    std::mutex genfactory_mutex; ///< Controls ngenerators_all and ngenerators_waiting counters.
     std::mutex buffer_mutex; ///< Controls buffers/counters
     std::condition_variable buffer_cv;
 

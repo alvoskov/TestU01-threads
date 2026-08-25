@@ -25,7 +25,7 @@ MT19937Generator::MT19937Generator() : UniformGenerator("MT19937") {}
 
 double MT19937Generator::GetU01()
 {
-    return static_cast<double>(gen()) * INV32;
+    return uint32_to_udouble(gen());
 }
 
 std::uint32_t MT19937Generator::GetBits32()
@@ -45,15 +45,14 @@ LcgGenerator::LcgGenerator(int seed) : UniformGenerator("LCG")
 
 double LcgGenerator::GetU01()
 {                                                
-    constexpr double xdbl_norm = 1.0 / static_cast<double>(1ULL << 32);
     x = static_cast<std::uint32_t>(((static_cast<std::uint64_t>(x)) * a + 0) % m);
-    return static_cast<double>(x) / xdbl_norm;
+    return uint32_to_udouble(x);
 }
 
 uint32_t LcgGenerator::GetBits32()
 {
     x = static_cast<std::uint32_t>((static_cast<std::uint64_t>(x) * a + 0) % m);
-    return x;
+    return x << 1;
 }
 
 ///////////////////////////////////////////////
@@ -92,7 +91,7 @@ KISS93Generator::KISS93Generator(std::uint32_t s1, std::uint32_t s2, std::uint32
 
 double KISS93Generator::GetU01()
 {
-    return GetBits32() * INV32;
+    return uint32_to_udouble(GetBits32());
 }
 
 uint32_t KISS93Generator::GetBits32()

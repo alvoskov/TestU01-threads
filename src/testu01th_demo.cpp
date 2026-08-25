@@ -74,7 +74,13 @@ int main(int argc, char* argv[])
         }},
         {"SPLITMIX", [] () -> std::shared_ptr<UniformGenerator> {
             return std::make_shared<SplitMixGenerator>();
-        }}
+        }},
+        {"xorwow", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::make_shared<XorwowGeneratorFamily<2, 1, 4, 362437>>();
+        }},
+        {"xorwow_v2", [] () -> std::shared_ptr<UniformGenerator> {
+            return std::make_shared<XorwowGeneratorFamily<19, 3, 11, 0x9E3779B9>>();
+        }},
     };
 
     if (argc < 3 || argc > 4) {

@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - An experimental multithreaded mode for `testu01th_pipes` (`--threads` optional
   extra key). Not as efficient as direct usage C++ interface but still faster
   than the single-threaded original version TestU01.
+- xorwow generator (two variants, the classical one by G.Marsaglia and its
+  improved modification by A.L.Voskov)
 
 ### Bugfix
 
@@ -23,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   `src/testu01th_pipes.cpp`. It allows to send PRNG output to TestU01 through
   stdin/stdout (just as in PractRand) but only in one-threaded mode.
 - `testu01th_pipes`: obsolete command line arguments documentation fixed.
+- uint32_t to double conversion fixed in a 31-bit LCG, also new
+  `uint32_to_udouble` helper function for such conversion.
 
 ### Changed
 

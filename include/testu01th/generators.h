@@ -17,24 +17,7 @@
 #define __TESTU01_GENERATORS_H
 #include "testu01_mt.h"
 #include <random>
-
-/**
- * @brief Conversion of unsigned (pseudorandom) 64-bit integer
- * to the double that belongs to the [0;1) interval.
- */
-static inline double uint64_to_udouble(std::uint64_t val)
-{
-    union {
-        std::uint64_t i;
-        double f;
-    } x;
-    x.i = val;
-    x.i = (x.i >> 12) | 0x3ff0000000000000;
-    x.f -= 1.0;
-    return x.f;
-}
-
-
+#include <sstream>
 
 namespace testu01_threads {
 
@@ -50,7 +33,6 @@ namespace testu01_threads {
 class MT19937Generator : public UniformGenerator
 {
     std::mt19937 gen;
-    static constexpr double INV32{1.0 / (static_cast<std::uint64_t>(1) << 32)};
 
 public:
     MT19937Generator();
@@ -133,7 +115,6 @@ class KISS93Generator : public UniformGenerator
     std::uint32_t xs1; ///< LFSR 1 internal state.
     std::uint32_t xs2; ///< LFSR 2 internal state.
     static constexpr uint32_t MASK31{0x7fffffffU}; ///< Mask of 31 bits
-    static constexpr double INV32{2.3283064365386963E-10}; ///< 1 / 2^32
 
 public:
     KISS93Generator(uint32_t s1 = 12345, uint32_t s2 = 6789, uint32_t s3 = 111213);
@@ -178,6 +159,61 @@ public:
         return x;
     }
 };
+
+
+/**
+ * @brief xorwow generators family.
+ * @details Recommended parameters:
+ *
+ * - `[a, b, c, weyl_inc] = [2, 1, 4, 362437]`: classical by G. Marsaglia
+ * - `[a, b, c, weyi_inc] = [19, 3, 11, 0x9E3779B9]`: found by A.L. Voskov, give
+ *   a better quality of lower bits.
+ */
+template<int a, int b, int c, std::uint32_t weyl_inc>
+class XorwowGeneratorFamily : public UniformGenerator
+{
+    std::uint32_t x; ///< Xorshift register
+    std::uint32_t y; ///< Xorshift register
+    std::uint32_t z; ///< Xorshift register
+    std::uint32_t w; ///< Xorshift register
+    std::uint32_t v; ///< Xorshift register
+    std::uint32_t d; ///< "Weyl sequence" counter
+
+    static std::string MakeGeneratorName()
+    {
+        std::stringstream sout;
+        sout << "xorwow[" << a << ", " << b << ", " << c << "; " << weyl_inc << "]";
+        return sout.str();
+    }
+
+public:
+    XorwowGeneratorFamily(const std::array<std::uint32_t, 6>& seeds = {123456, 654321, 11111, 44444, 55555, 66666})
+    : UniformGenerator{MakeGeneratorName()},
+      x{seeds[0]}, y{seeds[1]}, z{seeds[2]}, w{seeds[3]}, v{seeds[4]}, d{seeds[5]}
+    {
+        if (x == 0 && y == 0) {
+            x = 0x12345678;
+            y = 0x87654321;
+        }
+    }
+
+    double GetU01() override
+    {
+        return uint32_to_udouble(GetBits32());
+    }
+
+    std::uint32_t GetBits32() override
+    {
+        const std::uint32_t t = (x ^ (x >> a));
+        x = y;
+        y = z;
+        z = w;
+        w = v;
+        v = (v ^ (v << c)) ^ (t ^ (t << b));
+        return (d += weyl_inc) + v;
+    }
+};
+
 
 } // namespace testu01_threads
 

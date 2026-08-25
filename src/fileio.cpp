@@ -132,6 +132,7 @@ void Stdin32ParallelCollector::FillBuffer(bool last_fill)
 GenFactoryFunc Stdin32ParallelCollector::CreateGenFactoryFunc()
 {
     auto f = [&] () {
+        std::lock_guard<std::mutex> lock(genfactory_mutex);
         auto gen = std::make_shared<Stdin32ParallelGenerator>(*this, buffer);
         ngenerators_all++;
         ngenerators_waiting++;
