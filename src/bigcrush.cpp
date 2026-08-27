@@ -18,14 +18,17 @@
  */
 #include "testu01th/bigcrush.h"
 #include "testu01th/testu01_callbacks.h"
+#include <cstdlib>
+#include <iostream>
 
 using namespace testu01_threads;
 
 BigCrushBattery::BigCrushBattery(GenFactoryFunc genf)
     : TestsBattery{"BigCrush(mt)", genf}
 {
-    constexpr int s = 30, r = 0;
-    int j2 = 0;
+    constexpr int BIGCRUSH_NUM{106};
+    constexpr int s{30}, r{0};
+    int j2{0};
 
     // SerialOver tests
     tests.emplace_back(++j2, "SerialOver, r = 0",
@@ -381,5 +384,9 @@ BigCrushBattery::BigCrushBattery(GenFactoryFunc genf)
 
     tests.emplace_back(++j2, "AutoCor, d=3, r=27",
         sstring_AutoCor_cb(10, 30 + BILLION, 27, 3, 3));
-    //util_Assert (j2 <= BIGCRUSH_NUM, "BigCrush:   j2 > BIGCRUSH_NUM");
+
+    if (j2 != BIGCRUSH_NUM) {
+        std::cout << "Invalid number of tests in BigCrush (an internal error)" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
 }

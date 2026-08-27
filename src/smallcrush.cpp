@@ -18,14 +18,17 @@
  */
 #include "testu01th/smallcrush.h"
 #include "testu01th/testu01_callbacks.h"
+#include <cstdlib>
+#include <iostream>
 
 using namespace testu01_threads;
 
 SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
     : TestsBattery{"SmallCrush(mt)", genf}
 {
-    const int r = 0;
-    int j2 = 0;
+    constexpr int SMALLCRUSH_NUM{10};
+    const int r{0};
+    int j2{0};
 
     tests.emplace_back(++j2, "BirthdaySpacings", // 1
         smarsa_BirthdaySpacings_cb(1, 5 * MILLION, r, 1073741824, 2, 1));
@@ -64,4 +67,9 @@ SmallCrushBattery::SmallCrushBattery(GenFactoryFunc genf)
 
     tests.emplace_back(++j2, "RandomWalk", // 11-15
         smarsa_RandomWalk1_cb(1, MILLION, r, 30, 150, 150, ""));
+
+    if (j2 != SMALLCRUSH_NUM) {
+        std::cout << "Invalid number of tests in SmallCrush (an internal error)" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
 }

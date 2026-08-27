@@ -18,14 +18,17 @@
  */
 #include "testu01th/crush.h"
 #include "testu01th/testu01_callbacks.h"
+#include <cstdlib>
+#include <iostream>
 
 using namespace testu01_threads;
 
 CrushBattery::CrushBattery(GenFactoryFunc genf)
     : TestsBattery{"Crush(mt)", genf}
 {
-    constexpr int s = 30, r = 0;
-    int j2 = 0;
+    constexpr int CRUSH_NUM{96};
+    constexpr int s{30}, r{0};
+    int j2{0};
 
     // SerialOver tests
     tests.emplace_back(++j2, "SerialOver, t = 2",
@@ -368,4 +371,9 @@ CrushBattery::CrushBattery(GenFactoryFunc genf)
 
     tests.emplace_back(++j2, "AutoCor, d = 10",
         sstring_AutoCor_cb(5, 11 + BILLION, 20, 10, 10));
+
+    if (j2 != CRUSH_NUM) {
+        std::cout << "Invalid number of tests in Crush (an internal error)" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
 }

@@ -22,17 +22,15 @@
 
 namespace testu01_threads {
 
+/**
+ * @brief Wraps PRNGs from SmokeRand plugins to make them accessible by the
+ * TestU01-threads library. Automatically takes higher bits from 64-bit
+ * generators outputs.
+ */
 class UniformGeneratorPlugin : public UniformGenerator
 {
     GeneratorState obj;
-    static inline std::string GetGeneratorName(const GeneratorInfo* gi)
-    {
-        if (gi->parent != nullptr) {
-            return std::string(gi->name) + ":" + gi->parent->name;
-        } else {
-            return std::string(gi->name);
-        }
-    }
+    static std::string GetGeneratorName(const GeneratorInfo* gi);
 
 public:
     UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf);

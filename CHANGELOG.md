@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.11]
+## [0.11] 2026-08-27
 
 ### Added
 
@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   than the single-threaded original version TestU01.
 - xorwow generator (two variants, the classical one by G.Marsaglia and its
   improved modification by A.L.Voskov)
+- Assertions in SmallCrush, Crush and BigCrush batteries that control the total
+  number of tests.
 
 ### Bugfix
 
@@ -30,7 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Changed
 
-- CMakeLists.txt refactoring.
+- CMakeLists.txt refactoring (still not complete).
+- Auto-replacement of `:` to `_` in PRNG names loaded from SmokeRand plugins.
+  The `:` symbol is used as a separator by TestU01 report generators.
 
 ## [0.10] 2026-08-24
 

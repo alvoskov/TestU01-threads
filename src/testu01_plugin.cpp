@@ -21,6 +21,24 @@ using namespace testu01_threads;
 ///// UniformGeneratorPlugin class implementation /////
 ///////////////////////////////////////////////////////
 
+
+std::string UniformGeneratorPlugin::GetGeneratorName(const GeneratorInfo* gi)
+{
+    std::string name;
+    if (gi->parent != nullptr) {
+        name = std::string(gi->name) + ":" + gi->parent->name;
+    } else {
+        name = std::string(gi->name);
+    }
+    for (size_t i = 0; i < name.size(); i++) {
+        if (name[i] == ':') {  // TestU01 uses ':' as a separator
+            name[i] = '_';
+        }
+    }
+    return name;
+}
+
+
 UniformGeneratorPlugin::UniformGeneratorPlugin(const GeneratorInfo* gi, const CallerAPI* intf)
 : UniformGenerator{GetGeneratorName(gi)}
 {
@@ -43,11 +61,13 @@ double UniformGeneratorPlugin::GetU01()
     return static_cast<double>(u >> (obj.gi->nbits - 32)) * INV32;
 }
 
+
 std::uint32_t UniformGeneratorPlugin::GetBits32()
 {
     const std::uint64_t u{obj.gi->get_bits(obj.state)};
     return static_cast<std::uint32_t>(u >> (obj.gi->nbits - 32));
 }
+
 
 UniformGeneratorPlugin::~UniformGeneratorPlugin()
 {
