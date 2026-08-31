@@ -463,8 +463,12 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
 {
     // Timers and threads number
     chrono_Chrono* timer = chrono_Create();
+    size_t ntests = tests.size();
     if (nthreads == NTHREADS_DEFAULT) {
         nthreads = GetNThreads();
+    }
+    if (nthreads > ntests && ntests > 0) {
+        nthreads = static_cast<unsigned int>(ntests);
     }
     fprintf(stderr, "=====> Number of threads: %u\n", nthreads);
     BatteryResults results(nthreads);
@@ -473,7 +477,8 @@ BatteryResults TestsPull::Run(std::function<std::shared_ptr<UniformGenerator>()>
         threads_bats.emplace_back(create_gen());
     }
     // Disable thread unsafe features of TestU01
-    init_TestU01_internals();
+    const bool verbose = (ntests == 1);
+    init_TestU01_internals(verbose);
     // Create tests indexes arrays for each thread
     std::vector<std::vector<size_t>> thrd_testinds(nthreads);
     for (size_t i = 0; i < tests.size(); i++) {
